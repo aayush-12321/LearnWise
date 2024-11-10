@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<br><br>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
+  <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
+  <title>Instagram Login Form</title>
+</head>
+
+<body>
+
+  <div id="wrapper">
+    <div class="container">
+      <div class="phone-app-ddemo"></div>
+      <div class="form-data">
+        
+       
+        <!-- <form action="" method="GET" style="position: relative; display: flex; align-items: center; justify-content: center;">
+          <div class="header__search" style="position: relative; display: flex; align-items: center;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%);">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M21.669 21.6543C21.8625 21.4622 21.863 21.1494 21.6703 20.9566L17.3049 16.5913C18.7912 14.9327 19.7017 12.7525 19.7017 10.3508C19.7017 5.18819 15.5135 1 10.3508 1C5.18819 1 1 5.18819 1 10.3508C1 15.5135 5.18819 19.7017 10.3508 19.7017C12.7624 19.7017 14.9475 18.7813 16.606 17.2852L20.9739 21.653C21.1657 21.8449 21.4765 21.8454 21.669 21.6543ZM1.9843 10.3508C1.9843 5.7394 5.7394 1.9843 10.3508 1.9843C14.9623 1.9843 18.7174 5.7394 18.7174 10.3508C18.7174 14.9623 14.9623 18.7174 10.3508 18.7174C5.7394 18.7174 1.9843 14.9623 1.9843 10.3508Z" fill="#A5A5A5" stroke="#A5A5A5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input type="text" placeholder="Search" name="q" value="{{ request.GET.q }}" style="border-radius: 20px; padding: 10px 40px 10px 40px; margin-right: 10px; width: 250px; border: 1px solid #ccc; outline: none; font-size: 14px; transition: border-color 0.3s ease;">
+              <button class="btn btn-primary" type="submit" style="border-radius: 15px; background-color: rgb(63, 224, 125); height: 25px; padding: 0 20px; color: white; border: none; cursor: pointer; font-size: 14px; transition: background-color 0.3s ease;">Search</button>
+          </div>
+      </form> -->
+      
+        <form action="" method="POST" enctype="multipart/form-data">
+          <div class="logo" style="text-align: center;">
+            <h3 style="margin: 0; font-size: 24px; color: #333;">Search Results</h3><hr>
+        </div>
+
+        {% for user in users %}
+            <!-- <div class="side-menu__user-profile" style="text-align: start; border: solid rgba(192, 192, 192, 0.514) 1px; padding: 10px; border-radius: 25px;">
+                <a href="{% url 'profile' user.username %}" class="side-menu__user-avatar">
+                    {% if user.profile.image.url %}
+                    <img src="{{ user.profile.image.url }}" alt="User Picture">
+                    {% else %}
+                    <img src="{% static 'assets1/default.jpg' %}" alt="User Picture">
+
+                    {% endif %}
+                </a>
+                <div class="side-menu__user-idnfo">
+                    {% if user.profile.first_name %}
+                    <a href="{% url 'profile' user.username %}" style="font-size: 15px; color: black; text-align: center;">{{user.profile.first_name|title }} {{user.profile.last_name|title }}</a>
+                    {% else%}
+                    <a href="{% url 'profile' user.username %}">User</a>
+
+                    {% endif %}
+                    <br>
+                    <span style="font-size: 14px;">@{{user.username}}</span>
+                    <br>
+                    <a href="{% url 'profile' user.username %}" style="color: blue;" class="side-menu__user-button">View Profile</a>
+
+                </div>
+            </div> -->
+            <!-- <hr> -->
+             
+            <div class="side-menu__user-profile" style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+              <a href="#" class="side-menu__user-avatar" style="flex-shrink: 0; margin-right: 10px;">
+                  <img src="{{ user.profile.image.url }}" alt="User Picture" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
+              </a>
+              <div class="side-menu__user-info" style="flex-grow: 1;">
+                  {% if user.profile.first_name %}
+                  <a href="{{user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.profile.first_name|title }} {{user.profile.last_name|title }}</a>
+                  {% else %}
+                  <a href="{{user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{username}}</a>
+                  {% endif %}
+                  <span style="display: block; color: #777; font-size: 14px;">@{{user.username}}</span>
+              </div>
+              <a href="{% url 'profile' user %}" class="side-menu__user-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View Profile</a>
+          </div>
+        {% endfor %}
+        
+          <!-- <span>No Result Found</span> -->
+          
+        </form>
+        
+      </div>
+    </div>
+
+  </div>
+
+</body>
+
+</html>
+{% endblock content %}

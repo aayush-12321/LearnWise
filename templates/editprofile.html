@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<br><br>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
+  <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
+  <title>Instagram Login Form</title>
+</head>
+
+<body>
+
+  <div id="wrapper">
+    <div class="container">
+      <div class="phone-app-ddemo"></div>
+      <div class="form-data">
+        <form action="" method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+      <div class="logo" style="text-align: center;">
+        <h3 style="margin: 0; font-size: 24px; color: #333;">Edit Profile</h3><hr>
+    </div>
+          <span style=" margin-top:5px;padding: 5px; font-size: 20px;right: 20px;">Current Profile</span><br>
+          <div class="side-menu__user-profile" style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-top: 5px;">
+            <a href="#" class="side-menu__user-avatar" style="flex-shrink: 0; margin-right: 30px;">
+                <img src="{{ request.user.profile.image.url }}" alt="User Picture" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
+            </a>
+            <div class="side-menu__user-info" style="flex-grow: 1;">
+                {% if user.profile.first_name %}
+                <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{request.user.profile.first_name|title }} {{request.user.profile.last_name|title }}</a>
+                {% else %}
+                <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
+                {% endif %}
+                <span style="display: block; color: #777; font-size: 14px;">@{{request.user.username}}</span>
+            </div> 
+            <a href="{% url 'profile' request.user %}" class="side-menu__user-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View Profile</a>
+        </div>
+        <span style="padding: 5px; font-size: 20px;">Change Picture</span><br>
+
+          <label for="fileInput" style="display: block; text-align: center; cursor: pointer;">
+            <img src="{% static 'assets2/images/upload_area.png' %}" alt="Upload Area" style="width: 100%; max-width: 200px;">
+        </label>
+        <input type="file" name="picture" id="fileInput" style="display: none;">
+        <br>
+          <!-- {{form.image}} <br> -->
+		  {{form.first_name}} <br>
+		  {{form.last_name}} <br>
+		  {{form.bio}} <br>
+		  {{form.location}} <br>
+		  {{form.url}} <br>
+          <button class="form-btn" type="submit" style="background-color: rgb(63, 224, 125);">Update Profile</button>
+          <!-- <a href="index.html" class="form-btn" type="submit">Log in</a> -->
+          
+        </form>
+        
+      </div>
+    </div>
+
+  </div>
+
+</body>
+
+</html>
+{% endblock content %}

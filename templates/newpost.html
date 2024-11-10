@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<br><br>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
+  <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
+  <title>Instagram Login Form</title>
+</head>
+
+<body>
+
+  <div id="wrapper">
+    <div class="container" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #f9f9f9; padding: 20px;">
+      <div class="phone-app-demo" style="display: none;"></div>
+      <div class="form-data" style="background: #ffffff; border-radius: 12px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); padding: 30px; max-width: 500px; width: 100%; margin: auto;">
+          <form action="" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 20px;">
+              {% csrf_token %}
+              <div class="logo" style="text-align: center;">
+                  <h3 style="margin: 0; font-size: 24px; color: #333;">Create New Post</h3><hr>
+              </div>
+              <span style="padding: 3px; font-size: 20px; margin-bottom: 1px;">Upload Picture</span><br>
+              <label for="fileInput" style="display: block; text-align: center; cursor: pointer;">
+                <img src="{% static 'assets2/images/upload_area.png' %}" alt="Upload Area" style="width: 100%; max-width: 200px; margin-top: -25px;">
+            </label>
+            <!-- Hidden file input -->
+            <input type="file" name="picture" id="fileInput" style="display: none;">
+              <br>
+              {{form.caption}}
+              <br>
+              {{form.tags}}
+              <br>
+              <button class="form-btn" type="submit" style="background-color: rgb(63, 224, 125); color: white; border: none; border-radius: 20px; padding: 12px; font-size: 16px; cursor: pointer; transition: background-color 0.3s, transform 0.3s;">
+                  Post
+              </button>
+          </form>
+      </div>
+  </div>
+  
+
+  
+      
+  </div>
+
+</body>
+
+</html>
+{% endblock content %}
