@@ -59,7 +59,7 @@
                     <div style="margin-top: 15px;">
                         {% if request.user.is_authenticated and request.user == profile.user %}
                             <a href="{% url 'editprofile' %}" style="text-decoration: none;" class="btn profile-edit-btn">Edit Profile</a>
-                            <a href="{% url 'sign-out' %}" style="text-decoration: none;" class="btn profile-edit-btn">Logout</a>
+                            <a href="{% url 'logout' %}" style="text-decoration: none;" class="btn profile-edit-btn">Logout</a>
                             <!-- <button class="btn profile-settings-btn" aria-label="profile settings" style="border: none; background: none;">
                                 <i class="fas fa-cog" aria-hidden="true"></i>
                             </button> -->

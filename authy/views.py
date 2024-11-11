@@ -7,7 +7,7 @@ from django.db import transaction
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login,logout
 
 
 from post.models import Post, Follow, Stream
@@ -124,3 +124,8 @@ def register(request):
         'form': form,
     }
     return render(request, 'sign-up.html', context)
+
+
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(reverse("sign-in"))
