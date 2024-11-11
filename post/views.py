@@ -1,5 +1,7 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404,HttpResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 
@@ -158,5 +160,40 @@ def favourite(request, post_id):
     else:
         profile.favourite.add(post)
     return HttpResponseRedirect(reverse('post-details', args=[post_id]))
+
+
+# @csrf_exempt
+# def like_post(request, id):
+#     if request.user.is_authenticated:
+#         if request.method == 'PUT':
+#             post = Post.objects.get(pk=id)
+#             # print(post)
+#             try:
+#                 post.likers.add(request.user)
+#                 post.save()
+#                 return HttpResponse(status=204)
+#             except Exception as e:
+#                 return HttpResponse(e)
+#         else:
+#             return HttpResponse("Method must be 'PUT'")
+#     else:
+#         return HttpResponseRedirect(reverse('sign-up'))
+
+# @csrf_exempt
+# def unlike_post(request, id):
+#     if request.user.is_authenticated:
+#         if request.method == 'PUT':
+#             post = Post.objects.get(pk=id)
+#             # print(post)
+#             try:
+#                 post.likers.remove(request.user)
+#                 post.save()
+#                 return HttpResponse(status=204)
+#             except Exception as e:
+#                 return HttpResponse(e)
+#         else:
+#             return HttpResponse("Method must be 'PUT'")
+#     else:
+#         return HttpResponseRedirect(reverse('sign-up'))
 
 

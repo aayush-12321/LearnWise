@@ -44,7 +44,9 @@ class Post(models.Model):
     posted = models.DateField(auto_now_add=True)
     tags = models.ManyToManyField(Tag, related_name="tags")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    likes = models.IntegerField(default=0)
+    # likes = models.ManyToManyField(User,blank=True , related_name='likes')
+    likes=models.IntegerField(default=0)
+
 
     def get_absolute_url(self):
         return reverse("post-details", args=[str(self.id)])
