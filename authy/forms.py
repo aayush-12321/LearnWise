@@ -19,15 +19,77 @@ class EditProfileForm(forms.ModelForm):
 
 
 
-class UserRegisterForm(UserCreationForm):
-    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'prompt srch_explore'}), max_length=50, required=True)
-    # username = forms.EmailInput(widget=forms.TextInput(attrs={'placeholder': 'Username'}), max_length=50, required=True)
+# class UserRegisterForm(UserCreationForm):
+#     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'prompt srch_explore'}), max_length=50, required=True)
+#     # username = forms.EmailInput(widget=forms.TextInput(attrs={'placeholder': 'Username'}), max_length=50, required=True)
 
-    email = forms.EmailField(widget=forms.TextInput(attrs={'placeholder': 'Email', 'class': 'prompt srch_explore'}))
-    password1 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Enter Password', 'class': 'prompt srch_explore'}))
-    password2 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password', 'class': 'prompt srch_explore'}))
-    # email = forms.EmailField()
+#     email = forms.EmailField(widget=forms.TextInput(attrs={'placeholder': 'Email', 'class': 'prompt srch_explore'}))
+#     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Enter Password', 'class': 'prompt srch_explore'}))
+#     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password', 'class': 'prompt srch_explore'}))
+#     # email = forms.EmailField()
+
+#     class Meta:
+#         model = User
+#         fields = ['username', 'email', 'password1', 'password2']
+
+
+
+# class UserRegisterForm(UserCreationForm):
+#     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'prompt srch_explore'}), max_length=50, required=True)
+#     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'prompt srch_explore'}))
+#     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Enter Password', 'class': 'prompt srch_explore'}))
+#     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password', 'class': 'prompt srch_explore'}))
+    
+#     # New fields
+#     first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name'}), required=False, max_length=30)
+#     last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}), required=False, max_length=30)
+#     bio = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Tell us about yourself'}), required=False)
+#     location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Location'}), required=False, max_length=100)
+#     url = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Website URL'}), required=False)
+#     image = forms.ImageField(required=False)
+
+#     class Meta:
+#         model = User
+#         fields = ['username', 'email', 'password1', 'password2', 'first_name', 'last_name', 'bio', 'location', 'url', 'image']
+
+
+
+
+
+
+class UserRegisterForm(UserCreationForm):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'prompt srch_explore'}))
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name'}), required=False, max_length=200)
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}), required=False, max_length=200)
+    bio = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Tell us about yourself'}), required=False)
+    location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Location'}), required=False, max_length=200)
+    url = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Website URL'}), required=False)
+    image = forms.ImageField(required=False)
 
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+
+    def save(self, commit=True):
+        # Save the user instance
+        user = super().save(commit=commit)
+        
+        # Create or update the Profile instance
+        profile, created = Profile.objects.get_or_create(user=user)
+        
+        # Set the profile fields
+        profile.first_name = self.cleaned_data.get('first_name')
+        profile.last_name = self.cleaned_data.get('last_name')
+        profile.bio = self.cleaned_data.get('bio')
+        profile.location = self.cleaned_data.get('location')
+        profile.url = self.cleaned_data.get('url')
+        
+        # Set the profile image if provided
+        if self.cleaned_data.get('image'):
+            profile.image = self.cleaned_data.get('image')
+        
+        if commit:
+            user.save()
+            profile.save()
+        
+        return user

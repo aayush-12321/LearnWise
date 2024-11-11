@@ -98,32 +98,101 @@ def follow(request, username, option):
         return HttpResponseRedirect(reverse('profile', args=[username]))
 
 
-def register(request):
-    if request.method == "POST":
-        form = UserRegisterForm(request.POST)
-        if form.is_valid():
-            new_user = form.save()
-            # Profile.get_or_create(user=request.user)
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Hurray your account was created!!')
+# def register(request):
+#     if request.method == "POST":
+#         form = UserRegisterForm(request.POST)
+#         if form.is_valid():
+#             new_user = form.save()
+#             # Profile.get_or_create(user=request.user)
+#             username = form.cleaned_data.get('username')
+#             messages.success(request, f'Hurray your account was created!!')
 
-            # Automatically Log In The User
-            new_user = authenticate(username=form.cleaned_data['username'],
-                                    password=form.cleaned_data['password1'],)
-            login(request, new_user)
-            # return redirect('editprofile')
-            return redirect('index')
+#             # Automatically Log In The User
+#             new_user = authenticate(username=form.cleaned_data['username'],
+#                                     password=form.cleaned_data['password1'],)
+#             login(request, new_user)
+#             # return redirect('editprofile')
+#             return redirect('index')
             
 
 
-    elif request.user.is_authenticated:
-        return redirect('index')
+#     elif request.user.is_authenticated:
+#         return redirect('index')
+#     else:
+#         form = UserRegisterForm()
+#     context = {
+#         'form': form,
+#     }
+#     return render(request, 'sign-up.html', context)
+
+
+# def logout_view(request):
+#     logout(request)
+#     return HttpResponseRedirect(reverse("sign-in"))
+
+
+
+# def register(request):
+#     if request.method == "POST":
+#         form = UserRegisterForm(request.POST, request.FILES)  # Handle both form data and file uploads
+#         if form.is_valid():
+#             new_user = form.save()
+#             username = form.cleaned_data.get('username')
+#             messages.success(request, 'Your account has been created successfully!')
+
+#             # Automatically log in the user
+#             new_user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1'])
+#             if new_user is not None:
+#                 login(request, new_user)
+#                 return redirect('index')
+#             else:
+#                 messages.error(request, "There was an issue logging you in. Please try logging in manually.")
+#                 return redirect('sign-in')
+#         else:
+#             # Display form errors if any validation fails
+#             for field, errors in form.errors.items():
+#                 for error in errors:
+#                     messages.error(request, f"{field}: {error}")
+
+#     else:
+#         if request.user.is_authenticated:
+#             return redirect('index')
+#         form = UserRegisterForm()
+
+#     context = {'form': form}
+#     return render(request, 'sign-up.html', context)
+
+
+
+def register(request):
+    if request.method == "POST":
+        form = UserRegisterForm(request.POST, request.FILES)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, 'Your account has been created successfully!')
+
+            # Automatically log in the user
+            new_user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1'])
+            if new_user is not None:
+                login(request, new_user)
+                return redirect('index')
+            else:
+                messages.error(request, "There was an issue logging you in. Please try logging in manually.")
+                return redirect('sign-in')
+        else:
+            # Display form errors if validation fails
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+
     else:
+        if request.user.is_authenticated:
+            return redirect('index')
         form = UserRegisterForm()
-    context = {
-        'form': form,
-    }
+
+    context = {'form': form}
     return render(request, 'sign-up.html', context)
+
 
 
 def logout_view(request):
