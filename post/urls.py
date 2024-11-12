@@ -10,4 +10,9 @@ urlpatterns = [
 
     path('<uuid:post_id>/favourite', favourite, name='favourite'),
 
+    # path('<uuid:post_id>/favourite',favourite,name='post-favourite'),
+    # path('<uuid:post_id>/favourite', favourite, name='post-favourite'),
+
+
+
 ]

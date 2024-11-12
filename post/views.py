@@ -110,9 +110,10 @@ def PostDetail(request, post_id):
         'form': form,
         'comments': comments
     }
-    for comment in comments:
+    # for comment in comments:
         # print(f"Name:{comment.user.profile.first_name}")
-        print(f"Name:{comment.user.first_name}")
+        # print("*"*20)
+        # print(f"Name:{comment.user.first_name}")
 
     return render(request, 'postdetail.html', context)
 
@@ -148,6 +149,30 @@ def like(request, post_id):
     post.save()
     # return HttpResponseRedirect(reverse('post-details', args=[post_id]))
     return HttpResponseRedirect(reverse('post-details', args=[post_id]))
+
+
+
+# from django.http import JsonResponse
+# from django.views.decorators.http import require_POST
+
+
+# # @login_required
+# @require_POST
+# def favourite(request, post_id):
+#     user = request.user
+#     post = Post.objects.get(id=post_id)
+#     profile = Profile.objects.get(user=user)
+    
+#     if profile.favourite.filter(id=post_id).exists():
+#         profile.favourite.remove(post)
+#         is_favourite = False
+#     else:
+#         profile.favourite.add(post)
+#         is_favourite = True
+    
+#     return JsonResponse({'is_favourite': is_favourite})
+
+
 
 @login_required
 def favourite(request, post_id):

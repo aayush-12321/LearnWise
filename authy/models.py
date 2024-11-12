@@ -19,7 +19,9 @@ class Profile(models.Model):
     bio = models.CharField(max_length=200, null=True, blank=True)
     location = models.CharField(max_length=200, null=True, blank=True)
     url = models.URLField(max_length=200, null=True, blank=True)
+    # favourite = models.ManyToManyField(Post, blank=True)
     favourite = models.ManyToManyField(Post, blank=True)
+
 
     
     def save(self, *args, **kwargs):
