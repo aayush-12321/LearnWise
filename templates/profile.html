@@ -56,6 +56,44 @@
             background-color: rgb(35, 167, 85) !important;
         }
 
+        /* In styles.css */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    justify-items: center;
+}
+
+.gallery-item {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.gallery-item-info ul {
+    display: flex;
+    justify-content: space-around;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    color: #fff;
+    font-size: 0.9em;
+}
+
+.gallery-item-likes, .gallery-item-comments {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+}
+
+
     </style>
 
 </head>

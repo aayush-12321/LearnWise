@@ -204,30 +204,42 @@
                             <button style="background: none; border: none; color: #007bff; font-size: 14px; cursor: pointer;">See All</button>
                         </div>
                         <div class="side-menu__suggestions-content" style="display: flex; flex-direction: column; gap: 10px;">
-                            {% for user in all_users %}
-                                {% if request.user.username != user.username %}
-                                <div class="side-menu__suggestion" style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eaeaea;">
-                                    <a href="{% url 'profile' user %}" class="side-menu__suggestion-avatar" style="flex-shrink: 0; margin-right: 10px;">
-                                        <img src="{{user.profile.image.url}}" alt="User Picture" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                            {% for user in suggestions %}
+                        <div class="side-menu__suggestion" style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eaeaea;">
+                            <a href="{% url 'profile' user %}" class="side-menu__suggestion-avatar" style="flex-shrink: 0; margin-right: 10px;">
+                                <img src="{{ user.profile.image.url }}" alt="User Picture" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                            </a>
+                            
+                            <div class="side-menu__suggestion-info" style="flex-grow: 1;">
+                                {% if user.profile.first_name %}
+                                    <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">
+                                        {{ user.profile.first_name|title }} {{ user.profile.last_name|title }}
                                     </a>
-                                    
-                                    <div class="side-menu__suggestion-info" style="flex-grow: 1;">
-                                        {% if user.profile.first_name %}
-                                        <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.profile.first_name|title}} {{user.profile.last_name|title}}</a>
-                                        {% else %}
-                                        <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
-                                        {% endif %}
-                                        <span style="display: block; color: #777; font-size: 12px;">@{{user.username}}</span>
-                                    </div>
-                    
-                                    {% if follow_status == True %}
-                                    <a href="{% url 'follow' user 0 %}" class="side-menu__suggestion-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px;margin: 5px; font-size: 12px; cursor: pointer;">Follow</a>
-                                    {% else %}
-                                    <a href="{% url 'follow' user 1 %}" class="side-menu__suggestion-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px;margin: 5px; font-size: 12px; cursor: pointer;">Follow</a>
-                                    {% endif %}
-                                </div>
+                                {% else %}
+                                    <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">
+                                        {{ user.username }}
+                                    </a>
                                 {% endif %}
-                            {% endfor %}
+                                <span style="display: block; color: #777; font-size: 12px;">@{{ user.username }}</span>
+                            </div>
+                    
+                            {% if user in followings %}
+                                <a href="{% url 'follow' user 0 %}" class="side-menu__suggestion-button" style="padding: 5px 10px; background-color: #ccc; color: white; text-decoration: none; border-radius: 5px; margin: 5px; font-size: 12px; cursor: pointer;">
+                                    Unfollow
+                                </a>
+                            {% else %}
+                                <a href="{% url 'follow' user 1 %}" class="side-menu__suggestion-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; margin: 5px; font-size: 12px; cursor: pointer;">
+                                    Follow
+                                </a>
+                            {% endif %}
+                        </div>
+
+                        {% empty %}
+                                    <div style="text-align: center; border-bottom: .5px solid #e6ecf0; padding: 10px 15px;">
+                                        <span class="grey" style="font-size: .9em;">No suggestions available.</span>
+                                    </div>
+
+                    {% endfor %}
                         </div>
                     </div>
                 
@@ -253,33 +265,46 @@
                 <div class="side-menu__suggestions-section" style="padding: 15px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-top: 20px;">
                     <div class="side-menu__suggestions-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <h2 style="font-size: 18px; color: #333; margin: 0;">Suggestions for You</h2>
-                        <button style="background: none; border: none; color: #007bff; font-size: 14px; cursor: pointer;">See All</button>
+                        <button style="background: none; border: none; color: #007bff; font-size: 14px; cursor: pointer;">...</button>
                     </div>
                     <div class="side-menu__suggestions-content" style="display: flex; flex-direction: column; gap: 10px;">
-                        {% for user in all_users %}
-                            {% if request.user.username != user.username %}
-                            <div class="side-menu__suggestion" style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eaeaea;">
-                                <a href="{% url 'profile' user %}" class="side-menu__suggestion-avatar" style="flex-shrink: 0; margin-right: 10px;">
-                                    <img src="{{user.profile.image.url}}" alt="User Picture" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                                </a>
-                                
-                                <div class="side-menu__suggestion-info" style="flex-grow: 1;">
-                                    {% if user.profile.first_name %}
-                                    <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.profile.first_name|title}} {{user.profile.last_name|title}}</a>
-                                    {% else %}
-                                    <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
-                                    {% endif %}
-                                    <span style="display: block; color: #777; font-size: 12px;">@{{user.username}}</span>
-                                </div>
-                
-                                {% if follow_status == True %}
-                                <a href="{% url 'follow' user 0 %}" class="side-menu__suggestion-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px;margin: 5px; font-size: 12px; cursor: pointer;">Follow</a>
+                        {% for user in suggestions %}
+                        <div class="side-menu__suggestion" style="display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #eaeaea;">
+                            <a href="{% url 'profile' user %}" class="side-menu__suggestion-avatar" style="flex-shrink: 0; margin-right: 10px;">
+                                <img src="{{ user.profile.image.url }}" alt="User Picture" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                            </a>
+                            
+                            <div class="side-menu__suggestion-info" style="flex-grow: 1;">
+                                {% if user.profile.first_name %}
+                                    <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">
+                                        {{ user.profile.first_name|title }} {{ user.profile.last_name|title }}
+                                    </a>
                                 {% else %}
-                                <a href="{% url 'follow' user 1 %}" class="side-menu__suggestion-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px;margin: 5px; font-size: 12px; cursor: pointer;">Follow</a>
+                                    <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">
+                                        {{ user.username }}
+                                    </a>
                                 {% endif %}
+                                <span style="display: block; color: #777; font-size: 12px;">@{{ user.username }}</span>
                             </div>
+                    
+                            {% if user in followings %}
+                                <a href="{% url 'follow' user 0 %}" class="side-menu__suggestion-button" style="padding: 5px 10px; background-color: #ccc; color: white; text-decoration: none; border-radius: 5px; margin: 5px; font-size: 12px; cursor: pointer;">
+                                    Unfollow
+                                </a>
+                            {% else %}
+                                <a href="{% url 'follow' user 1 %}" class="side-menu__suggestion-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; margin: 5px; font-size: 12px; cursor: pointer;">
+                                    Follow
+                                </a>
                             {% endif %}
-                        {% endfor %}
+                        </div>
+
+                        {% empty %}
+                                    <div style="text-align: center; border-bottom: .5px solid #e6ecf0; padding: 10px 15px;">
+                                        <span class="grey" style="font-size: .9em;">No suggestions available.</span>
+                                    </div>
+
+                    {% endfor %}
+                    
                     </div>
 
                 </div>

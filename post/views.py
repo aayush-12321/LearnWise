@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,JsonResponse
 
 from post.models import Post, Tag, Follow, Stream, Likes
 from django.contrib.auth.models import User
@@ -13,6 +13,7 @@ from django.urls import resolve
 from comment.models import Comment
 from comment.forms import NewCommentForm
 from django.core.paginator import Paginator
+from django.db.models import Count
 
 from django.db.models import Q
 # from post.models import Post, Follow, Stream
@@ -47,11 +48,54 @@ def index(request):
         users_paginator = paginator.get_page(page_number)
 
 
+#-----------------------------------------------------------------------------
+    # gives more priority to user with more mutual friends while suggesting
+
+    followings = []
+    suggestions = []
+    
+    # if request.user.is_authenticated:
+    #     # Get a list of user IDs that the current user is following
+    #     followings = Follow.objects.filter(follower=request.user).values_list('following', flat=True)
+        
+    #     # Suggest users that the current user is not already following and is not the current user
+    #     suggestions = User.objects.exclude(pk__in=followings).exclude(pk=request.user.pk).order_by("?")[:6]
+
+    if request.user.is_authenticated:
+        # Get IDs of users the current user is following
+        followings = set(Follow.objects.filter(follower=request.user).values_list('following', flat=True))
+
+        # Step 1: Get all potential suggestions (users not followed by the current user and not the user themselves)
+        potential_suggestions = User.objects.exclude(pk__in=followings).exclude(pk=request.user.pk)
+
+        # Step 2: Calculate mutual friends for each suggested user
+        suggestions_with_mutuals = []
+        for user in potential_suggestions:
+            # Get users who follow both the current user and the suggested user (mutual friends)
+            mutual_friends_count = Follow.objects.filter(
+                following=user
+            ).filter(
+                follower__in=followings
+            ).count()
+            
+            suggestions_with_mutuals.append((user, mutual_friends_count))
+
+        # Step 3: Sort suggestions by mutual friends count in descending order and limit to 6 results
+        sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[1:7]
+        suggestions = [user for user, _ in sorted_suggestions]
+        
+
+    # print("#"*20)
+    # print(followings)
+    # print(suggestions)
+
+
     context = {
         'post_items': post_items,
         'follow_status': follow_status,
         'profile': profile,
         'all_users': all_users,
+        "suggestions":suggestions,
         # 'users_paginator': users_paginator,
     }
     return render(request, 'index.html', context)
@@ -222,3 +266,61 @@ def favourite(request, post_id):
 #         return HttpResponseRedirect(reverse('sign-up'))
 
 
+@csrf_exempt
+def delete_post(request, post_id):
+    if request.user.is_authenticated:
+        if request.method == 'PUT':
+            post = Post.objects.get(id=post_id)
+            if request.user == post.creater:
+                try:
+                    delete = post.delete()
+                    return HttpResponse(status=201)
+                except Exception as e:
+                    return HttpResponse(e)
+            else:
+                return HttpResponse(status=404)
+        else:
+            return HttpResponse("Method must be 'PUT'")
+    else:
+        return HttpResponseRedirect(reverse('sign-in'))
+    
+
+
+@login_required
+@csrf_exempt
+def edit_post(request, post_id):
+    if request.method == 'POST':
+        text = request.POST.get('text')
+        pic = request.FILES.get('picture')
+        img_chg = request.POST.get('img_change')
+        post_id = request.POST.get('id')
+        post = Post.objects.get(id=post_id)
+        try:
+            post.content_text = text
+            if img_chg != 'false':
+                post.content_image = pic
+            post.save()
+            
+            if(post.content_text):
+                post_text = post.content_text
+            else:
+                post_text = False
+            if(post.content_image):
+                post_image = post.img_url()
+            else:
+                post_image = False
+            
+            return JsonResponse({
+                "success": True,
+                "text": post_text,
+                "picture": post_image
+            })
+        except Exception as e:
+        #     print('-----------------------------------------------')
+        #     print(e)
+        #     print('-----------------------------------------------')
+            return JsonResponse({
+                "success": False
+            })
+    else:
+            return HttpResponse("Method must be 'POST'")

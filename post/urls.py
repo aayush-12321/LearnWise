@@ -1,5 +1,5 @@
 from django.urls import path
-from post.views import index, NewPost, PostDetail, Tags,like,favourite
+from post.views import index, NewPost, PostDetail, Tags,like,favourite,delete_post,edit_post
 
 urlpatterns = [
     path('', index, name='index'),
@@ -10,8 +10,11 @@ urlpatterns = [
 
     path('<uuid:post_id>/favourite', favourite, name='favourite'),
 
-    # path('<uuid:post_id>/favourite',favourite,name='post-favourite'),
-    # path('<uuid:post_id>/favourite', favourite, name='post-favourite'),
+    
+    path("n/post/<int:post_id>/delete", delete_post, name="deletepost"),
+    path("n/post/<int:post_id>/edit", edit_post, name="editpost"),
+
+
 
 
 
