@@ -421,7 +421,7 @@ img { max-width: 100%; }
 .post__content {
     display: flex;
     position: relative;
-}
+} 
 .post__medias {
     display: flex;
     overflow-y: hidden;
@@ -440,7 +440,7 @@ img { max-width: 100%; }
     flex: none;
     scroll-snap-align: start;
     scroll-snap-stop: always;
-}
+} 
 
 .post__footer {
     background-color: var(--primary);

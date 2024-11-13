@@ -18,87 +18,104 @@ from django.db.models import Count
 from django.db.models import Q
 # from post.models import Post, Follow, Stream
 
-
-
+from datetime import timedelta
+from django.utils import timezone
+from django.db.models import Q
 
 @login_required
 def index(request):
     user = request.user
-    user = request.user
-    all_users = User.objects.all()
-    follow_status = Follow.objects.filter(following=user, follower=request.user).exists()
-
-    profile = Profile.objects.all()
-
-    posts = Stream.objects.filter(user=user)
-    group_ids = []
-
+    following_ids = set(Follow.objects.filter(follower=user).values_list('following', flat=True))
+    mutual_follow_ids = set(Follow.objects.filter(following=user).values_list('follower', flat=True)).intersection(following_ids)
     
-    for post in posts:
-        group_ids.append(post.post_id)
-        
-    post_items = Post.objects.filter(id__in=group_ids).all().order_by('-posted')
+    own_posts = Post.objects.filter(user=user)
+    following_posts = Post.objects.filter(user__in=following_ids)
+    mutual_posts = Post.objects.filter(user__in=mutual_follow_ids)
+    other_posts = Post.objects.exclude(user__in=following_ids).exclude(user=user)
 
+    all_posts = own_posts | following_posts | mutual_posts | other_posts
+    scored_posts = []
+
+    # Calculate post scores with a priority for followed users
+    for post in all_posts:
+        if post.user.id in following_ids:
+            # Higher priority for followed users
+            relationship_multiplier = 2.0
+            like_weight = 2.5
+            comment_weight = 2.0
+            recency_decay = 1.1  # Slower decay for followed users
+        elif post.user == user:
+            relationship_multiplier = 1.25
+            like_weight = 1.8
+            comment_weight = 1.5
+            recency_decay = 1.25
+        elif post.user.id in mutual_follow_ids:
+            relationship_multiplier = 1.2
+            like_weight = 1.8
+            comment_weight = 1.4
+            recency_decay = 1.3
+        else:
+            relationship_multiplier = 1.0
+            like_weight = 1.5
+            comment_weight = 1.2
+            recency_decay = 1.5
+
+        # Engagement scores
+        likes = post.likes
+        comments_count = post.comment.count()
+        
+        # Recency factor with customized decay based on relationship
+        days_since_post = (timezone.now().date() - post.posted).days
+        recency_factor = recency_decay ** days_since_post
+
+        # Calculate the final score, applying the customized weights
+        score = ((likes + 1) * like_weight + (comments_count + 1) * comment_weight) / recency_factor
+        score *= relationship_multiplier
+
+        scored_posts.append((post, score))
+
+    # Sort posts by score in descending order
+    scored_posts.sort(key=lambda x: x[1], reverse=True)
+    sorted_posts = [post for post, _ in scored_posts]
+
+     # Handle search query if present
     query = request.GET.get('q')
     if query:
         users = User.objects.filter(Q(username__icontains=query))
-
         paginator = Paginator(users, 6)
         page_number = request.GET.get('page')
         users_paginator = paginator.get_page(page_number)
 
-
-#-----------------------------------------------------------------------------
-    # gives more priority to user with more mutual friends while suggesting
-
+    # Suggestions based on mutual friends
     followings = []
     suggestions = []
-    
-    # if request.user.is_authenticated:
-    #     # Get a list of user IDs that the current user is following
-    #     followings = Follow.objects.filter(follower=request.user).values_list('following', flat=True)
-        
-    #     # Suggest users that the current user is not already following and is not the current user
-    #     suggestions = User.objects.exclude(pk__in=followings).exclude(pk=request.user.pk).order_by("?")[:6]
-
     if request.user.is_authenticated:
-        # Get IDs of users the current user is following
         followings = set(Follow.objects.filter(follower=request.user).values_list('following', flat=True))
-
-        # Step 1: Get all potential suggestions (users not followed by the current user and not the user themselves)
         potential_suggestions = User.objects.exclude(pk__in=followings).exclude(pk=request.user.pk)
-
-        # Step 2: Calculate mutual friends for each suggested user
+        
         suggestions_with_mutuals = []
         for user in potential_suggestions:
-            # Get users who follow both the current user and the suggested user (mutual friends)
-            mutual_friends_count = Follow.objects.filter(
-                following=user
-            ).filter(
-                follower__in=followings
-            ).count()
-            
+            mutual_friends_count = Follow.objects.filter(following=user).filter(follower__in=followings).count()
             suggestions_with_mutuals.append((user, mutual_friends_count))
-
-        # Step 3: Sort suggestions by mutual friends count in descending order and limit to 6 results
-        sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[1:7]
-        suggestions = [user for user, _ in sorted_suggestions]
         
+        sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[:6]
+        suggestions = [user for user, _ in sorted_suggestions]
 
-    # print("#"*20)
-    # print(followings)
-    # print(suggestions)
-
-
+    # Prepare context and render template
     context = {
-        'post_items': post_items,
-        'follow_status': follow_status,
-        'profile': profile,
-        'all_users': all_users,
-        "suggestions":suggestions,
+        'post_items': sorted_posts,
+        'profile': Profile.objects.all(),
+        'follow_status': Follow.objects.filter(following=user, follower=request.user).exists(),
+        'all_users': User.objects.all(),
+        'suggestions': suggestions,
         # 'users_paginator': users_paginator,
+        # 'comments_count' : post.comment.count()
     }
     return render(request, 'index.html', context)
+
+
+
+
 
 
 @login_required

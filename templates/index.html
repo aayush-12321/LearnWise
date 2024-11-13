@@ -4,8 +4,24 @@
 <style>
    .side-menu__suggestion-button:hover,.side-menu__user-button:hover{
     background-color: rgb(35, 167, 85)  !important;
-    
    }
+    .post__content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* height: 300px; */
+            /* Set a fixed height if desired */
+            width: 100%;
+            /* Make the container full width */
+        }
+
+        .post__media {
+            max-width: 100%;
+            /* max-height: 100%; */
+            /* Optional: limit the height */
+            border-radius: 8px;
+        }
+
 
 </style>
     <main class="main-container">
@@ -158,11 +174,18 @@
                         </p>
                 
                         <!-- Post Image -->
-                        <div class="post__content" style="margin-top: 10px;">
+                        <!-- <div class="post__content" style="margin-top: 10px;">
                             <a href="{% url 'post-details' post.id %}">
                                 <img class="post__media" src="{{ post.picture.url }}" alt="Post Content" style="width: 100%; border-radius: 8px;">
                             </a>
+                        </div> -->
+
+                        <div class="post__content">
+                            <a href="{% url 'post-details' post.id %}">
+                                <img class="post__media" src="{{ post.picture.url }}" alt="Post Content">
+                            </a>
                         </div>
+                        
                 
                         <div class="post__footer" style="margin-top: 10px;">
                             <div class="post__buttons" style="display: flex; align-items: center;">
@@ -186,10 +209,22 @@
                                 </a>
                                 <!-- Additional buttons like comment and share can go here -->
                             </div>
-                
-                            <div class="post__likes" style="margin-top: 10px;">
-                                <span style="font-size: 14px; color: #555;">{{post.likes}} likes</span>
+                            
+                            <!-- Like counts -->
+                            <div class="post__interaction" style="display: flex; align-items: center; margin-top: 10px;">
+                                <div class="post__likes" style="margin-right: 10px;">
+                                    <a href="#" style="font-size: 14px; color: #555; text-decoration: none;">
+                                        {{post.likes}} likes
+                                    </a>
+                                </div>
+                                
+                                <div class="post__comments">
+                                    <a href="{% url 'post-details' post.id %}" style="font-size: 14px; color: #555; text-decoration: none;">
+                                        {{post.comment.count}} comments
+                                    </a>
+                                </div>
                             </div>
+                            
                 
                             <span class="post__date-time" style="font-size: 12px; color: #999;">{{post.posted}}</span>
                         </div>
