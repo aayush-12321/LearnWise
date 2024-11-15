@@ -92,28 +92,57 @@ def UserProfile(request, username):
     }
     return render(request, 'profile.html', context)
 
-def EditProfile(request):
-    user = request.user.id
-    profile = Profile.objects.get(user__id=user)
+# def EditProfile(request):
+#     user = request.user.id
+#     profile = Profile.objects.get(user__id=user)
+
+#     if request.method == "POST":
+#         form = EditProfileForm(request.POST, request.FILES, instance=request.user.profile)
+#         if form.is_valid():
+#             profile.image = form.cleaned_data.get('image')
+#             profile.first_name = form.cleaned_data.get('first_name')
+#             profile.last_name = form.cleaned_data.get('last_name')
+#             profile.location = form.cleaned_data.get('location')
+#             profile.url = form.cleaned_data.get('url')
+#             profile.bio = form.cleaned_data.get('bio')
+#             profile.save()
+#             return redirect('profile', profile.user.username)
+#     else:
+#         form = EditProfileForm(instance=request.user.profile)
+
+#     context = {
+#         'form':form,
+#     }
+#     return render(request, 'editprofile.html', context)
+
+
+from django.contrib import messages
+import os
+def editProfile(request):
+    profile = request.user.profile  # Retrieve the profile of the logged-in user
 
     if request.method == "POST":
-        form = EditProfileForm(request.POST, request.FILES, instance=request.user.profile)
-        if form.is_valid():
-            profile.image = form.cleaned_data.get('image')
-            profile.first_name = form.cleaned_data.get('first_name')
-            profile.last_name = form.cleaned_data.get('last_name')
-            profile.location = form.cleaned_data.get('location')
-            profile.url = form.cleaned_data.get('url')
-            profile.bio = form.cleaned_data.get('bio')
-            profile.save()
-            return redirect('profile', profile.user.username)
-    else:
-        form = EditProfileForm(instance=request.user.profile)
+        if len(request.FILES) != 0:
+            if profile.image and len(profile.image.path) > 0:
+                os.remove(profile.image.path)  # Remove the old image if it exists
+            profile.image = request.FILES['picture']
+
+        profile.first_name = request.POST.get('first_name')
+        profile.last_name = request.POST.get('last_name')
+        profile.bio = request.POST.get('bio')
+        profile.location = request.POST.get('location')
+        profile.url = request.POST.get('url')
+        
+        profile.save()
+        messages.success(request, "Profile updated successfully")
+        return redirect('profile', profile.user.username)
 
     context = {
-        'form':form,
+        'profile': profile
     }
     return render(request, 'editprofile.html', context)
+
+
 
 def follow(request, username, option):
     user = request.user

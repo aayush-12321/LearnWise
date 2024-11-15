@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% load static %}
-{% load crispy_forms_tags %}
 {% block content %}
 <br><br>
 <!DOCTYPE html>
@@ -12,58 +11,122 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
   <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
-  <title>Instagram Login Form</title>
+  <title>Social Media: Edit Profile</title>
+  <style>
+   body {
+  background: linear-gradient(135deg, #89f7fe, #66a6ff);
+  background-attachment: fixed; /* Fix the background to the viewport */
+  background-size: cover; /* Cover the entire viewport */
+}
+    .preview-image {
+      display: block;
+      margin: 10px auto;
+      max-width: 100%;
+      border-radius: 10px;
+      border: 2px solid #ddd;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .form-container {
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin: 20px auto;
+      max-width: 600px;
+    }
+    .form-header {
+      text-align: center;
+      font-size: 24px;
+      color: #333;
+    }
+    .form-label {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .form-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: rgb(63, 224, 125);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    .form-btn:hover {
+      background-color: rgb(52, 190, 105);
+    }
+  </style>
 </head>
 
 <body>
-
   <div id="wrapper">
     <div class="container">
-      <div class="phone-app-ddemo"></div>
-      <div class="form-data">
+      <div class="form-container">
         <form action="" method="POST" enctype="multipart/form-data">
-			{% csrf_token %}
-      <div class="logo" style="text-align: center;">
-        <h3 style="margin: 0; font-size: 24px; color: #333;">Edit Profile</h3><hr>
-    </div>
-          <span style=" margin-top:5px;padding: 5px; font-size: 20px;right: 20px;">Current Profile</span><br>
-          <div class="side-menu__user-profile" style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); margin-top: 5px;">
+          {% csrf_token %}
+          <div class="form-header">Edit Profile</div>
+          <hr>
+
+          <span style="margin-top:5px; padding: 5px; font-size: 20px;">Current Profile</span><br>
+          <div class="side-menu__user-profile" style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; margin-top: 5px;">
             <a href="#" class="side-menu__user-avatar" style="flex-shrink: 0; margin-right: 30px;">
-                <img src="{{ request.user.profile.image.url }}" alt="User Picture" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
+              <img src="{{ request.user.profile.image.url }}" alt="User Picture" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
             </a>
             <div class="side-menu__user-info" style="flex-grow: 1;">
-                {% if user.profile.first_name %}
-                <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{request.user.profile.first_name|title }} {{request.user.profile.last_name|title }}</a>
-                {% else %}
-                <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
-                {% endif %}
-                <span style="display: block; color: #777; font-size: 14px;">@{{request.user.username}}</span>
+              {% if user.profile.first_name %}
+              <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{request.user.profile.first_name|title }} {{request.user.profile.last_name|title }}</a>
+              {% else %}
+              <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
+              {% endif %}
+              <span style="display: block; color: #777; font-size: 14px;">@{{request.user.username}}</span>
             </div> 
             <a href="{% url 'profile' request.user %}" class="side-menu__user-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View Profile</a>
-        </div>
-        <span style="padding: 5px; font-size: 20px;">Change Picture</span><br>
+          </div>
 
+          {% if profile.image %}
+            <img src="{{ profile.image.url }}" alt="Current Image" class="preview-image">
+          {% endif %}
+
+          <span style="padding: 5px; font-size: 20px;">Change Picture</span><br>
           <label for="fileInput" style="display: block; text-align: center; cursor: pointer;">
             <img src="{% static 'assets2/images/upload_area.png' %}" alt="Upload Area" style="width: 100%; max-width: 200px;">
-        </label>
-        <input type="file" name="picture" id="fileInput" style="display: none;">
-        <br>
-          <!-- {{form.image}} <br> -->
-		  {{form.first_name}} <br>
-		  {{form.last_name}} <br>
-		  {{form.bio}} <br>
-		  {{form.location}} <br>
-		  {{form.url}} <br>
-          <button class="form-btn" type="submit" style="background-color: rgb(63, 224, 125);">Update Profile</button>
-          <!-- <a href="index.html" class="form-btn" type="submit">Log in</a> -->
-          
+          </label>
+          <input type="file" name="picture" id="fileInput" class="form-control" style="margin: 4px 0px;">
+          <br>
+
+          <div class="mb-3">
+            <label for="firstName" class="form-label">First Name</label>
+            <input type="text" name="first_name" value="{{ request.user.profile.first_name }}" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label for="lastName" class="form-label">Last Name</label>
+            <input type="text" name="last_name" value="{{ request.user.profile.last_name }}" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label for="bio" class="form-label">Bio</label>
+            <input type="text" name="bio" value="{{ request.user.profile.bio }}" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label for="location" class="form-label">Location</label>
+            <input type="text" name="location" value="{{ request.user.profile.location }}" class="form-control">
+          </div>
+
+          <div class="mb-3">
+            <label for="url" class="form-label">URL</label>
+            <input type="text" name="url" value="{{ request.user.profile.url }}" class="form-control">
+          </div>
+
+          <button class="form-btn" type="submit">Update Profile</button>
         </form>
-        
       </div>
     </div>
-
   </div>
-
 </body>
 
 </html>
