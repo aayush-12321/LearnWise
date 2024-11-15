@@ -128,15 +128,32 @@ post details:
             justify-content: center;
             align-items: center;
             /* height: 300px; */
-            /* Set a fixed height if desired */
             width: 100%;
-            /* Make the container full width */
+            margin-top: 10px;
         }
 
         .post__media {
             max-width: 100%;
             /* max-height: 100%; */
             /* Optional: limit the height */
+            border-radius: 8px;
+        }
+
+        /* for caption */
+        .caption-placeholder {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .post__caption {
+            padding: 10px;
+            background-color: #f9f9f9;
             border-radius: 8px;
         }
 
@@ -249,26 +266,29 @@ post details:
                     </div>
 
                     <!-- Caption -->
-                    <div class="post__caption" style="margin-top: 10px;">
-                        <p style="font-size: 14px; color: #555;">{{post.caption}}</p>
-                        <p style="font-size: 13px;">{% for tag in post.tags.all %}
-                            <a href="{{ tag.get_absolute_url }}" style="text-decoration: none; color: #007bff;">#{{ tag }}</a>
+                    <!-- Caption Section (displayed always if available) -->
+                    {% if post.caption %}
+                    <div class="post__caption" style="margin-bottom: 10px;">
+                        <p style="font-size: 14px; color: #555;">{{ post.caption|linebreaks }}</p>
+                        <p style="font-size: 13px;">
+                            {% for tag in post.tags.all %}
+                            <a href="{{ tag.get_absolute_url }}"
+                                style="text-decoration: none; color: #007bff;">#{{tag}}</a>
                             {% endfor %}
                         </p>
                     </div>
+                    {% endif %}
 
-                    <!-- Post Image -->
-                    <!-- <div class="post__content">
-                        <a href="{% url 'post-details' post.id %}">
-                            <img class="post__media" src="{{ post.picture.url }}" alt="Post Content"
-                                style="width: 100%; border-radius: 8px;">
-                        </a>
-                    </div> -->
+                    <!-- Image Section (displayed only if an image is available) -->
+                    {% if post.picture %}
                     <div class="post__content">
                         <a href="{% url 'post-details' post.id %}">
                             <img class="post__media" src="{{ post.picture.url }}" alt="Post Content">
                         </a>
                     </div>
+                    {% endif %}
+
+
 
 
                     <!-- Like and Comment Section -->

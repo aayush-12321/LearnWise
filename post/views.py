@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404,HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 from django.urls import reverse
 from django.http import HttpResponseRedirect,JsonResponse
@@ -219,9 +220,6 @@ def index(request):
     return render(request, 'index.html', context)
 
 
-
-
-
 @login_required
 def NewPost(request):
     user = request.user
@@ -232,18 +230,36 @@ def NewPost(request):
         picture = request.FILES.get('picture')
         caption = request.POST.get('caption')
         tag_form = request.POST.get('tags')
-        
-        if picture and caption:
-            tag_list = tag_form.split(',') if tag_form else []
 
-            for tag in tag_list:
-                t, created = Tag.objects.get_or_create(title=tag.strip())
-                tags_obj.append(t)
-            
-            p, created = Post.objects.get_or_create(picture=picture, caption=caption, user=user)
-            p.tags.set(tags_obj)
-            p.save()
+        # Validation: Ensure one of the allowed combinations is provided
+        if (
+            picture or caption or tag_form
+        ) and (picture or caption or (caption and tag_form) or (picture and tag_form)):
+            # Handle tags if provided
+            if tag_form:
+                tag_list = tag_form.split(',')
+                for tag in tag_list:
+                    t, created = Tag.objects.get_or_create(title=tag.strip())
+                    tags_obj.append(t)
+
+            # Create a new post instance
+            post = Post.objects.create(
+                user=user,
+                picture=picture if picture else None,
+                caption=caption if caption else ''
+            )
+
+            # Associate tags with the post
+            if tags_obj:
+                post.tags.set(tags_obj)
+
+            post.save()
+
+            messages.success(request, 'Your post has been created!')
             return redirect('profile', request.user.username)
+        else:
+            # Show error if conditions aren't met
+            messages.error(request, 'Please provide at least a valid combination of photo, caption, or tags.')
 
     context = {
         'profile': profile
