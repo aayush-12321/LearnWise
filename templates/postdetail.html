@@ -118,6 +118,88 @@ post details:
             border-radius: 8px;
         }
 
+        .side-menu__suggestion-button:hover,
+    .side-menu__user-button:hover {
+        background-color: rgb(35, 167, 85) !important;
+    }
+
+    .post__content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* height: 300px; */
+        /* Set a fixed height if desired */
+        width: 100%;
+        /* Make the container full width */
+    }
+
+    .post__media {
+        max-width: 100%;
+        /* max-height: 100%; */
+        /* Optional: limit the height */
+        border-radius: 8px;
+    }
+
+
+    /*  */
+    :root {
+    --like-color: #FF5C5C; /* Red color for like button */
+    --save-color: #4CAF50; /* Green color for save button */
+    --comment-color: rgb(0, 123, 255); /* Blue color for comment button */
+    
+}
+
+.post__buttons {
+    display: flex;
+    align-items: center;
+    gap: 20px; /* Adds space between the buttons */
+}
+
+.post__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* Default icon color */
+.post__button svg path {
+    fill: #333; /* Initial color (black) */
+    transition: fill 0.3s ease;
+}
+
+/* Filled Like Button */
+.post__button--like.filled svg path {
+    fill: var(--like-color); /* Red for like when selected */
+}
+
+/* Filled Save Button */
+.post__button--save.filled svg path {
+    fill: var(--save-color); /* Green for save when selected */
+}
+
+/* Filled Comment Button */
+.post__button--comment.filled svg path {
+    fill: var(--comment-color); /* Yellow for comment when selected */
+}
+
+/* Hover Effects */
+.post__button--like:hover {
+    background-color: rgba(255, 92, 92, 0.2);
+}
+
+.post__button--save:hover {
+    background-color: rgba(76, 175, 80, 0.2);
+}
+
+.post__button--comment:hover {
+    background-color: rgba(75, 129, 182, 0.2);
+}
+
     </style>
 </head>
 <main class="main-container">
@@ -190,33 +272,27 @@ post details:
                     <!-- Like, comment, and share buttons with SVGs -->
 
                     <div class="post__footer" style="margin-top: 10px;">
+
                         <div class="post__buttons" style="display: flex; align-items: center;">
-                            <a href="{% url 'like' post.id %}" class="post__button" style="margin-right: 10px;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
+                            <a href="{% url 'like' post.id %}"
+                                class="post__button post__button--like {% if post.id in liked_post_ids %}filled{% endif %}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path
-                                        d="M11.4995 21.2609C11.1062 21.2609 10.7307 21.1362 10.4133 20.9001C8.2588 19.3012 3.10938 15.3239 1.81755 12.9143C0.127895 9.76543 1.14258 5.72131 4.07489 3.89968C5.02253 3.31177 6.09533 3 7.18601 3C8.81755 3 10.3508 3.66808 11.4995 4.85726C12.6483 3.66808 14.1815 3 15.8131 3C16.9038 3 17.9766 3.31177 18.9242 3.89968C21.8565 5.72131 22.8712 9.76543 21.186 12.9143C19.8942 15.3239 14.7448 19.3012 12.5902 20.9001C12.2684 21.1362 11.8929 21.2609 11.4995 21.2609ZM7.18601 4.33616C6.34565 4.33616 5.5187 4.57667 4.78562 5.03096C2.43888 6.49183 1.63428 9.74316 2.99763 12.2819C4.19558 14.5177 9.58639 18.6242 11.209 19.8267C11.3789 19.9514 11.6158 19.9514 11.7856 19.8267C13.4082 18.6197 18.799 14.5133 19.997 12.2819C21.3603 9.74316 20.5557 6.48738 18.209 5.03096C17.4804 4.57667 16.6534 4.33616 15.8131 4.33616C14.3425 4.33616 12.9657 5.04878 12.0359 6.28696L11.4995 7.00848L10.9631 6.28696C10.0334 5.04878 8.6611 4.33616 7.18601 4.33616Z"
-                                        fill="#333" stroke="#333" stroke-width="0.6" />
+                                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.42 3.42 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5 18.58 5 20 6.42 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                                 </svg>
                             </a>
 
-                            <a href="{% url 'favourite' post.id %}" class="post__button post__button--align-right">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
+                            <a href="{% url 'favourite' post.id %}"
+                                class="post__button post__button--save {% if post.id in saved_post_ids %}filled{% endif %}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path
-                                        d="M19.875 2H4.125C3.50625 2 3 2.44939 3 3.00481V22.4648C3 23.0202 3.36563 23.1616 3.82125 22.7728L11.5444 16.1986C11.7244 16.0471 12.0225 16.0471 12.2025 16.1936L20.1731 22.7879C20.6287 23.1666 21 23.0202 21 22.4648V3.00481C21 2.44939 20.4994 2 19.875 2ZM19.3125 20.0209L13.3444 15.0827C12.9281 14.7394 12.405 14.5677 11.8763 14.5677C11.3363 14.5677 10.8019 14.7444 10.3856 15.0979L4.6875 19.9502V3.51479H19.3125V20.0209Z"
-                                        fill="var(--text-dark)" stroke="var(--text-dark)" stroke-width="0.7" />
+                                        d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z" />
                                 </svg>
                             </a>
 
-                            <!-- <button class="post__button post__button--align-right">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M19.875 2H4.125C3.50625 2 3 2.44939 3 3.00481V22.4648C3 23.0202 3.36563 23.1616 3.82125 22.7728L11.5444 16.1986C11.7244 16.0471 12.0225 16.0471 12.2025 16.1936L20.1731 22.7879C20.6287 23.1666 21 23.0202 21 22.4648V3.00481C21 2.44939 20.4994 2 19.875 2ZM19.3125 20.0209L13.3444 15.0827C12.9281 14.7394 12.405 14.5677 11.8763 14.5677C11.3363 14.5677 10.8019 14.7444 10.3856 15.0979L4.6875 19.9502V3.51479H19.3125V20.0209Z" fill="var(--text-dark)" stroke="var(--text-dark)" stroke-width="0.7"/>
-                                </svg>
-                            </button> -->
-
-
+                           
                         </div>
+
                         <div class="post__interaction" style="display: flex; align-items: center; margin-top: 10px;">
                             <div class="post__likes" style="margin-right: 10px;">
                                 <a href="#" style="font-size: 14px; color: #555; text-decoration: none;">

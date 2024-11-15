@@ -1,86 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-.dropbtn {
-  background-color: #3498DB;
-  color: white;
-  padding: 16px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-}
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --like-color: #FF5C5C;    /* Red color for like button */
+      --save-color: #4CAF50;    /* Green color for save button */
+    }
 
-.dropbtn:hover, .dropbtn:focus {
-  background-color: #2980B9;
-}
+    body {
+      background-color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
 
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f1f1f1;
-  min-width: 160px;
-  overflow: auto;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-}
+    .post__buttons {
+      display: flex;
+      align-items: center;
+      gap: 20px;  /* Adds space between the buttons */
+    }
 
-.dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-}
+    .post__button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
-.dropdown-content a:hover {background-color: #ddd;}
+    /* Default icon color */
+    .post__button svg path {
+      fill: #333;  /* Initial color (black) */
+      transition: fill 0.3s ease;
+    }
 
-.show {display: block;}
-</style>
+    /* Filled Like Button */
+    .post__button--like.filled svg path {
+      fill: var(--like-color); /* Red for like when selected */
+    }
+
+    /* Filled Save Button */
+    .post__button--save.filled svg path {
+      fill: var(--save-color); /* Green for save when selected */
+    }
+
+    /* Hover Effect for Like */
+    .post__button--like:hover {
+      background-color: rgba(255, 92, 92, 0.2);
+    }
+
+    /* Hover Effect for Save */
+    .post__button--save:hover {
+      background-color: rgba(76, 175, 80, 0.2);
+    }
+  </style>
 </head>
-<body style="background-color:white;">
 
-<h2>Clickable Dropdown with Delete Confirmation</h2>
-<p>Click on the button to open the dropdown menu.</p>
+<body>
+  <div class="container">
+    <div class="post__buttons">
+      <!-- Like Button -->
+      <div class="post__button post__button--like" onclick="toggleButton('like', this)">
+        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.42 3.42 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5 18.58 5 20 6.42 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </div>
 
-<div class="dropdown">
-  <button onclick="myFunction()" class="dropbtn">Dropdown</button>
-  <div id="myDropdown" class="dropdown-content">
-    <a href="#contact">Contact</a>
-    <a href="#delete" onclick="confirmDelete(event)">Delete</a>
+      <!-- Save Button -->
+      <div class="post__button post__button--save" onclick="toggleButton('save', this)">
+        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/>
+        </svg>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-function myFunction() {
-  document.getElementById("myDropdown").classList.toggle("show");
-}
-
-function confirmDelete(event) {
-  event.preventDefault(); // Prevents navigation
-  if (confirm("Are you sure you want to delete this?")) {
-    alert("Item deleted."); // Replace with actual delete action
-  }
-}
-
-// Close the dropdown if the user clicks outside of it
-window.onclick = function(event) {
-  if (!event.target.matches('.dropbtn')) {
-    var dropdowns = document.getElementsByClassName("dropdown-content");
-    for (var i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
+  <script>
+    function toggleButton(type, element) {
+      // Toggle the 'filled' class based on the button type
+      if (type === 'like') {
+        element.classList.toggle('filled');
+      } else if (type === 'save') {
+        element.classList.toggle('filled');
       }
     }
-  }
-}
-</script>
-
+  </script>
 </body>
 </html>
