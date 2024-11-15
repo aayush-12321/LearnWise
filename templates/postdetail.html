@@ -100,7 +100,7 @@ post details:
             fill: #3897f0;
         }
 
-        
+
         .post__content {
             display: flex;
             justify-content: center;
@@ -119,87 +119,94 @@ post details:
         }
 
         .side-menu__suggestion-button:hover,
-    .side-menu__user-button:hover {
-        background-color: rgb(35, 167, 85) !important;
-    }
+        .side-menu__user-button:hover {
+            background-color: rgb(35, 167, 85) !important;
+        }
 
-    .post__content {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        /* height: 300px; */
-        /* Set a fixed height if desired */
-        width: 100%;
-        /* Make the container full width */
-    }
+        .post__content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* height: 300px; */
+            /* Set a fixed height if desired */
+            width: 100%;
+            /* Make the container full width */
+        }
 
-    .post__media {
-        max-width: 100%;
-        /* max-height: 100%; */
-        /* Optional: limit the height */
-        border-radius: 8px;
-    }
+        .post__media {
+            max-width: 100%;
+            /* max-height: 100%; */
+            /* Optional: limit the height */
+            border-radius: 8px;
+        }
 
 
-    /*  */
-    :root {
-    --like-color: #FF5C5C; /* Red color for like button */
-    --save-color: #4CAF50; /* Green color for save button */
-    --comment-color: rgb(0, 123, 255); /* Blue color for comment button */
-    
-}
+        /*  */
+        :root {
+            --like-color: #FF5C5C;
+            /* Red color for like button */
+            --save-color: #4CAF50;
+            /* Green color for save button */
+            --comment-color: rgb(0, 123, 255);
+            /* Blue color for comment button */
 
-.post__buttons {
-    display: flex;
-    align-items: center;
-    gap: 20px; /* Adds space between the buttons */
-}
+        }
 
-.post__button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+        .post__buttons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            /* Adds space between the buttons */
+        }
 
-/* Default icon color */
-.post__button svg path {
-    fill: #333; /* Initial color (black) */
-    transition: fill 0.3s ease;
-}
+        .post__button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-/* Filled Like Button */
-.post__button--like.filled svg path {
-    fill: var(--like-color); /* Red for like when selected */
-}
+        /* Default icon color */
+        .post__button svg path {
+            fill: #333;
+            /* Initial color (black) */
+            transition: fill 0.3s ease;
+        }
 
-/* Filled Save Button */
-.post__button--save.filled svg path {
-    fill: var(--save-color); /* Green for save when selected */
-}
+        /* Filled Like Button */
+        .post__button--like.filled svg path {
+            fill: var(--like-color);
+            /* Red for like when selected */
+        }
 
-/* Filled Comment Button */
-.post__button--comment.filled svg path {
-    fill: var(--comment-color); /* Yellow for comment when selected */
-}
+        /* Filled Save Button */
+        .post__button--save.filled svg path {
+            fill: var(--save-color);
+            /* Green for save when selected */
+        }
 
-/* Hover Effects */
-.post__button--like:hover {
-    background-color: rgba(255, 92, 92, 0.2);
-}
+        /* Filled Comment Button */
+        .post__button--comment.filled svg path {
+            fill: var(--comment-color);
+            /* Yellow for comment when selected */
+        }
 
-.post__button--save:hover {
-    background-color: rgba(76, 175, 80, 0.2);
-}
+        /* Hover Effects */
+        .post__button--like:hover {
+            background-color: rgba(255, 92, 92, 0.2);
+        }
 
-.post__button--comment:hover {
-    background-color: rgba(75, 129, 182, 0.2);
-}
+        .post__button--save:hover {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
 
+        .post__button--comment:hover {
+            background-color: rgba(75, 129, 182, 0.2);
+        }
     </style>
 </head>
 <main class="main-container">
@@ -290,14 +297,18 @@ post details:
                                 </svg>
                             </a>
 
-                           
+
                         </div>
 
                         <div class="post__interaction" style="display: flex; align-items: center; margin-top: 10px;">
                             <div class="post__likes" style="margin-right: 10px;">
-                                <a href="#" style="font-size: 14px; color: #555; text-decoration: none;">
-                                    {{post.likes}} likes
+                                <a href="{% url 'post-likers' post.id %}"
+                                    style="font-size: 14px; color: #555; text-decoration: none;"
+                                    onmouseover="this.style.color='blue'" onmouseout="this.style.color='#555'">
+                                    {{ post.likes }} likes
                                 </a>
+
+
                             </div>
 
                             <div class="post__comments">

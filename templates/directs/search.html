@@ -12,7 +12,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
   <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
-  <title>Instagram Login Form</title>
+  <title>Social Media Search</title>
 </head>
 
 <body>
@@ -65,22 +65,25 @@
             <!-- <hr> -->
              
             <div class="side-menu__user-profile" style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-              <a href="#" class="side-menu__user-avatar" style="flex-shrink: 0; margin-right: 10px;">
+              <a href="{% url 'profile' user %}" class="side-menu__user-avatar" style="flex-shrink: 0; margin-right: 10px;">
                   <img src="{{ user.profile.image.url }}" alt="User Picture" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
               </a>
               <div class="side-menu__user-info" style="flex-grow: 1;">
                   {% if user.profile.first_name %}
-                  <a href="{{user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.profile.first_name|title }} {{user.profile.last_name|title }}</a>
+                  <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.profile.first_name|title }} {{user.profile.last_name|title }}</a>
                   {% else %}
-                  <a href="{{user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{username}}</a>
+                  <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{username}}</a>
                   {% endif %}
-                  <span style="display: block; color: #777; font-size: 14px;">@{{user.username}}</span>
+                  <a href="{% url 'profile' user %}" style="display: block; color: #777; font-size: 14px;">@{{user.username}}</a>
               </div>
               <a href="{% url 'profile' user %}" class="side-menu__user-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View Profile</a>
           </div>
+
+          {% empty %}
+        <p style="text-align: center; color: #777; font-size: 16px;">No Result Found.</p>
+
         {% endfor %}
         
-          <!-- <span>No Result Found</span> -->
           
         </form>
         

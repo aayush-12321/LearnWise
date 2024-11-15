@@ -90,9 +90,11 @@ class Post(models.Model):
 
 
 class Follow(models.Model):
-    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower')
-    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
 
+    def __str__(self):
+        return f"{self.follower.username} follows {self.following.username}"
     def user_follow(sender, instance, *args, **kwargs):
         follow = instance
         sender = follow.follower
@@ -106,6 +108,12 @@ class Follow(models.Model):
         following = follow.following
         notify = Notification.objects.filter(sender=sender, user=following, notification_types=3)
         notify.delete()
+    
+    # def followers_names(self):
+    #     return [follower.username for follower in self.follower.all()]
+    
+    # def followings_names(self):
+    #     return [followings.username for followings in self.following.all()]
 
 class Stream(models.Model):
     following = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='stream_following')

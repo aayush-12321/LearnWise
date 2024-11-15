@@ -287,6 +287,7 @@ def PostDetail(request, post_id):
         'comments': comments,
         'liked_post_ids': list(liked_post_ids),
         'saved_post_ids': list(saved_post_ids),
+
     }
     # for comment in comments:
         # print(f"Name:{comment.user.profile.first_name}")
@@ -376,6 +377,17 @@ def favourite(request, post_id):
     post.save()
     return HttpResponseRedirect(reverse('post-details', args=[post_id]))
 
+@login_required
+def post_likers(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    
+    # Get the usernames of the likers
+    likers = post.likers.all()  # Assuming likers is a ManyToManyField
+    context = {
+        'post': post,
+        'likers': likers,
+    }
+    return render(request, 'likers.html', context)
 
 
 @csrf_exempt
