@@ -10,8 +10,12 @@ from notification.models import Notification
 
 
 # uploading user files to a specific directory
+# def user_directory_path(instance, filename):
+#     return 'user_{0}/{1}'.format(instance.user.id, filename)
+
 def user_directory_path(instance, filename):
-    return 'user_{0}/{1}'.format(instance.user.id, filename)
+    # Access the user through the related post
+    return f"user_{instance.post.user.id}/{filename}"
 
 
 class Tag(models.Model):
@@ -70,9 +74,28 @@ class Tag(models.Model):
 #         notify = Notification.objects.filter(post=post, sender=sender, notification_types=1)
 #         notify.delete()
 
+# class Post(models.Model):
+#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+#     picture = models.ImageField(upload_to=user_directory_path, verbose_name="Picture")
+#     caption = models.CharField(max_length=10000, verbose_name="Caption")
+#     posted = models.DateField(auto_now_add=True)
+#     tags = models.ManyToManyField(Tag, related_name="tags")
+#     user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     likes = models.IntegerField(default=0)
+#     likers = models.ManyToManyField(User, blank=True, related_name='liked_posts')
+#     savers = models.ManyToManyField(User, blank=True, related_name='saved_posts')
+
+#     def get_absolute_url(self):
+#         return reverse("post-details", args=[str(self.id)])
+    
+#     def get_likers_names(self):
+#         return [liker.username for liker in self.likers.all()]
+
+from django.db import models
+import uuid
+
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    picture = models.ImageField(upload_to=user_directory_path, verbose_name="Picture")
     caption = models.CharField(max_length=10000, verbose_name="Caption")
     posted = models.DateField(auto_now_add=True)
     tags = models.ManyToManyField(Tag, related_name="tags")
@@ -86,6 +109,13 @@ class Post(models.Model):
     
     def get_likers_names(self):
         return [liker.username for liker in self.likers.all()]
+
+class PostImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    post = models.ForeignKey(Post, related_name="pictures", on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=user_directory_path)
+    uploaded = models.DateTimeField(auto_now_add=True)
+
 
 
 

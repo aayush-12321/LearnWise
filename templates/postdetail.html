@@ -224,6 +224,46 @@ post details:
         .post__button--comment:hover {
             background-color: rgba(75, 129, 182, 0.2);
         }
+
+        /* Grid layout for the images */
+        /* .post__grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 10px; 
+    }
+    .post__grid-item img {
+        width: 100%;
+        height: 250;
+        border-radius: 9px; 
+        box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+    } */
+/* Grid layout for the images */
+.post__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 11px; 
+}
+
+.post__grid-item img {
+    width: 100%; 
+    height: 270px; 
+    border-radius: 9px; 
+    box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); 
+    object-fit: cover; 
+    object-position: center; 
+}
+
+/* Single image styling (optional if needed) */
+.post__single-image img {
+    width: 100%; 
+    height: auto; 
+    border-radius: 9px; 
+    box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); 
+    object-fit: contain; 
+    object-position: center; 
+}
+
+
     </style>
 </head>
 <main class="main-container">
@@ -280,13 +320,39 @@ post details:
                     {% endif %}
 
                     <!-- Image Section (displayed only if an image is available) -->
-                    {% if post.picture %}
+                    <!-- {% if post.pictures.all %}
                     <div class="post__content">
-                        <a href="{% url 'post-details' post.id %}">
-                            <img class="post__media" src="{{ post.picture.url }}" alt="Post Content">
+                        {% for picture in post.pictures.all %}
+                        <a href="{{ picture.image.url }}" class="post__media-container">
+                            <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %} -->
+
+                    {% if post.pictures.all %}
+                    {% if post.pictures.count == 1 %}
+                    <!-- Single Image Full-Width Layout -->
+                    <div class="post__single-image">
+                        <a href="{{ post.pictures.first.image.url }}" target="_blank">
+                            <img class="post__media" src="{{ post.pictures.first.image.url }}" alt="Post Content">
                         </a>
                     </div>
+                    {% else %}
+                    <div class="post__grid">
+                        {% for picture in post.pictures.all %}
+                        <div class="post__grid-item">
+                            <a href="{{ picture.image.url }}" target="_blank">
+                                <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                   
                     {% endif %}
+                    {% endif %}
+
+
 
 
 
@@ -412,3 +478,12 @@ post details:
             });
     
     </script> -->
+<!-- <script>
+    document.querySelectorAll('.post__grid-item a').forEach(link => {
+        link.addEventListener('click', event => {
+            event.preventDefault();
+            window.open(link.href, '_blank');
+        });
+    });
+</script> -->
+    

@@ -45,6 +45,10 @@
             max-width: 300px;
             overflow: hidden;
             border-radius: 8px;
+            background-color: #f0f0f0;
+            box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); 
+
+
         }
 
         .gallery-item-info ul {
@@ -107,9 +111,9 @@
                 {% for post in posts %}
                 <a href="{{ post.get_absolute_url }}">
                     <div class="gallery-item" tabindex="0">
-                        {% if post.picture %}
+                        {% if post.pictures.all %}
                         <!-- Display picture if available -->
-                        <img src="{{ post.picture.url }}" class="gallery-image" alt="Post Image">
+                        <img src="{{post.pictures.first.image.url}}" class="gallery-image" alt="Post Image">
                         {% else %}
                         <!-- Display caption if no picture is available -->
                         <div class="caption-placeholder">
@@ -118,6 +122,11 @@
                         {% endif %}
                         <div class="gallery-item-info">
                             <ul>
+                                <li class="gallery-item-remaining">
+                                    <span class="visually-hidden">+</span>
+                                    <i class="fas fa-camera" style="color:rgb(255, 75, 92); " aria-hidden="true"></i> {{ post.pictures.count }}
+                                </li>
+
                                 <li class="gallery-item-likes">
                                     <span class="visually-hidden">Likes:</span>
                                     <i class="fas fa-heart" aria-hidden="true"></i> {{ post.likes }}

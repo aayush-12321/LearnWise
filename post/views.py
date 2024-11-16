@@ -22,121 +22,6 @@ from django.db.models import Q
 
 from datetime import timedelta
 from django.utils import timezone
-from django.db.models import Q
-
-# @login_required
-# def index(request):
-#     user = request.user
-#     following_ids = set(Follow.objects.filter(follower=user).values_list('following', flat=True))
-#     mutual_follow_ids = set(Follow.objects.filter(following=user).values_list('follower', flat=True)).intersection(following_ids)
-    
-#     own_posts = Post.objects.filter(user=user)
-#     following_posts = Post.objects.filter(user__in=following_ids)
-#     mutual_posts = Post.objects.filter(user__in=mutual_follow_ids)
-#     other_posts = Post.objects.exclude(user__in=following_ids).exclude(user=user)
-
-#     all_posts = own_posts | following_posts | mutual_posts | other_posts
-#     scored_posts = []
-#     liked_by=[]
-#     saved_by=[]
-
-
-#     # Calculate post scores with a priority for followed users
-#     for post in all_posts:
-#         if post.user.id in following_ids:
-#             # Higher priority for followed users
-#             relationship_multiplier = 2.0
-#             like_weight = 2.5
-#             comment_weight = 2.0
-#             recency_decay = 1.1  # Slower decay for followed users
-#         elif post.user == user:
-#             relationship_multiplier = 1.25
-#             like_weight = 1.8
-#             comment_weight = 1.5
-#             recency_decay = 1.25
-#         elif post.user.id in mutual_follow_ids:
-#             relationship_multiplier = 1.2
-#             like_weight = 1.8
-#             comment_weight = 1.4
-#             recency_decay = 1.3
-#         else:
-#             relationship_multiplier = 1.0
-#             like_weight = 1.5
-#             comment_weight = 1.2
-#             recency_decay = 1.5
-
-#         # Engagement scores
-#         likes = post.likes
-#         comments_count = post.comment.count()
-        
-#         # Recency factor with customized decay based on relationship
-#         days_since_post = (timezone.now().date() - post.posted).days
-#         recency_factor = recency_decay ** days_since_post
-
-#         # Calculate the final score, applying the customized weights
-#         score = ((likes + 1) * like_weight + (comments_count + 1) * comment_weight) / recency_factor
-#         score *= relationship_multiplier
-
-#         #
-        
-#         likers = [like.user.username for like in Likes.objects.filter(post=post)]
-#         savers = [profile.user.username for profile in Profile.objects.filter(favourite=post)]
-#         # print(post.caption)
-#         # print(f'Likers: {likers}')
-#         # print(f'savers: {savers}')
-
-#         scored_posts.append((post, score))
-#         liked_by.append(likers)
-#         saved_by.append(saved_by)
-
-#     # Sort posts by score in descending order
-#     scored_posts.sort(key=lambda x: x[1], reverse=True)
-#     sorted_posts = [post for post, _ in scored_posts]
-
-#      # Handle search query if present
-#     query = request.GET.get('q')
-#     if query:
-#         users = User.objects.filter(Q(username__icontains=query))
-#         paginator = Paginator(users, 6)
-#         page_number = request.GET.get('page')
-#         users_paginator = paginator.get_page(page_number)
-
-#     # Suggestions based on mutual friends
-#     followings = []
-#     suggestions = []
-#     if request.user.is_authenticated:
-#         followings = set(Follow.objects.filter(follower=request.user).values_list('following', flat=True))
-#         potential_suggestions = User.objects.exclude(pk__in=followings).exclude(pk=request.user.pk)
-        
-#         suggestions_with_mutuals = []
-#         for user in potential_suggestions:
-#             mutual_friends_count = Follow.objects.filter(following=user).filter(follower__in=followings).count()
-#             suggestions_with_mutuals.append((user, mutual_friends_count))
-        
-#         sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[:6]
-#         suggestions = [user for user, _ in sorted_suggestions]
-
-#     # Prepare context and render template
-#     context = {
-#         'post_items': sorted_posts,
-#         'profile': Profile.objects.all(),
-#         'follow_status': Follow.objects.filter(following=user, follower=request.user).exists(),
-#         'all_users': User.objects.all(),
-#         'suggestions': suggestions,
-#         # 'saved_by':saved_by,
-#         # 'liked_by':liked_by,
-#         # 'liked_post_ids': list(liked_post_ids),
-#         # 'saved_post_ids': list(saved_post_ids),
-#         # 'post_items': posts_with_status,
-#         # 'users_paginator': users_paginator,
-#         # 'comments_count' : post.comment.count()
-#     }
-#     return render(request, 'index.html', context)
-
-
-from django.db.models import Q
-from django.core.paginator import Paginator
-from django.utils import timezone
 
 @login_required
 def index(request):
@@ -207,7 +92,7 @@ def index(request):
         mutual_friends_count = Follow.objects.filter(following=suggested_user, follower__in=followings).count()
         suggestions_with_mutuals.append((suggested_user, mutual_friends_count))
 
-    sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[1:7]
+    sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[:7]
     suggestions = [user for user, _ in sorted_suggestions]
 
     # Prepare context and render template
@@ -220,82 +105,84 @@ def index(request):
     return render(request, 'index.html', context)
 
 
-@login_required
-def NewPost(request):
-    user = request.user
-    profile = get_object_or_404(Profile, user=user)
-    tags_obj = []
-
-    if request.method == "POST":
-        picture = request.FILES.get('picture')
-        caption = request.POST.get('caption')
-        tag_form = request.POST.get('tags')
-
-        # Validation: Ensure one of the allowed combinations is provided
-        if (
-            picture or caption or tag_form
-        ) and (picture or caption or (caption and tag_form) or (picture and tag_form)):
-            # Handle tags if provided
-            if tag_form:
-                tag_list = tag_form.split(',')
-                for tag in tag_list:
-                    t, created = Tag.objects.get_or_create(title=tag.strip())
-                    tags_obj.append(t)
-
-            # Create a new post instance
-            post = Post.objects.create(
-                user=user,
-                picture=picture if picture else None,
-                caption=caption if caption else ''
-            )
-
-            # Associate tags with the post
-            if tags_obj:
-                post.tags.set(tags_obj)
-
-            post.save()
-
-            messages.success(request, 'Your post has been created!')
-            return redirect('profile', request.user.username)
-        else:
-            # Show error if conditions aren't met
-            messages.error(request, 'Please provide at least a valid combination of photo, caption, or tags.')
-
-    context = {
-        'profile': profile
-    }
-    return render(request, 'newpost.html', context)
-
-
 # @login_required
 # def NewPost(request):
 #     user = request.user
 #     profile = get_object_or_404(Profile, user=user)
 #     tags_obj = []
-    
-#     if request.method == "POST":
-#         form = NewPostform(request.POST, request.FILES)
-#         if form.is_valid():
-#             picture = form.cleaned_data.get('picture')
-#             caption = form.cleaned_data.get('caption')
-#             tag_form = form.cleaned_data.get('tags')
-#             tag_list = list(tag_form.split(',')) if tag_form else []
 
-#             for tag in tag_list:
-#                 t, created = Tag.objects.get_or_create(title=tag.strip())
-#                 tags_obj.append(t)
-#             p, created = Post.objects.get_or_create(
-#                 picture=picture,
-#                 caption=caption,
-#                 user=user
+#     if request.method == "POST":
+#         picture = request.FILES.get('picture')
+#         caption = request.POST.get('caption')
+#         tag_form = request.POST.get('tags')
+
+#         # Validation: Ensure one of the allowed combinations is provided
+#         if (
+#             picture or caption or tag_form
+#         ) and (picture or caption or (caption and tag_form) or (picture and tag_form)):
+#             # Handle tags if provided
+#             if tag_form:
+#                 tag_list = tag_form.split(',')
+#                 for tag in tag_list:
+#                     t, created = Tag.objects.get_or_create(title=tag.strip())
+#                     tags_obj.append(t)
+
+#             # Create a new post instance
+#             post = Post.objects.create(
+#                 user=user,
+#                 picture=picture if picture else None,
+#                 caption=caption if caption else ''
 #             )
-#             p.tags.set(tags_obj)
-#             p.save()
+
+#             # Associate tags with the post
+#             if tags_obj:
+#                 post.tags.set(tags_obj)
+
+#             post.save()
+
+#             messages.success(request, 'Your post has been created!')
 #             return redirect('profile', request.user.username)
-#     else:
-#         form = NewPostform()
-#     context = {'form': form}
+#         else:
+#             # Show error if conditions aren't met
+#             messages.error(request, 'Please provide at least a valid combination of photo, caption, or tags.')
+
+#     context = {
+#         'profile': profile
+#     }
 #     return render(request, 'newpost.html', context)
+
+from django.db import transaction
+from post.models import PostImage
+@login_required
+def NewPost(request):
+    if request.method == 'POST':
+        caption = request.POST.get('caption', '')
+        tags_form = request.POST.get('tags', '')
+        pictures = request.FILES.getlist('pictures')
+
+        if caption or pictures:
+            post = Post.objects.create(
+                user=request.user,
+                caption=caption,
+            )
+            # Handle tags
+            if tags_form:
+                tag_list = tags_form.split(',')
+                for tag in tag_list:
+                    t, created = Tag.objects.get_or_create(title=tag.strip())
+                    post.tags.add(t)
+
+            # Save pictures
+            for picture in pictures:
+                PostImage.objects.create(post=post, image=picture)
+
+            messages.success(request, 'Your post has been created!')
+            return redirect('profile', request.user.username)
+        else:
+            messages.error(request, 'Please provide a caption or pictures.')
+
+    return render(request, 'newpost.html')
+
 
 
 @login_required
@@ -336,10 +223,6 @@ def PostDetail(request, post_id):
         'saved_post_ids': list(saved_post_ids),
 
     }
-    # for comment in comments:
-        # print(f"Name:{comment.user.profile.first_name}")
-        # print("*"*20)
-        # print(f"Name:{comment.user.first_name}")
 
     return render(request, 'postdetail.html', context)
 
@@ -354,42 +237,6 @@ def Tags(request, tag_slug):
 
     }
     return render(request, 'tag.html', context)
-
-
-# # Like function
-# @login_required
-# def like(request, post_id):
-#     user = request.user
-#     post = Post.objects.get(id=post_id)
-#     current_likes = post.likes
-#     liked = Likes.objects.filter(user=user, post=post).count()
-
-#     if not liked:
-#         Likes.objects.create(user=user, post=post)
-#         current_likes = current_likes + 1
-#     else:
-#         Likes.objects.filter(user=user, post=post).delete()
-#         current_likes = current_likes - 1
-        
-#     post.likes = current_likes
-#     post.save()
-#     # return HttpResponseRedirect(reverse('post-details', args=[post_id]))
-#     return HttpResponseRedirect(reverse('post-details', args=[post_id]))
-
-
-
-
-# @login_required
-# def favourite(request, post_id):
-#     user = request.user
-#     post = Post.objects.get(id=post_id)
-#     profile = Profile.objects.get(user=user)
-
-#     if profile.favourite.filter(id=post_id).exists():
-#         profile.favourite.remove(post)
-#     else:
-#         profile.favourite.add(post)
-#     return HttpResponseRedirect(reverse('post-details', args=[post_id]))
 
 
 @login_required
@@ -493,24 +340,3 @@ def edit_post(request, post_id):
     else:
             return HttpResponse("Method must be 'POST'")
 
-
-# from django.http import JsonResponse
-# from django.views.decorators.csrf import csrf_exempt
-
-# @csrf_exempt
-# def toggle_like(request, post_id):
-#     post = Post.objects.get(id=post_id)
-#     like, created = Likes.objects.get_or_create(user=request.user, post=post)
-#     if not created:
-#         like.delete()  # Unlike the post if it was already liked
-#     return JsonResponse({'status': 'success'})
-
-# @csrf_exempt
-# def toggle_save(request, post_id):
-#     profile = request.user.profile
-#     post = Post.objects.get(id=post_id)
-#     if post in profile.favourite.all():
-#         profile.favourite.remove(post)  # Unsaving the post
-#     else:
-#         profile.favourite.add(post)  # Saving the post
-#     return JsonResponse({'status': 'success'})
