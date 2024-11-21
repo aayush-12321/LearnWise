@@ -94,16 +94,17 @@
 
     /* Home-specific post grid layout */
     /* Post grid layout for multiple images */
+    /* Grid Layout Styling */
     .home_post_grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        /* Two pictures per row */
+        /* Two images per row */
         gap: 10px;
         /* Space between images */
         position: relative;
     }
 
-    /* Fixed width and height for grid images */
+    /* Grid Image Styling */
     .home_post_grid .post__grid-item img {
         width: 100%;
         /* Full width of the container */
@@ -112,9 +113,25 @@
         border-radius: 8px;
         object-fit: cover;
         /* Cover space without distortion */
+        box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+        /* Optional: Shadow effect */
     }
 
-    /* Overlay for remaining pictures */
+    /* Single Image Layout */
+    .post__single-image img {
+        width: 100%;
+        /* Full width of the container */
+        height: auto;
+        /* Auto height for a natural aspect ratio */
+        border-radius: 9px;
+        object-fit: contain;
+        /* Fit the content within */
+        object-position: center;
+        box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+        /* Optional: Shadow effect */
+    }
+
+    /* Overlay for the remaining pictures */
     .gallery-item-info {
         position: absolute;
         top: 0;
@@ -131,7 +148,7 @@
         justify-content: center;
         border-radius: 8px;
         z-index: 1;
-        /* Ensure it's on top of the image */
+        /* Ensure it appears on top of the images */
     }
 
     /* Remaining pictures text */
@@ -141,11 +158,73 @@
         color: #fff;
     }
 
-    .post__grid-item img {
+    /* Optional: Hover effect for images in grid */
+    .home_post_grid .post__grid-item:hover img {
+        transform: scale(1.05);
+        /* Slight zoom effect on hover */
+        transition: transform 0.3s ease;
+        /* Smooth transition */
+    }
+
+    .post__single-video {
+        width: 100%;
+        height: auto;
         border-radius: 9px;
-        /* Optional: Rounded corners */
         box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
-        /* Optional: Shadow effect */
+        object-fit: contain;
+        object-position: center;
+    }
+
+    /* Video styling for grid layout */
+    .post__grid-video {
+        width: 100%;
+        height: 270px;
+        border-radius: 9px;
+        box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+        object-fit: cover;
+        object-position: center;
+    }
+
+    /* paginator */
+    .pagination-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .pagination {
+        display: inline-flex;
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .pagination .page-item {
+        margin: 0 5px;
+    }
+
+    .pagination .page-link {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        color: #007bff;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #aaa;
+        pointer-events: none;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #28a745;
+        /* Green background */
+        color: white;
+        border-color: #28a745;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #f0f0f0;
     }
 </style>
 <main class="main-container">
@@ -259,9 +338,9 @@
                     </button>
                 </div> -->
 
-            <div class="posts">
+            <div class="posts" id="posts-container">
                 {% for post in post_items %}
-                <article class="post"
+                <article class="post" id="post-{{ post.id }}"
                     style="border: 1.5px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 15px; box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); ">
                     <div class="post__header"
                         style="display: flex; align-items: center; justify-content: space-between;">
@@ -297,10 +376,14 @@
                     <!-- Caption Section (displayed always if available) -->
 
                     {% if post.caption|length > 100 %}
-                    <p>{{ post.caption|truncatewords:20|linebreaks }}</p>
-                    <a href="{% url 'post-details' post.id %}" class="read-more-link">Read more</a>
-                    {% else %}
+                    <div class="post__caption" style="margin-bottom: 10px;">
+                        <a href="{% url 'post-details' post.id %}" style="text-decoration: none; color: #555;">
+                            <p style="font-size: 14px; color: #555;">{{ post.caption|truncatewords:20|linebreaks }}</p>
+                            <span style="color: rgb(0, 141, 254);">Read more </span>
+                        </a>
+                    </div>
 
+                    {% else %}
 
                     <div class="post__caption" style="margin-bottom: 10px;">
                         <a href="{% url 'post-details' post.id %}" style="text-decoration: none; color: #555;">
@@ -314,141 +397,173 @@
                         {% endfor %}
                     </p>
 
-                    <!-- Image Section (displayed only if an image is available) -->
-                    <!-- {% if post.pictures.all %}
-                    <div class="post__content">
-                        {% for picture in post.pictures.all %}
-                        <a href="{{ picture.image.url }}" class="post__media-container">
-                            <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
-                        </a>
-                        {% endfor %}
-                    </div>
-                    {% endif %} -->
 
-                    {% if post.pictures.all %}
+                    <!-- {% if post.pictures.all %}
                     {% if post.pictures.count == 1 %}
-                    <!-- Single Image Full-Width Layout -->
+                   
                     <div class="post__single-image">
                         <a href="{% url 'post-details' post.id %}">
                             <img class="post__media" src="{{ post.pictures.first.image.url }}" alt="Post Content">
                         </a>
                     </div>
                     {% else %}
-                    <!-- Grid Layout for Multiple Images -->
+                    
                     <div class="home_post_grid">
                         {% for picture in post.pictures.all %}
-                        {% if forloop.counter <= 4 %} <div class="post__grid-item">
-                            <a href="{% url 'post-details' post.id %}">
+                        {% if forloop.counter <= 4 %}<a href="{% url 'post-details' post.id %}">
+                            <div class="post__grid-item">
+
                                 <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
+                            </div>
                             </a>
 
+
+
                             {% if forloop.counter == 4 and post.pictures.count > 4 %}
-                            <!-- Show '+remaining' only on the 4th image when there are more than 4 images -->
                             <a href="{% url 'post-details' post.id %}">
                                 <div class="gallery-item-info">
                                     <span class="remaining-pictures">+{{ post.pictures.count|add:-4 }}</span>
                                 </div>
                             </a>
                             {% endif %}
+                            {% endif %}
+                            {% endfor %}
                     </div>
                     {% endif %}
-                    {% endfor %}
-            </div>
-            {% endif %}
-            {% endif %}
+                    {% endif %} -->
+                    {% if post.pictures.all %}
+                    {% if post.pictures.count == 1 %}
+                   
+                    <div class="post__single-image">
+                        <a href="{% url 'post-details' post.id %}">
+                            <img class="post__media" src="{{ post.pictures.first.image.url }}" alt="Post Content">
+                        </a>
+                    </div>
+                    {% else %}
+                    
+                    <div class="home_post_grid">
+                        {% for picture in post.pictures.all %}
+                        {% if forloop.counter <= 4 %}<a href="{% url 'post-details' post.id %}">
+                            <div class="post__grid-item">
+
+                                <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
+                            </div>
+                            </a>
+
+
+
+                            {% if forloop.counter == 4 and post.pictures.count > 4 %}
+                            <a href="{% url 'post-details' post.id %}">
+                                <div class="gallery-item-info">
+                                    <span class="remaining-pictures">+{{ post.pictures.count|add:-4 }}</span>
+                                </div>
+                            </a>
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endif %}
+
+
+
+                    <!--  -->
+                   
 
 
 
 
+                    <div class="post__footer" style="margin-top: 10px;">
+                        <div class="post__buttons" style="display: flex; align-items: center;">
+                            <a href="{% url 'like' post.id %}"
+                                class="post__button post__button--like {% if post.id in liked_post_ids %}filled{% endif %}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.42 3.42 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5 18.58 5 20 6.42 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                </svg>
+                            </a>
+
+                            <a href="{% url 'post-details' post.id %}"
+                                class="post__button post__button--comment {% if post.id in commented_post_ids %}filled{% endif %}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M21.2959 20.8165L20.2351 16.8602C20.1743 16.6385 20.2047 16.3994 20.309 16.1907C21.2351 14.3342 21.5438 12.117 20.9742 9.80402C20.2003 6.67374 17.757 4.16081 14.6354 3.33042C13.7833 3.10869 12.9442 3 12.1312 3C6.29665 3 1.74035 8.47365 3.31418 14.5647C4.04458 17.3819 7.05314 20.2992 9.88344 20.9861C10.6486 21.173 11.4008 21.26 12.1312 21.26C13.7006 21.26 15.1701 20.8557 16.4614 20.1601C16.6049 20.0818 16.7657 20.0383 16.9222 20.0383C17.0005 20.0383 17.0787 20.047 17.157 20.0688L21.009 21.0991C21.0307 21.1035 21.0525 21.1078 21.0699 21.1078C21.2177 21.1078 21.3351 20.9687 21.2959 20.8165ZM19.0178 17.1863L19.6178 19.4253L17.4831 18.8558C17.3005 18.8079 17.1135 18.7819 16.9222 18.7819C16.557 18.7819 16.1875 18.8775 15.8571 19.0558C14.6963 19.6818 13.4441 19.9992 12.1312 19.9992C11.4834 19.9992 10.8269 19.9166 10.1791 19.7601C7.78354 19.1775 5.14453 16.6037 4.53586 14.2473C3.90111 11.7865 4.40109 9.26057 5.90536 7.31719C7.40964 5.3738 9.6791 4.26081 12.1312 4.26081C12.8529 4.26081 13.5876 4.35646 14.3137 4.5521C16.9961 5.26511 19.0786 7.39544 19.7525 10.1084C20.2264 12.0213 20.0308 13.9299 19.183 15.6298C18.9395 16.1168 18.8787 16.6689 19.0178 17.1863Z" />
+                                </svg>
+                            </a>
 
 
-            <div class="post__footer" style="margin-top: 10px;">
-                <div class="post__buttons" style="display: flex; align-items: center;">
-                    <!-- <a href="{% url 'like' post.id %}" class="post__button post__button--like {% if user in liked_by %}filled{% endif %}">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.42 3.42 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5 18.58 5 20 6.42 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                    </svg>
-                                  </a> -->
+                            <a href="{% url 'favourite' post.id %}"
+                                class="post__button post__button--save {% if post.id in saved_post_ids %}filled{% endif %}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z" />
+                                </svg>
+                            </a>
 
-                    <a href="{% url 'like' post.id %}"
-                        class="post__button post__button--like {% if post.id in liked_post_ids %}filled{% endif %}">
-                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.42 3.42 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5 18.58 5 20 6.42 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                        </svg>
-                    </a>
+                        </div>
 
-                    <!-- <div class="post__button post__button--like {% if post.id in liked_post_ids %}filled{% endif %}" onclick="toggleButton('like', this, '{{ post.id }}')">
-                                    <svg width="24" height="24" viewBox="0 0 24 24">
-                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.42 3.42 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5 18.58 5 20 6.42 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-
-                                    </svg>
-                                  </div> -->
-
-                    <a href="{% url 'post-details' post.id %}"
-                        class="post__button post__button--comment {% if post.id in commented_post_ids %}filled{% endif %}">
-                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M21.2959 20.8165L20.2351 16.8602C20.1743 16.6385 20.2047 16.3994 20.309 16.1907C21.2351 14.3342 21.5438 12.117 20.9742 9.80402C20.2003 6.67374 17.757 4.16081 14.6354 3.33042C13.7833 3.10869 12.9442 3 12.1312 3C6.29665 3 1.74035 8.47365 3.31418 14.5647C4.04458 17.3819 7.05314 20.2992 9.88344 20.9861C10.6486 21.173 11.4008 21.26 12.1312 21.26C13.7006 21.26 15.1701 20.8557 16.4614 20.1601C16.6049 20.0818 16.7657 20.0383 16.9222 20.0383C17.0005 20.0383 17.0787 20.047 17.157 20.0688L21.009 21.0991C21.0307 21.1035 21.0525 21.1078 21.0699 21.1078C21.2177 21.1078 21.3351 20.9687 21.2959 20.8165ZM19.0178 17.1863L19.6178 19.4253L17.4831 18.8558C17.3005 18.8079 17.1135 18.7819 16.9222 18.7819C16.557 18.7819 16.1875 18.8775 15.8571 19.0558C14.6963 19.6818 13.4441 19.9992 12.1312 19.9992C11.4834 19.9992 10.8269 19.9166 10.1791 19.7601C7.78354 19.1775 5.14453 16.6037 4.53586 14.2473C3.90111 11.7865 4.40109 9.26057 5.90536 7.31719C7.40964 5.3738 9.6791 4.26081 12.1312 4.26081C12.8529 4.26081 13.5876 4.35646 14.3137 4.5521C16.9961 5.26511 19.0786 7.39544 19.7525 10.1084C20.2264 12.0213 20.0308 13.9299 19.183 15.6298C18.9395 16.1168 18.8787 16.6689 19.0178 17.1863Z" />
-                        </svg>
-                    </a>
-                    <!-- <button class="post__button">
-                                <a href="{% url 'post-details' post.id %}">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                            d="M21.2959 20.8165L20.2351 16.8602C20.1743 16.6385 20.2047 16.3994 20.309 16.1907C21.2351 14.3342 21.5438 12.117 20.9742 9.80402C20.2003 6.67374 17.757 4.16081 14.6354 3.33042C13.7833 3.10869 12.9442 3 12.1312 3C6.29665 3 1.74035 8.47365 3.31418 14.5647C4.04458 17.3819 7.05314 20.2992 9.88344 20.9861C10.6486 21.173 11.4008 21.26 12.1312 21.26C13.7006 21.26 15.1701 20.8557 16.4614 20.1601C16.6049 20.0818 16.7657 20.0383 16.9222 20.0383C17.0005 20.0383 17.0787 20.047 17.157 20.0688L21.009 21.0991C21.0307 21.1035 21.0525 21.1078 21.0699 21.1078C21.2177 21.1078 21.3351 20.9687 21.2959 20.8165ZM19.0178 17.1863L19.6178 19.4253L17.4831 18.8558C17.3005 18.8079 17.1135 18.7819 16.9222 18.7819C16.557 18.7819 16.1875 18.8775 15.8571 19.0558C14.6963 19.6818 13.4441 19.9992 12.1312 19.9992C11.4834 19.9992 10.8269 19.9166 10.1791 19.7601C7.78354 19.1775 5.14453 16.6037 4.53586 14.2473C3.90111 11.7865 4.40109 9.26057 5.90536 7.31719C7.40964 5.3738 9.6791 4.26081 12.1312 4.26081C12.8529 4.26081 13.5876 4.35646 14.3137 4.5521C16.9961 5.26511 19.0786 7.39544 19.7525 10.1084C20.2264 12.0213 20.0308 13.9299 19.183 15.6298C18.9395 16.1168 18.8787 16.6689 19.0178 17.1863Z"
-                                            fill="var(--text-dark)" stroke="var(--text-dark)" stroke-width="0.7" />
-                                    </svg>
+                        <!-- Like counts -->
+                        <div class="post__interaction" style="display: flex; align-items: center; margin-top: 10px;">
+                            <div class="post__likes" style="margin-right: 10px;">
+                                <a href="{% url 'post-likers' post.id %}"
+                                    style="font-size: 14px; color: #555; text-decoration: none;"
+                                    onmouseover="this.style.color='blue'" onmouseout="this.style.color='#555'">
+                                    {{ post.likes }} likes
                                 </a>
-                            </button> -->
+                            </div>
 
-                    <!-- <a href="{% url 'favourite' post.id %}" class="post__button post__button--save {% if user in saved_by %}filled{% endif %}">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                      <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/>
-                                    </svg>
-                                  </a> -->
+                            <div class="post__comments">
+                                <a href="{% url 'post-details' post.id %}"
+                                    style="font-size: 14px; color: #555; text-decoration: none;">
+                                    {{post.comment.count}} comments
+                                </a>
+                            </div>
+                        </div>
 
 
-                    <a href="{% url 'favourite' post.id %}"
-                        class="post__button post__button--save {% if post.id in saved_post_ids %}filled{% endif %}">
-                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z" />
-                        </svg>
-                    </a>
-
-                    <!-- <div class="post__button post__button--save {% if post.id in saved_post_ids %}filled{% endif %}" onclick="toggleButton('save', this, '{{ post.id }}')">
-                                    <svg width="24" height="24" viewBox="0 0 24 24">
-                                        <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z"/>
-                                    </svg>
-                                  </div> -->
-                    <!-- Additional buttons like comment and share can go here -->
-                </div>
-
-                <!-- Like counts -->
-                <div class="post__interaction" style="display: flex; align-items: center; margin-top: 10px;">
-                    <div class="post__likes" style="margin-right: 10px;">
-                        <a href="{% url 'post-likers' post.id %}"
-                            style="font-size: 14px; color: #555; text-decoration: none;"
-                            onmouseover="this.style.color='blue'" onmouseout="this.style.color='#555'">
-                            {{ post.likes }} likes
-                        </a>
+                        <span class="post__date-time" style="font-size: 12px; color: #999;">{{post.posted}}</span>
                     </div>
-
-                    <div class="post__comments">
-                        <a href="{% url 'post-details' post.id %}"
-                            style="font-size: 14px; color: #555; text-decoration: none;">
-                            {{post.comment.count}} comments
-                        </a>
-                    </div>
-                </div>
-
-
-                <span class="post__date-time" style="font-size: 12px; color: #999;">{{post.posted}}</span>
-            </div>
-            <div>
+                    <!-- <div> -->
                 </article>
                 {% endfor %}
+                <!-- <div id="loading-indicator" style="display: none; text-align: center;">Loading...</div> -->
+
+                <nav aria-label="Page navigation" class="pagination-container">
+                    <ul class="pagination">
+                        {% if post_items.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ post_items.previous_page_number }}">Previous</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Previous</span>
+                        </li>
+                        {% endif %}
+
+                        {% for page_num in post_items.paginator.page_range %}
+                        {% if page_num == post_items.number %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                        {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if post_items.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ post_items.next_page_number }}">Next</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+
             </div>
 
 
@@ -513,7 +628,8 @@
         <section class="side-menu" style="width: 500px;">
             <div class="side-menu__user-profile"
                 style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);">
-                <a href="{{ request.user.username }}" class="side-menu__user-avatar" style="flex-shrink: 0; margin-right: 10px;">
+                <a href="{{ request.user.username }}" class="side-menu__user-avatar"
+                    style="flex-shrink: 0; margin-right: 10px;">
                     <img src="{{ request.user.profile.image.url }}" alt="User Picture"
                         style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
                 </a>
@@ -635,3 +751,48 @@
       });
     }
   </script> -->
+
+        {% block script %}
+        <script>
+            let page = 1;
+            const postContainer = document.querySelector('#post-container');
+
+            const loadMorePosts = () => {
+                const lastPost = document.querySelector('.post:last-child');
+                const observer = new IntersectionObserver(entries => {
+                    if (entries[0].isIntersecting) {
+                        observer.disconnect();
+                        page += 1;
+                        fetch(`/index?page=${page}`, {
+                            headers: {
+                                'x-requested-with': 'XMLHttpRequest'
+                            }
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.posts) {
+                                    data.posts.forEach(post => {
+                                        const postElement = document.createElement('article');
+                                        postElement.classList.add('post');
+                                        postElement.id = `post-${post.id}`;
+                                        postElement.innerHTML = `
+                            <h3>${post.user.username}</h3>
+                            <p>${post.caption}</p>
+                        `;
+                                        postContainer.appendChild(postElement);
+                                    });
+                                }
+                                if (data.has_next) {
+                                    loadMorePosts();
+                                }
+                            });
+                    }
+                });
+                observer.observe(lastPost);
+            };
+
+            loadMorePosts();
+
+        </script>
+
+        {% endblock script %}

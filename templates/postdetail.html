@@ -237,33 +237,55 @@ post details:
         border-radius: 9px; 
         box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
     } */
-/* Grid layout for the images */
-.post__grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 11px; 
+        /* Grid layout for the images */
+        .post__grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 11px;
+        }
+
+        .post__grid-item img {
+            width: 100%;
+            height: 270px;
+            border-radius: 9px;
+            box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+            object-position: center;
+        }
+
+        /* Single image styling (optional if needed) */
+        .post__single-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 9px;
+            box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+            object-fit: contain;
+            object-position: center;
+        }
+        .post__grid .post__grid-item:hover img {
+    transform: scale(1.05); /* Slight zoom effect on hover */
+    transition: transform 0.3s ease; /* Smooth transition */
 }
 
-.post__grid-item img {
-    width: 100%; 
-    height: 270px; 
-    border-radius: 9px; 
-    box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); 
-    object-fit: cover; 
-    object-position: center; 
-}
+        /* Video styling for single media */
+        .post__single-video {
+            width: 100%;
+            height: auto;
+            border-radius: 9px;
+            box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+            object-fit: contain;
+            object-position: center;
+        }
 
-/* Single image styling (optional if needed) */
-.post__single-image img {
-    width: 100%; 
-    height: auto; 
-    border-radius: 9px; 
-    box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); 
-    object-fit: contain; 
-    object-position: center; 
-}
-
-
+        /* Video styling for grid layout */
+        .post__grid-video {
+            width: 100%;
+            height: 270px;
+            border-radius: 9px;
+            box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+            object-position: center;
+        }
     </style>
 </head>
 <main class="main-container">
@@ -319,20 +341,11 @@ post details:
                     </div>
                     {% endif %}
 
-                    <!-- Image Section (displayed only if an image is available) -->
-                    <!-- {% if post.pictures.all %}
-                    <div class="post__content">
-                        {% for picture in post.pictures.all %}
-                        <a href="{{ picture.image.url }}" class="post__media-container">
-                            <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
-                        </a>
-                        {% endfor %}
-                    </div>
-                    {% endif %} -->
 
-                    {% if post.pictures.all %}
+
+                    <!-- {% if post.pictures.all %}
                     {% if post.pictures.count == 1 %}
-                    <!-- Single Image Full-Width Layout -->
+                  
                     <div class="post__single-image">
                         <a href="{{ post.pictures.first.image.url }}" target="_blank">
                             <img class="post__media" src="{{ post.pictures.first.image.url }}" alt="Post Content">
@@ -350,11 +363,50 @@ post details:
                     </div>
                    
                     {% endif %}
+                    {% endif %} -->
+
+                    {% if media_info %}
+                    {% if media_info|length == 1 %}
+                    <!-- Single Media (Image or Video) Full-Width Layout -->
+                    <div class="post__single-image">
+                        {% with media_info.0 as media %}
+                        {% if media.is_video %}
+                        <!-- Single Video -->
+                        <video controls class="post__single-video">
+                            <source src="{{ media.url }}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        {% else %}
+                        <!-- Single Image -->
+                        <a href="{{ media.url }}" target="_blank">
+                            <img src="{{ media.url }}" alt="Post Content">
+                        </a>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% else %}
+                    <!-- Multiple Media (Images and Videos) Grid Layout -->
+                    <div class="post__grid">
+                        {% for media in media_info %}
+                        <div class="post__grid-item">
+                            {% if media.is_video %}
+                            <!-- Video in Grid -->
+                            <video controls class="post__grid-video">
+                                <source src="{{ media.url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                            {% else %}
+                            <!-- Image in Grid -->
+                            <a href="{{ media.url }}" target="_blank">
+                                <img src="{{ media.url }}" alt="Post Content">
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
                     {% endif %}
-
-
-
-
+            
+                    {% endif %}
 
 
                     <!-- Like and Comment Section -->
@@ -420,7 +472,7 @@ post details:
                                 </div>
                                 <div class="text-right mt-2">
                                     <button class="btn btn-primary btn-sm shadow-none" type="submit">Post
-                                        comment</button>
+                                        Comment</button>
                                 </div>
                             </div>
                         </form>
@@ -436,7 +488,7 @@ post details:
                                     <span class="date">{{comment.date}}</span>
                                 </div>
                             </div>
-                            <p class="comment-text">{{ comment.body }}</p>
+                            <p class="comment-text">{{ comment.body|linebreaks }}</p>
                         </div>
                         {% endfor %}
                     </div>
@@ -448,42 +500,3 @@ post details:
 
 
 {% endblock content %}
-<!-- 
-<script>
-    
-    $(document).ready(function () {
-                $('.favourite-button').click(function (e) {
-                    e.preventDefault(); // Prevent the default action (page reload)
-    
-                    var post_id = $(this).data('post-id');
-                    var favouriteUrl = $(this).attr('href');
-    
-                    $.ajax({
-                        type: 'POST',
-                        url: favouriteUrl,
-                        data: {
-                            'post_id': post_id,
-                            'csrfmiddlewaretoken': '{{ csrf_token }}'
-                        },
-                        success: function (response) {
-                            // Change button appearance based on save state
-                            if (response.is_favourite) {
-                                $('#favourite-button-' + post_id + ' svg path').attr('fill', '#FFDe00'); // Indicate saved state
-                            } else {
-                                $('#favourite-button-' + post_id + ' svg path').attr('fill', 'var(--text-dark)'); // Indicate unsaved state
-                            }
-                        }
-                    });
-                });
-            });
-    
-    </script> -->
-<!-- <script>
-    document.querySelectorAll('.post__grid-item a').forEach(link => {
-        link.addEventListener('click', event => {
-            event.preventDefault();
-            window.open(link.href, '_blank');
-        });
-    });
-</script> -->
-    

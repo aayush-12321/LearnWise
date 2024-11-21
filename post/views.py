@@ -19,9 +19,93 @@ from django.db.models import Count
 
 from django.db.models import Q
 # from post.models import Post, Follow, Stream
-
 from datetime import timedelta
 from django.utils import timezone
+
+
+
+# @login_required
+# def index(request):
+#     user = request.user
+#     following_ids = set(Follow.objects.filter(follower=user).values_list('following', flat=True))
+#     mutual_follow_ids = set(Follow.objects.filter(following=user).values_list('follower', flat=True)).intersection(following_ids)
+
+#     # Fetch posts
+#     own_posts = Post.objects.filter(user=user)
+#     following_posts = Post.objects.filter(user__in=following_ids)
+#     mutual_posts = Post.objects.filter(user__in=mutual_follow_ids)
+#     other_posts = Post.objects.exclude(user__in=following_ids).exclude(user=user)
+#     all_posts = own_posts | following_posts | mutual_posts | other_posts
+
+#     # Scoring posts
+#     scored_posts = []
+#     for post in all_posts:
+#         if post.user.id in following_ids:
+#             relationship_multiplier = 2.0
+#             like_weight = 2.5
+#             comment_weight = 2.0
+#             recency_decay = 1.1
+#         elif post.user == user:
+#             relationship_multiplier = 1.25
+#             like_weight = 1.8
+#             comment_weight = 1.5
+#             recency_decay = 1.25
+#         elif post.user.id in mutual_follow_ids:
+#             relationship_multiplier = 1.2
+#             like_weight = 1.8
+#             comment_weight = 1.4
+#             recency_decay = 1.3
+#         else:
+#             relationship_multiplier = 1.0
+#             like_weight = 1.5
+#             comment_weight = 1.2
+#             recency_decay = 1.5
+
+#         likes = post.likes
+#         comments_count = post.comment.count()
+#         days_since_post = (timezone.now().date() - post.posted).days
+#         recency_factor = recency_decay ** days_since_post
+
+#         score = ((likes + 1) * like_weight + (comments_count + 1) * comment_weight) / recency_factor
+#         score *= relationship_multiplier
+#         scored_posts.append((post, score))
+
+#     scored_posts.sort(key=lambda x: x[1], reverse=True)
+#     sorted_posts = [post for post, _ in scored_posts]
+
+#     # Identify liked and saved posts
+#     liked_post_ids = Post.objects.filter(likers=user).values_list('id', flat=True)
+#     saved_post_ids = Post.objects.filter(savers=user).values_list('id', flat=True)
+
+#     # Handle search query if present
+#     query = request.GET.get('q')
+#     if query:
+#         users = User.objects.filter(Q(username__icontains=query))
+#         paginator = Paginator(users, 6)
+#         page_number = request.GET.get('page')
+#         users_paginator = paginator.get_page(page_number)
+
+#     # Suggestions based on mutual friends
+#     followings = set(Follow.objects.filter(follower=request.user).values_list('following', flat=True))
+#     potential_suggestions = User.objects.exclude(pk__in=followings).exclude(pk=request.user.pk)
+#     suggestions_with_mutuals = []
+#     for suggested_user in potential_suggestions:
+#         mutual_friends_count = Follow.objects.filter(following=suggested_user, follower__in=followings).count()
+#         suggestions_with_mutuals.append((suggested_user, mutual_friends_count))
+
+#     sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[:7]
+#     suggestions = [user for user, _ in sorted_suggestions]
+
+#     # Prepare context and render template
+#     context = {
+#         'post_items': sorted_posts,
+#         'liked_post_ids': list(liked_post_ids),
+#         'saved_post_ids': list(saved_post_ids),
+#         'suggestions': suggestions,
+#     }
+    # return render(request, 'index.html', context)
+
+
 
 @login_required
 def index(request):
@@ -39,36 +123,46 @@ def index(request):
     # Scoring posts
     scored_posts = []
     for post in all_posts:
+        # Set scoring parameters based on post type
         if post.user.id in following_ids:
-            relationship_multiplier = 2.0
-            like_weight = 2.5
-            comment_weight = 2.0
-            recency_decay = 1.1
+            # Following user's post: Highest priority
+            relationship_multiplier = 2.8  # Higher weight for following users
+            like_weight = 2.8
+            comment_weight = 2.3
+            recency_decay = 1.01  # Slower decay rate
         elif post.user == user:
-            relationship_multiplier = 1.25
+            # User's own post: Slightly lower priority
+            relationship_multiplier = 2.0
+            like_weight = 2.0
+            comment_weight = 1.8
+            recency_decay = 1.2
+        elif post.user.id in mutual_follow_ids:
+            # Mutual follower's post: Lower priority
+            relationship_multiplier = 1.5
             like_weight = 1.8
             comment_weight = 1.5
-            recency_decay = 1.25
-        elif post.user.id in mutual_follow_ids:
-            relationship_multiplier = 1.2
-            like_weight = 1.8
-            comment_weight = 1.4
             recency_decay = 1.3
         else:
+            # Other user's post: Lowest priority
             relationship_multiplier = 1.0
             like_weight = 1.5
             comment_weight = 1.2
-            recency_decay = 1.5
+            recency_decay = 1.4
 
+        # Calculate score based on likes, comments, and recency
         likes = post.likes
-        comments_count = post.comment.count()
+        comments_count = post.comment.count()  # Assuming Post has a related name `comment` for comments
+
         days_since_post = (timezone.now().date() - post.posted).days
+        # print(days_since_post)
         recency_factor = recency_decay ** days_since_post
 
+        # Score formula
         score = ((likes + 1) * like_weight + (comments_count + 1) * comment_weight) / recency_factor
         score *= relationship_multiplier
         scored_posts.append((post, score))
 
+    # Sort posts by score (descending order)
     scored_posts.sort(key=lambda x: x[1], reverse=True)
     sorted_posts = [post for post, _ in scored_posts]
 
@@ -95,14 +189,24 @@ def index(request):
     sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[:7]
     suggestions = [user for user, _ in sorted_suggestions]
 
+        
+    # print(media_info)
+
+    # Paginate sorted posts
+    paginator = Paginator(sorted_posts, 5)
+    page_number = request.GET.get('page')
+    sorted_posts = paginator.get_page(page_number)
+
     # Prepare context and render template
     context = {
         'post_items': sorted_posts,
         'liked_post_ids': list(liked_post_ids),
         'saved_post_ids': list(saved_post_ids),
         'suggestions': suggestions,
+        # 'media_info': media_info,
     }
     return render(request, 'index.html', context)
+
 
 
 # @login_required
@@ -185,13 +289,50 @@ def NewPost(request):
 
 
 
+# @login_required
+# def PostDetail(request, post_id):
+    
+#     post = get_object_or_404(Post, id=post_id)
+
+#     # print(post.get_likers_names())
+#     # print("#"*20)
+
+#     user = request.user
+
+#     # Identify liked and saved posts
+#     liked_post_ids = Post.objects.filter(likers=user).values_list('id', flat=True)
+#     saved_post_ids = Post.objects.filter(savers=user).values_list('id', flat=True)
+
+
+#     #comments
+#     comments = Comment.objects.filter(post=post).order_by('-date')
+
+#     if request.method == "POST":
+#         # form = NewCommentForm(request.POST)
+#         form = NewCommentForm(request.POST,request.FILES)
+#         if form.is_valid():
+#             comment = form.save(commit=False)
+#             comment.post = post
+#             comment.user = request.user
+#             comment.save()
+#             return HttpResponseRedirect(reverse('post-details', args=[post.id]))
+#     else:
+#         form = NewCommentForm()
+
+#     context = {
+#         'post': post,
+#         'form': form,
+#         'comments': comments,
+#         'liked_post_ids': list(liked_post_ids),
+#         'saved_post_ids': list(saved_post_ids),
+
+#     }
+
+#     return render(request, 'postdetail.html', context)
+
 @login_required
 def PostDetail(request, post_id):
-    
     post = get_object_or_404(Post, id=post_id)
-
-    # print(post.get_likers_names())
-    # print("#"*20)
 
     user = request.user
 
@@ -199,13 +340,21 @@ def PostDetail(request, post_id):
     liked_post_ids = Post.objects.filter(likers=user).values_list('id', flat=True)
     saved_post_ids = Post.objects.filter(savers=user).values_list('id', flat=True)
 
-
-    #comments
+    # Comments
     comments = Comment.objects.filter(post=post).order_by('-date')
 
+    # Process media info for the post
+    media_info = []
+    for picture in post.pictures.all():
+        media_url = picture.image.url
+        is_video = media_url.lower().endswith(('.mp4', '.webm'))
+        media_info.append({
+            'url': media_url,
+            'is_video': is_video
+        })
+
     if request.method == "POST":
-        # form = NewCommentForm(request.POST)
-        form = NewCommentForm(request.POST,request.FILES)
+        form = NewCommentForm(request.POST, request.FILES)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.post = post
@@ -221,22 +370,64 @@ def PostDetail(request, post_id):
         'comments': comments,
         'liked_post_ids': list(liked_post_ids),
         'saved_post_ids': list(saved_post_ids),
-
+        'media_info': media_info,  # Add media info to context
     }
 
     return render(request, 'postdetail.html', context)
+
+
+# @login_required
+# def Tags(request, tag_slug):
+#     tag = get_object_or_404(Tag, slug=tag_slug)
+#     posts = Post.objects.filter(tags=tag).order_by('-posted')
+
+#     media_info = []
+#     for picture in posts.pictures.all():
+#         media_url = picture.image.url
+#         is_video = media_url.lower().endswith(('.mp4', '.webm'))
+#         media_info.append({
+#             'url': media_url,
+#             'is_video': is_video
+#         })
+
+#     context = {
+#         'posts': posts,
+#         'tag': tag,
+#         'media_info': media_info,  # Add media info to context
+
+
+#     }
+#     return render(request, 'tag.html', context)
 
 @login_required
 def Tags(request, tag_slug):
     tag = get_object_or_404(Tag, slug=tag_slug)
     posts = Post.objects.filter(tags=tag).order_by('-posted')
 
-    context = {
-        'posts': posts,
-        'tag': tag
+    posts_with_media_info = []
+    for post in posts:
+        # Fetch the first picture or video from the post
+        first_picture = post.pictures.first()
+        media_info = None
+        if first_picture:
+            media_url = first_picture.image.url
+            is_video = media_url.lower().endswith(('.mp4', '.webm'))
+            media_info = {
+                'url': media_url,
+                'is_video': is_video
+            }
 
+        posts_with_media_info.append({
+            'post': post,
+            'media_info': media_info,
+        })
+
+    context = {
+        'posts_with_media_info': posts_with_media_info,
+        'tag': tag,
     }
     return render(request, 'tag.html', context)
+
 
 
 @login_required

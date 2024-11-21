@@ -109,6 +109,9 @@ class Post(models.Model):
     
     def get_likers_names(self):
         return [liker.username for liker in self.likers.all()]
+    
+    def __str__(self):
+        return f"{self.user.username} posts {self.caption[:7]}"
 
 class PostImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
