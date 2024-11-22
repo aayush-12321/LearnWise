@@ -9,20 +9,13 @@ from django.http import HttpResponseRedirect,JsonResponse
 # from post.models import Post, Tag, Follow, Stream, Likes
 from post.models import Post, Tag, Follow, Stream
 from django.contrib.auth.models import User
-from post.forms import NewPostform
 from authy.models import Profile
-from django.urls import resolve
 from comment.models import Comment
 from comment.forms import NewCommentForm
 from django.core.paginator import Paginator
-from django.db.models import Count
-
+from post.models import PostImage
 from django.db.models import Q
-# from post.models import Post, Follow, Stream
-from datetime import timedelta
 from django.utils import timezone
-
-
 
 # @login_required
 # def index(request):
@@ -104,8 +97,6 @@ from django.utils import timezone
 #         'suggestions': suggestions,
 #     }
     # return render(request, 'index.html', context)
-
-
 
 @login_required
 def index(request):
@@ -207,56 +198,6 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
-
-
-# @login_required
-# def NewPost(request):
-#     user = request.user
-#     profile = get_object_or_404(Profile, user=user)
-#     tags_obj = []
-
-#     if request.method == "POST":
-#         picture = request.FILES.get('picture')
-#         caption = request.POST.get('caption')
-#         tag_form = request.POST.get('tags')
-
-#         # Validation: Ensure one of the allowed combinations is provided
-#         if (
-#             picture or caption or tag_form
-#         ) and (picture or caption or (caption and tag_form) or (picture and tag_form)):
-#             # Handle tags if provided
-#             if tag_form:
-#                 tag_list = tag_form.split(',')
-#                 for tag in tag_list:
-#                     t, created = Tag.objects.get_or_create(title=tag.strip())
-#                     tags_obj.append(t)
-
-#             # Create a new post instance
-#             post = Post.objects.create(
-#                 user=user,
-#                 picture=picture if picture else None,
-#                 caption=caption if caption else ''
-#             )
-
-#             # Associate tags with the post
-#             if tags_obj:
-#                 post.tags.set(tags_obj)
-
-#             post.save()
-
-#             messages.success(request, 'Your post has been created!')
-#             return redirect('profile', request.user.username)
-#         else:
-#             # Show error if conditions aren't met
-#             messages.error(request, 'Please provide at least a valid combination of photo, caption, or tags.')
-
-#     context = {
-#         'profile': profile
-#     }
-#     return render(request, 'newpost.html', context)
-
-from django.db import transaction
-from post.models import PostImage
 @login_required
 def NewPost(request):
     if request.method == 'POST':
@@ -286,49 +227,6 @@ def NewPost(request):
             messages.error(request, 'Please provide a caption or pictures.')
 
     return render(request, 'newpost.html')
-
-
-
-# @login_required
-# def PostDetail(request, post_id):
-    
-#     post = get_object_or_404(Post, id=post_id)
-
-#     # print(post.get_likers_names())
-#     # print("#"*20)
-
-#     user = request.user
-
-#     # Identify liked and saved posts
-#     liked_post_ids = Post.objects.filter(likers=user).values_list('id', flat=True)
-#     saved_post_ids = Post.objects.filter(savers=user).values_list('id', flat=True)
-
-
-#     #comments
-#     comments = Comment.objects.filter(post=post).order_by('-date')
-
-#     if request.method == "POST":
-#         # form = NewCommentForm(request.POST)
-#         form = NewCommentForm(request.POST,request.FILES)
-#         if form.is_valid():
-#             comment = form.save(commit=False)
-#             comment.post = post
-#             comment.user = request.user
-#             comment.save()
-#             return HttpResponseRedirect(reverse('post-details', args=[post.id]))
-#     else:
-#         form = NewCommentForm()
-
-#     context = {
-#         'post': post,
-#         'form': form,
-#         'comments': comments,
-#         'liked_post_ids': list(liked_post_ids),
-#         'saved_post_ids': list(saved_post_ids),
-
-#     }
-
-#     return render(request, 'postdetail.html', context)
 
 @login_required
 def PostDetail(request, post_id):
@@ -375,30 +273,6 @@ def PostDetail(request, post_id):
 
     return render(request, 'postdetail.html', context)
 
-
-# @login_required
-# def Tags(request, tag_slug):
-#     tag = get_object_or_404(Tag, slug=tag_slug)
-#     posts = Post.objects.filter(tags=tag).order_by('-posted')
-
-#     media_info = []
-#     for picture in posts.pictures.all():
-#         media_url = picture.image.url
-#         is_video = media_url.lower().endswith(('.mp4', '.webm'))
-#         media_info.append({
-#             'url': media_url,
-#             'is_video': is_video
-#         })
-
-#     context = {
-#         'posts': posts,
-#         'tag': tag,
-#         'media_info': media_info,  # Add media info to context
-
-
-#     }
-#     return render(request, 'tag.html', context)
-
 @login_required
 def Tags(request, tag_slug):
     tag = get_object_or_404(Tag, slug=tag_slug)
@@ -427,8 +301,6 @@ def Tags(request, tag_slug):
         'tag': tag,
     }
     return render(request, 'tag.html', context)
-
-
 
 @login_required
 def like(request, post_id):
@@ -474,60 +346,72 @@ def post_likers(request, post_id):
     }
     return render(request, 'likers.html', context)
 
+@login_required
+def edit_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id, user=request.user)  # Ensure the user can only edit their own posts
+    if request.method == 'POST':
+        # Retrieve form data
+        caption = request.POST.get('caption', '').strip()
+        tags_form = request.POST.get('tags', '').strip()
+        pictures = request.FILES.getlist('pictures')
+        remove_images = request.POST.getlist('remove_images')
+
+        # Check if removing caption without picture or removing picture without caption
+        has_existing_images = post.pictures.exclude(id__in=remove_images).exists()  # Remaining images after removal
+        is_caption_empty = not caption
+        is_picture_empty = not pictures and not has_existing_images
+
+        if is_caption_empty and not post.pictures.exists():
+            messages.error(request, "You cannot remove the caption unless a picture is provided.")
+            return render(request, 'editpost.html', {'post': post})
+
+        if is_picture_empty and not caption:
+            messages.error(request, "You cannot remove the picture unless a caption is provided.")
+            return render(request, 'editpost.html', {'post': post})
+
+        # Update the post's caption (allow blank)
+        post.caption = caption
+
+        # Handle tags
+        if tags_form:
+            post.tags.clear()  # Remove all existing tags
+            tag_list = tags_form.split(',')
+            for tag in tag_list:
+                t, created = Tag.objects.get_or_create(title=tag.strip())
+                post.tags.add(t)
+        elif not tags_form:
+            post.tags.clear()  # Remove all tags if no tags are provided
+
+        # Handle image removal
+        for image_id in remove_images:
+            post.pictures.filter(id=image_id).delete()
+
+        # Handle new pictures
+        if pictures:
+            for picture in pictures:
+                PostImage.objects.create(post=post, image=picture)
+
+        post.save()  # Save changes
+        messages.success(request, "Post updated successfully!")
+        return redirect('post-details', post.id)
+
+    return render(request, 'editpost.html', {'post': post})
 
 @csrf_exempt
 def delete_post(request, post_id):
     if request.user.is_authenticated:
-        if request.method == 'PUT':
-            post = Post.objects.get(id=post_id)
-            if request.user == post.creater:
-                try:
-                    delete = post.delete()
-                    return HttpResponse(status=201)
-                except Exception as e:
-                    return HttpResponse(e)
-            else:
-                return HttpResponse(status=404)
+        if request.method == 'POST':  
+            try:
+                post = Post.objects.get(id=post_id)
+                if request.user == post.user:
+                    post.delete()
+                    # return HttpResponse(status=200)
+                    return HttpResponseRedirect(reverse('profile', args=[request.user.username]))
+                else:
+                    return HttpResponse(status=403)  # Forbidden
+            except Post.DoesNotExist:
+                return HttpResponse(status=404)  # Not Found
         else:
-            return HttpResponse("Method must be 'PUT'")
+            return HttpResponse("Invalid request method", status=405)  # Method Not Allowed
     else:
         return HttpResponseRedirect(reverse('sign-in'))
-    
-
-
-@login_required
-@csrf_exempt
-def edit_post(request, post_id):
-    if request.method == 'POST':
-        text = request.POST.get('text')
-        pic = request.FILES.get('picture')
-        img_chg = request.POST.get('img_change')
-        post_id = request.POST.get('id')
-        post = Post.objects.get(id=post_id)
-        try:
-            post.content_text = text
-            if img_chg != 'false':
-                post.content_image = pic
-            post.save()
-            
-            if(post.content_text):
-                post_text = post.content_text
-            else:
-                post_text = False
-            if(post.content_image):
-                post_image = post.img_url()
-            else:
-                post_image = False
-            
-            return JsonResponse({
-                "success": True,
-                "text": post_text,
-                "picture": post_image
-            })
-        except Exception as e:
-            return JsonResponse({
-                "success": False
-            })
-    else:
-            return HttpResponse("Method must be 'POST'")
-

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<style>
+   /* Body Styling */
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #89f7fe, #66a6ff);
+  background-attachment: fixed;
+  background-size: cover;
+  margin: 0;
+  padding: 0;
+}
+
+/* Center Container */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Form Container */
+.form-data {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  max-width: 600px;
+  width: 100%;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Input Styles */
+textarea,
+input[type="text"],
+input[type="file"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  margin-bottom: 15px;
+}
+
+/* Submit Button */
+.form-btn {
+  background-color: rgb(63, 224, 125);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.form-btn:hover {
+  background-color: rgb(53, 190, 105);
+}
+
+/* Existing Pictures Section */
+h4 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.pictures-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.pictures-grid img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.pictures-grid label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  font-size: 14px;
+  gap: 5px;
+}
+
+
+</style>
+<div id="wrapper">
+    <div class="container">
+      <div class="form-data">
+        <form action="" method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <h3>Edit Post</h3>
+          <hr>
+  
+          <!-- Existing Pictures with Option to Remove -->
+          <h4>Existing Pictures</h4>
+          <div class="pictures-grid">
+            {% for picture in post.pictures.all %}
+            <label>
+              <img src="{{ picture.image.url }}" alt="Post Image">
+              <input type="checkbox" name="remove_images" value="{{ picture.id }}"> Remove
+            </label>
+            {% endfor %}
+          </div>
+  
+          <!-- Upload New Pictures -->
+          <label for="fileInput">Add New Picture(s):</label>
+          <input type="file" multiple name="pictures" id="fileInput">
+  
+          <!-- Edit Caption -->
+          <textarea name="caption" placeholder="Write a caption...">{{ post.caption }}</textarea>
+  
+          <!-- Edit Tags -->
+          <input type="text" name="tags" placeholder="Enter tags separated by commas."
+            value="{% for tag in post.tags.all %}{{ tag.title }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+  
+          <!-- Save Changes -->
+          <button class="form-btn" type="submit">Save Changes</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

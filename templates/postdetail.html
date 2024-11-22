@@ -262,10 +262,13 @@ post details:
             object-fit: contain;
             object-position: center;
         }
+
         .post__grid .post__grid-item:hover img {
-    transform: scale(1.05); /* Slight zoom effect on hover */
-    transition: transform 0.3s ease; /* Smooth transition */
-}
+            transform: scale(1.05);
+            /* Slight zoom effect on hover */
+            transition: transform 0.3s ease;
+            /* Smooth transition */
+        }
 
         /* Video styling for single media */
         .post__single-video {
@@ -292,10 +295,10 @@ post details:
     <section class="content-container">
         <div class="content">
             <div class="posts">
-                <article class="post">
+                <article class="post" style="border: 1.5px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 15px; box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); ">
                     <!-- Post Header -->
                     <div class="post__header"
-                        style="display: flex; align-items: center; justify-content: space-between;">
+                    style="display: flex; align-items: center; justify-content: space-between;">
                         <div class="post__profile" style="display: flex; align-items: center;">
                             {% if post.user.profile.image %}
                             <a href="{{post.user.profile.image.url}}" class="post__avatar" style="margin-right: 10px;">
@@ -309,37 +312,92 @@ post details:
                                     class="name">{{post.user.profile.first_name|title}}
                                     {{post.user.profile.last_name|title}}</a>
                                 {% else %}
-                                <a href="{% url 'profile' post.user %}" class="name">{{user.username}}</a>
+                                <a href="{% url 'profile' post.user %}" class="name">{{post.user.username}}</a>
                                 {% endif %}
                                 <span class="date">@{{post.user.username}}</span>
                             </div>
                         </div>
-                        <button class="post__more-options">
+                        <!-- <button class="post__more-options"> -->
+                        <div class="post__more-options">
                             <!-- SVG icon code -->
-                            <button class="post__more-options" style="background: none; border: none; cursor: pointer;">
+                            <!-- <button class="post__more-options" style="background: none; border: none; cursor: pointer;">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                                     xmlns="http://www.w3.org/2000/svg">
                                     <circle cx="6.5" cy="11.5" r="1.5" fill="#333" />
                                     <circle cx="12" cy="11.5" r="1.5" fill="#333" />
                                     <circle cx="17.5" cy="11.5" r="1.5" fill="#333" />
                                 </svg>
-                            </button>
-                        </button>
+                            </button> -->
+
+                            {% if post.user.username == user.username %}
+                            <div class="dropdown">
+                                <button class="post__more-options" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="6.5" cy="11.5" r="1.5" fill="#333" />
+                                        <circle cx="12" cy="11.5" r="1.5" fill="#333" />
+                                        <circle cx="17.5" cy="11.5" r="1.5" fill="#333" />
+                                    </svg>
+                                </button>
+
+                                <ul class="dropdown-menu">
+
+                                    
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'edit_post' post.id %}">Edit Post</a>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item text-danger"
+                                            onclick="openDeleteModal('{{ post.id }}')">Delete Post</button>
+                                    </li>
+                                    
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                        <!-- </button> -->
+                         </div>
                     </div>
+
+                    <!-- Delete Confirmation Modal -->
+                    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">Delete Post?</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete this post? This action cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <form id="deleteForm" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
 
                     <!-- Caption -->
                     <!-- Caption Section (displayed always if available) -->
                     {% if post.caption %}
                     <div class="post__caption" style="margin-bottom: 10px;">
                         <p style="font-size: 14px; color: #555;">{{ post.caption|linebreaks }}</p>
-                        <p style="font-size: 13px;">
-                            {% for tag in post.tags.all %}
-                            <a href="{{ tag.get_absolute_url }}"
-                                style="text-decoration: none; color: #007bff;">#{{tag}}</a>
-                            {% endfor %}
-                        </p>
                     </div>
                     {% endif %}
+                    <p style="font-size: 13px;">
+                        {% for tag in post.tags.all %}
+                        <a href="{{ tag.get_absolute_url }}"
+                            style="text-decoration: none; color: #007bff;">#{{tag}}</a>
+                        {% endfor %}
+                    </p>
 
 
 
@@ -405,7 +463,7 @@ post details:
                         {% endfor %}
                     </div>
                     {% endif %}
-            
+
                     {% endif %}
 
 
@@ -500,3 +558,40 @@ post details:
 
 
 {% endblock content %}
+
+
+{% block script %}
+
+<script>
+
+  function openDeleteModal(postId) {
+    const deleteForm = document.getElementById("deleteForm");
+    deleteForm.action = `/${postId}/delete/`; // Dynamic action URL
+    const deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
+    deleteModal.show();
+}
+
+
+//     document.querySelectorAll('.delete-button').forEach(button => {
+//     button.addEventListener('click', event => {
+//         const postId = button.dataset.postId;
+//         fetch(`/${postId}/delete/`, {
+//             method: 'POST',
+//             headers: {
+//                 'X-CSRFToken': getCookie('csrftoken'),
+//             },
+//         })
+//         .then(response => {
+//             if (response.ok) {
+//                 alert('Post deleted successfully!');
+//                 window.location.reload();
+//             } else {
+//                 alert('Error deleting the post.');
+//             }
+//         });
+//     });
+// });
+
+</script>
+
+{% endblock script %}

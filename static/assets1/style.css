@@ -780,6 +780,33 @@ img { max-width: 100%; }
     border-radius: 50%;
 }
 
+.post__more-options {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    min-width: 8rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.dropdown-item.text-danger {
+    color: #dc3545;
+}
+
+.modal-footer button {
+    margin-left: 0.5rem;
+}
+
+
 
 /* Media Queries */
 @media (max-width: 767px) {

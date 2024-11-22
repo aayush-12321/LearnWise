@@ -6,6 +6,8 @@ from authy.views import UserProfile, editProfile,followers_followings_list
 
 urlpatterns = [
     # Profile Section
+    path('<str:username>/', UserProfile, name='profile'),
+
     path('profile/edit', editProfile, name="editprofile"),
     # path('follow/<int:user_id>/<str:follow_type>/', followers_followings_list, name='follow_list'),
     path('user/<int:user_id>/<str:follow_type>/', views.followers_followings_list, name='follow_list'),

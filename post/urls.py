@@ -12,10 +12,12 @@ urlpatterns = [
     # path('follow/<int:user_id>/<str:follow_type>/', followers_followings_list, name='follow_list'),
 
     
-    path("n/post/<int:post_id>/delete", delete_post, name="deletepost"),
-    path("n/post/<int:post_id>/edit", edit_post, name="editpost"),
-    # path('<uuid:post_id>/toggle_like/', toggle_like, name='toggle-like'),
-    # path('<uuid:post_id>/toggle_save/', toggle_save, name='toggle-save'),
+    # path("n/post/<int:post_id>/delete", delete_post, name="deletepost"),
+    # path("n/post/<int:post_id>/edit", edit_post, name="editpost"),
+    
+    path('post/<uuid:post_id>/edit/', edit_post, name='edit_post'),
+    # path('<uuid:post_id>/delete/', delete_post, name='delete-post'),
+    path('<uuid:post_id>/delete/', delete_post, name='delete-post'),
 
 
 
