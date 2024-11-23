@@ -130,8 +130,8 @@
 
             <!-- Email Field -->
             <div class="form-group">
-                <label for="id_username">Username / Email</label>
-                <input type="text" name="username" id="id_username" placeholder="Username or Email" value="{{ request.POST.username }}">
+                <label for="id_username">Username</label>
+                <input type="text" name="username" id="id_username" placeholder="Username" value="{{ request.POST.username }}">
                 {% if form.username.errors %}
                     <p class="error-message">{{ form.username.errors }}</p>
                 {% endif %}

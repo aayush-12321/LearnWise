@@ -32,45 +32,29 @@
     margin: 0;
     padding: 0;
 }
-
-.gallery {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
-    justify-items: center;
-    margin: 20px;
-}
-
 .gallery-item {
     position: relative;
     width: 100%;
-    max-width: 300px; /* Control the max width of the gallery items */
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+    max-width: 300px;
+    height: 200px; /* Fixed height for consistency */
     overflow: hidden;
-    text-align: center;
+    border-radius: 8px;
     display: flex;
-    align-items: center; /* Vertically center content */
-    justify-content: center; /* Horizontally center content */
-    box-sizing: border-box;
-    /* padding: 10px; */
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
 }
 
-/* To ensure images and videos are centered vertically and horizontally */
-.gallery-video, .gallery-image {
-    display: block;
-    max-width: 100%; /* Ensure media doesn’t overflow */
-    max-height: 100%; /* Prevent media from exceeding container's height */
-    object-fit: contain; /* Ensures the aspect ratio is preserved */
-    margin: 0 auto; /* Center the media horizontally */
+.gallery-image, .gallery-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the media fills the box while maintaining aspect ratio */
     border-radius: 8px;
 }
 
-/* Placeholder for when there is no image or video */
 .caption-placeholder {
     width: 100%;
-    height: 200px;
+    height: 200px; /* Matches .gallery-item height */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -85,38 +69,10 @@
     font-size: 16px;
     color: #555;
     margin: 0;
-}
-
-.gallery-item-info ul {
-    display: flex;
-    justify-content: space-around;
-    padding: 5px;
-    margin: 0;
-    list-style: none;
-    width: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    color: #fff;
-    font-size: 0.9em;
-}
-
-.gallery-item-likes,
-.gallery-item-comments {
-    padding: 10px;
-    display: flex;
-    align-items: center;
-}
-
-@media screen and (max-width: 768px) {
-    .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* More compact layout */
-    }
-
-    .gallery-item-info ul {
-        font-size: 0.8em;
-    }
+    text-align: center;
+    word-wrap: break-word;
+    width: 90%; /* Limits text width inside the placeholder */
+    line-height: 1.4; /* Improves readability */
 }
 
 
@@ -133,7 +89,7 @@
         </div>
     </header>
     <main>
-
+        <div class="container">
         <div class="gallery">
             {% for item in posts_with_media_info %}
             <a href="{{ item.post.get_absolute_url }}">
@@ -163,11 +119,11 @@
                             </li>
                             <li class="gallery-item-likes">
                                 <span class="visually-hidden">Likes:</span>
-                                <i class="fas fa-heart" aria-hidden="true"></i> {{ item.post.likes }}
+                                <i class="fas fa-heart" style="color:rgb(255, 75, 92);" aria-hidden="true"></i> {{ item.post.likes }}
                             </li>
                             <li class="gallery-item-comments">
                                 <span class="visually-hidden">Comments:</span>
-                                <i class="fas fa-comment" aria-hidden="true"></i> {{ item.post.comment.count }}
+                                <i class="fas fa-comment" style="color:rgb(255, 75, 92);" aria-hidden="true"></i> {{ item.post.comment.count }}
                             </li>
                         </ul>
                     </div>
@@ -177,7 +133,7 @@
             <p class="no-posts">No posts to display</p>
             {% endfor %}
         </div>
-
+    </div>
 
 
         <!-- End of container -->
