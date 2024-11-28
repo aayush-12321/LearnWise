@@ -267,18 +267,18 @@
                                 </li>
                                 <li class="gallery-item-likes">
                                     <span class="visually-hidden">Likes:</span>
-                                    <i class="fas fa-heart" aria-hidden="true"></i> {{ item.post.likes }}
+                                    <i class="fas fa-heart" style="color:rgb(255, 75, 92);" aria-hidden="true"></i> {{ item.post.likes }}
                                 </li>
                                 <li class="gallery-item-comments">
                                     <span class="visually-hidden">Comments:</span>
-                                    <i class="fas fa-comment" aria-hidden="true"></i> {{ item.post.comment.count }}
+                                    <i class="fas fa-comment" style="color:rgb(255, 75, 92);" aria-hidden="true"></i> {{ item.post.comment.count }}
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </a>
                 {% empty %}
-                <p class="no-posts">No posts to display</p>
+                <p class="no-posts">No Content To Display</p>
                 {% endfor %}
             </div>
             
