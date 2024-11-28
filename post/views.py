@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404,HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-
+import json
 from django.urls import reverse
 from django.http import HttpResponseRedirect,JsonResponse
 
@@ -16,87 +16,6 @@ from django.core.paginator import Paginator
 from post.models import PostImage
 from django.db.models import Q
 from django.utils import timezone
-
-# @login_required
-# def index(request):
-#     user = request.user
-#     following_ids = set(Follow.objects.filter(follower=user).values_list('following', flat=True))
-#     mutual_follow_ids = set(Follow.objects.filter(following=user).values_list('follower', flat=True)).intersection(following_ids)
-
-#     # Fetch posts
-#     own_posts = Post.objects.filter(user=user)
-#     following_posts = Post.objects.filter(user__in=following_ids)
-#     mutual_posts = Post.objects.filter(user__in=mutual_follow_ids)
-#     other_posts = Post.objects.exclude(user__in=following_ids).exclude(user=user)
-#     all_posts = own_posts | following_posts | mutual_posts | other_posts
-
-#     # Scoring posts
-#     scored_posts = []
-#     for post in all_posts:
-#         if post.user.id in following_ids:
-#             relationship_multiplier = 2.0
-#             like_weight = 2.5
-#             comment_weight = 2.0
-#             recency_decay = 1.1
-#         elif post.user == user:
-#             relationship_multiplier = 1.25
-#             like_weight = 1.8
-#             comment_weight = 1.5
-#             recency_decay = 1.25
-#         elif post.user.id in mutual_follow_ids:
-#             relationship_multiplier = 1.2
-#             like_weight = 1.8
-#             comment_weight = 1.4
-#             recency_decay = 1.3
-#         else:
-#             relationship_multiplier = 1.0
-#             like_weight = 1.5
-#             comment_weight = 1.2
-#             recency_decay = 1.5
-
-#         likes = post.likes
-#         comments_count = post.comment.count()
-#         days_since_post = (timezone.now().date() - post.posted).days
-#         recency_factor = recency_decay ** days_since_post
-
-#         score = ((likes + 1) * like_weight + (comments_count + 1) * comment_weight) / recency_factor
-#         score *= relationship_multiplier
-#         scored_posts.append((post, score))
-
-#     scored_posts.sort(key=lambda x: x[1], reverse=True)
-#     sorted_posts = [post for post, _ in scored_posts]
-
-#     # Identify liked and saved posts
-#     liked_post_ids = Post.objects.filter(likers=user).values_list('id', flat=True)
-#     saved_post_ids = Post.objects.filter(savers=user).values_list('id', flat=True)
-
-#     # Handle search query if present
-#     query = request.GET.get('q')
-#     if query:
-#         users = User.objects.filter(Q(username__icontains=query))
-#         paginator = Paginator(users, 6)
-#         page_number = request.GET.get('page')
-#         users_paginator = paginator.get_page(page_number)
-
-#     # Suggestions based on mutual friends
-#     followings = set(Follow.objects.filter(follower=request.user).values_list('following', flat=True))
-#     potential_suggestions = User.objects.exclude(pk__in=followings).exclude(pk=request.user.pk)
-#     suggestions_with_mutuals = []
-#     for suggested_user in potential_suggestions:
-#         mutual_friends_count = Follow.objects.filter(following=suggested_user, follower__in=followings).count()
-#         suggestions_with_mutuals.append((suggested_user, mutual_friends_count))
-
-#     sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[:7]
-#     suggestions = [user for user, _ in sorted_suggestions]
-
-#     # Prepare context and render template
-#     context = {
-#         'post_items': sorted_posts,
-#         'liked_post_ids': list(liked_post_ids),
-#         'saved_post_ids': list(saved_post_ids),
-#         'suggestions': suggestions,
-#     }
-    # return render(request, 'index.html', context)
 
 @login_required
 def index(request):
@@ -415,3 +334,47 @@ def delete_post(request, post_id):
             return HttpResponse("Invalid request method", status=405)  # Method Not Allowed
     else:
         return HttpResponseRedirect(reverse('sign-in'))
+    
+@login_required
+@csrf_exempt
+def edit_comment(request, comment_id):
+    if request.method == "POST":
+        try:
+            comment = Comment.objects.get(id=comment_id, user=request.user)
+            data = json.loads(request.body)  # Parse the incoming JSON body
+            new_body = data.get('body', '').strip()
+
+            if not new_body:
+                return JsonResponse({"success": False, "error": "Comment body cannot be empty."})
+
+            comment.body = new_body
+            comment.save()
+
+            # Return the updated body in the response
+            return JsonResponse({"success": True, "new_body": new_body})
+
+        except Comment.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Comment not found or not authorized."})
+
+    return JsonResponse({"success": False, "error": "Invalid request method."})
+
+
+
+
+@login_required
+@csrf_exempt
+def delete_comment(request, comment_id):
+    if request.method == "POST":
+        try:
+            # Get the comment belonging to the user
+            comment = get_object_or_404(Comment, id=comment_id, user=request.user)
+            
+            # Delete the comment
+            comment.delete()
+            return JsonResponse({"success": True})
+
+        except Comment.DoesNotExist:
+            return JsonResponse({"success": False, "error": "Comment not found or unauthorized."})
+    return JsonResponse({"success": False, "error": "Invalid request method."})
+
+

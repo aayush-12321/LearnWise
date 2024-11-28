@@ -295,10 +295,11 @@ post details:
     <section class="content-container">
         <div class="content">
             <div class="posts">
-                <article class="post" style="border: 1.5px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 15px; box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); ">
+                <article class="post"
+                    style="border: 1.5px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 15px; box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); ">
                     <!-- Post Header -->
                     <div class="post__header"
-                    style="display: flex; align-items: center; justify-content: space-between;">
+                        style="display: flex; align-items: center; justify-content: space-between;">
                         <div class="post__profile" style="display: flex; align-items: center;">
                             {% if post.user.profile.image %}
                             <a href="{{post.user.profile.image.url}}" class="post__avatar" style="margin-right: 10px;">
@@ -342,7 +343,7 @@ post details:
 
                                 <ul class="dropdown-menu">
 
-                                    
+
                                     <li>
                                         <a class="dropdown-item" href="{% url 'edit_post' post.id %}">Edit Post</a>
                                     </li>
@@ -350,13 +351,13 @@ post details:
                                         <button class="dropdown-item text-danger"
                                             onclick="openDeleteModal('{{ post.id }}')">Delete Post</button>
                                     </li>
-                                    
+
                                 </ul>
                             </div>
                             {% endif %}
 
-                        <!-- </button> -->
-                         </div>
+                            <!-- </button> -->
+                        </div>
                     </div>
 
                     <!-- Delete Confirmation Modal -->
@@ -394,8 +395,7 @@ post details:
                     {% endif %}
                     <p style="font-size: 13px;">
                         {% for tag in post.tags.all %}
-                        <a href="{{ tag.get_absolute_url }}"
-                            style="text-decoration: none; color: #007bff;">#{{tag}}</a>
+                        <a href="{{ tag.get_absolute_url }}" style="text-decoration: none; color: #007bff;">#{{tag}}</a>
                         {% endfor %}
                     </p>
 
@@ -517,7 +517,7 @@ post details:
                     </div>
 
                     <!-- Comment Section -->
-                    <div class="comment-section mt-1">
+                    <!-- <div class="comment-section mt-1">
                         <form method="POST">
                             {% csrf_token %}
                             <div class="bg-light p-2">
@@ -549,7 +549,116 @@ post details:
                             <p class="comment-text">{{ comment.body|linebreaks }}</p>
                         </div>
                         {% endfor %}
+                    </div> -->
+
+
+                    <!-- Comment Section -->
+                    <div class="comment-section mt-1">
+                        <!-- New Comment Form -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="bg-light p-2">
+                                <div class="d-flex flex-row align-items-start">
+                                    <a href="#" class="side-menu__user-avatar">
+                                        <img src="{{ request.user.profile.image.url }}" alt="User Picture">
+                                    </a>
+                                    <textarea name="body" placeholder="Write your comment here..."
+                                        id="{{ form.body.id_for_label }}">{{ form.body.value|default_if_none:'' }}</textarea>
+                                </div>
+                                <div class="text-right mt-2">
+                                    <button class="btn btn-primary btn-sm shadow-none" type="submit">Post
+                                        Comment</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Display Comments -->
+                        {% for comment in comments %}
+                        <div class="comment-box" id="comment-{{ comment.id }}">
+                            <div class="user-info d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ comment.user.profile.image.url }}">
+                                    <div class="ms-2">
+                                        <a href="{% url 'profile' comment.user %}" class="name">
+                                            {{ comment.user.profile.first_name }} {{ comment.user.profile.last_name }}
+                                        </a>
+                                        <span class="date">{{ comment.date }}</span>
+                                    </div>
+                                </div>
+
+
+                                {% if comment.user == request.user %}
+                                <div class="dropdown">
+                                    <button class="btn btn-sm" data-bs-toggle="dropdown"
+                                        aria-expanded="false">⋮</button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <!-- <button class="dropdown-item"
+                                                onclick="openEditCommentModal('{{ comment.id }}', '{{ comment.body|escapejs }}')">
+                                                Edit
+                                            </button> -->
+                                            <button class="dropdown-item"
+                                                onclick="openEditCommentModal('{{ comment.id }}', '{{ comment.body|escapejs }}')">Edit</button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item text-danger"
+                                                onclick="openDeleteCommentModal('{{ comment.id }}')">Delete</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <p class="comment-text" id="comment-body-{{ comment.id }}">{{ comment.body|linebreaks }}</p>
+                        </div>
+                        {% endfor %}
                     </div>
+
+                    <!-- Edit Comment Modal -->
+                    <div class="modal fade" id="editCommentModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Comment</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <textarea id="editCommentBody" class="form-control" rows="3"></textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="saveCommentButton">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete Comment Confirmation Modal -->
+                    <!-- Delete Confirmation Modal -->
+                    <div class="modal fade" id="deleteCommentModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">Delete Comment?</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete this comment? This action cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-danger"
+                                        id="confirmDeleteButton">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
                 </article>
             </div>
         </div>
@@ -563,34 +672,126 @@ post details:
 {% block script %}
 
 <script>
+    // Open delete post Modal
+    function openDeleteModal(postId) {
+        const deleteForm = document.getElementById("deleteForm");
+        deleteForm.action = `/${postId}/delete/`; // Dynamic action URL
+        const deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
+        deleteModal.show();
+    }
 
-  function openDeleteModal(postId) {
-    const deleteForm = document.getElementById("deleteForm");
-    deleteForm.action = `/${postId}/delete/`; // Dynamic action URL
-    const deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
-    deleteModal.show();
-}
+
+    // Open Edit Comment Modal
+    function openEditCommentModal(commentId, commentBody) {
+        const editCommentModal = new bootstrap.Modal(document.getElementById("editCommentModal"));
+        const editCommentBody = document.getElementById("editCommentBody");
+        const saveCommentButton = document.getElementById("saveCommentButton");
+
+        // Populate the textarea with the existing comment text
+        editCommentBody.value = commentBody;
+
+        // Update the save button's action
+        saveCommentButton.onclick = function () {
+            saveComment(commentId);
+        };
+
+        // Open the modal
+        editCommentModal.show();
+    }
+
+    // Save Edited Comment
+    function saveComment(commentId) {
+        const newBody = document.getElementById("editCommentBody").value.trim();
+
+        if (!newBody) {
+            alert("Comment cannot be empty.");
+            return;
+        }
+
+        fetch(`/comment/${commentId}/edit/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ body: newBody }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    // Reload the page to reflect the change
+                    window.location.reload();
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                alert("An error occurred while saving the comment.");
+            });
+    }
 
 
-//     document.querySelectorAll('.delete-button').forEach(button => {
-//     button.addEventListener('click', event => {
-//         const postId = button.dataset.postId;
-//         fetch(`/${postId}/delete/`, {
-//             method: 'POST',
-//             headers: {
-//                 'X-CSRFToken': getCookie('csrftoken'),
-//             },
-//         })
-//         .then(response => {
-//             if (response.ok) {
-//                 alert('Post deleted successfully!');
-//                 window.location.reload();
-//             } else {
-//                 alert('Error deleting the post.');
-//             }
-//         });
-//     });
-// });
+    //scroll to edited comment
+    window.onload = function () {
+        // Check if there is a commentId in the URL (for example, '?comment_id=5')
+        const urlParams = new URLSearchParams(window.location.search);
+        const commentId = urlParams.get('comment_id');
+
+        if (commentId) {
+            // Find the comment with the ID and scroll to it
+            const commentElement = document.getElementById(`comment-${commentId}`);
+            if (commentElement) {
+                commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                commentElement.classList.add('highlight'); // Optional: add a highlight class to visually mark it
+            }
+        }
+    };
+
+
+
+
+    // Open Delete Comment Modal
+    function openDeleteCommentModal(commentId) {
+        const deleteButton = document.getElementById("confirmDeleteButton");
+        // Set the commentId on the delete button
+        deleteButton.setAttribute("data-comment-id", commentId);
+
+        // Open the modal
+        const deleteModal = new bootstrap.Modal(document.getElementById("deleteCommentModal"));
+        deleteModal.show();
+    }
+
+    // Handle the deletion on confirmation
+    document.getElementById("confirmDeleteButton").onclick = function () {
+        const commentId = this.getAttribute("data-comment-id");
+
+        fetch(`/comment/${commentId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // If the deletion is successful, remove the comment from the DOM
+                    const commentElement = document.getElementById(`comment-${commentId}`);
+                    if (commentElement) {
+                        commentElement.remove();
+                    }
+                    // Close the modal after successful deletion
+                    bootstrap.Modal.getInstance(document.getElementById("deleteCommentModal")).hide();
+                } else {
+                    alert(data.error || "Failed to delete the comment.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                alert("An error occurred while deleting the comment.");
+            });
+    }
+
 
 </script>
 

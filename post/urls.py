@@ -1,5 +1,5 @@
 from django.urls import path
-from post.views import index, NewPost, PostDetail, Tags,like,favourite,delete_post,edit_post,post_likers
+from post.views import index, NewPost, PostDetail, Tags,like,favourite,delete_post,edit_post,post_likers,edit_comment,delete_comment
 
 urlpatterns = [
     path('', index, name='index'),
@@ -18,6 +18,11 @@ urlpatterns = [
     path('post/<uuid:post_id>/edit/', edit_post, name='edit_post'),
     # path('<uuid:post_id>/delete/', delete_post, name='delete-post'),
     path('<uuid:post_id>/delete/', delete_post, name='delete-post'),
+
+
+    path('comment/<int:comment_id>/edit/', edit_comment, name='edit_comment'),
+    path('comment/<int:comment_id>/delete/', delete_comment, name='delete_comment'),
+    #  path('<int:comment_id>/delete/', delete_comment, name='delete_comment'),
 
 
 
