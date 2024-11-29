@@ -6,7 +6,8 @@ from django.utils.text import slugify
 from django.urls import reverse
 import uuid
 from notification.models import Notification
-
+from django.db import models
+import uuid
 
 
 # uploading user files to a specific directory
@@ -37,63 +38,6 @@ class Tag(models.Model):
             self.slug = slugify(self.title)
         return super().save(*args, **kwargs)
 
-# class PostFileContent(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     file = models.FileField(upload_to=user_directory_path, verbose_name="Choose File")
-
-# class Post(models.Model):
-#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-#     picture = models.ImageField(upload_to=user_directory_path, verbose_name="Picture")
-#     caption = models.CharField(max_length=10000, verbose_name="Caption")
-#     posted = models.DateField(auto_now_add=True)
-#     tags = models.ManyToManyField(Tag, related_name="tags")
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     likes=models.IntegerField(default=0)
-
-#     def get_absolute_url(self):
-#         return reverse("post-details", args=[str(self.id)])
-    
-#     # def __str__(self):
-#     #     return str(self.caption)
-
-# class Likes(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_likes")
-
-#     def user_liked_post(sender, instance, *args, **kwargs):
-#         like = instance
-#         post = like.post
-#         sender = like.user
-#         notify = Notification(post=post, sender=sender, user=post.user)
-#         notify.save()
-
-#     def user_unliked_post(sender, instance, *args, **kwargs):
-#         like = instance
-#         post = like.post
-#         sender = like.user
-#         notify = Notification.objects.filter(post=post, sender=sender, notification_types=1)
-#         notify.delete()
-
-# class Post(models.Model):
-#     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-#     picture = models.ImageField(upload_to=user_directory_path, verbose_name="Picture")
-#     caption = models.CharField(max_length=10000, verbose_name="Caption")
-#     posted = models.DateField(auto_now_add=True)
-#     tags = models.ManyToManyField(Tag, related_name="tags")
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     likes = models.IntegerField(default=0)
-#     likers = models.ManyToManyField(User, blank=True, related_name='liked_posts')
-#     savers = models.ManyToManyField(User, blank=True, related_name='saved_posts')
-
-#     def get_absolute_url(self):
-#         return reverse("post-details", args=[str(self.id)])
-    
-#     def get_likers_names(self):
-#         return [liker.username for liker in self.likers.all()]
-
-from django.db import models
-import uuid
-
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     caption = models.CharField(max_length=10000, verbose_name="Caption")
@@ -118,8 +62,6 @@ class PostImage(models.Model):
     post = models.ForeignKey(Post, related_name="pictures", on_delete=models.CASCADE)
     image = models.ImageField(upload_to=user_directory_path)
     uploaded = models.DateTimeField(auto_now_add=True)
-
-
 
 
 class Follow(models.Model):
@@ -165,9 +107,5 @@ class Stream(models.Model):
 
 
 post_save.connect(Stream.add_post, sender=Post)
-
-# post_save.connect(Likes.user_liked_post, sender=Likes)
-# post_delete.connect(Likes.user_unliked_post, sender=Likes)
-
 post_save.connect(Follow.user_follow, sender=Follow)
 post_delete.connect(Follow.user_unfollow, sender=Follow)
