@@ -12,7 +12,21 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
     <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
-    <title>Social Media: Follow</title>
+    <title>LearnWise : Follow</title>
+
+    <style>
+        .role{
+        /* margin: 0px 15px; */
+        font-size: 12px;
+    }
+
+    #mentor{
+        color: green;
+    }
+    #learner{
+        color: red;
+    }
+    </style>
 </head>
 
 <body>
@@ -46,6 +60,14 @@
                                 style="font-weight: bold; color: #333; text-decoration: none;">{{ follow_user.username }}</a>
                             {% endif %}
                             <span style="display: block; color: #777; font-size: 14px;">@{{ follow_user.username }}</span>
+                            
+                            {% if follow_user.profile.role %}
+                            {% if follow_user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor">{{ follow_user.profile.role }}</span>
+                            {% elif follow_user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner">{{ follow_user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
                         </div>
                         <a href="{% url 'profile' follow_user.username %}" class="side-menu__user-button"
                             style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View

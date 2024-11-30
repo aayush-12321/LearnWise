@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
-    <title>Register | Social Media</title>
+    <link rel="shortcut icon" href="{% static 'assets1/favicon-removebg-preview.svg' %}" type="image/x-icon">
+    <title>Register | LearnWise</title>
     <style>
         /* Basic page styling */
         body {
@@ -133,32 +134,32 @@
             <!-- User Information Fields -->
             <div class="form-group">
                 <label for="id_username">Username</label>
-                {{ form.username }}
-                {% for error in form.username.errors %}
+                {{ user_form.username }}
+                {% for error in user_form.username.errors %}
                     <p class="error-message">{{ error }}</p>
                 {% endfor %}
             </div>
 
             <div class="form-group">
                 <label for="id_email">Email</label>
-                {{ form.email }}
-                {% for error in form.email.errors %}
+                {{ user_form.email }}
+                {% for error in user_form.email.errors %}
                     <p class="error-message">{{ error }}</p>
                 {% endfor %}
             </div>
 
             <div class="form-group">
                 <label for="id_password1">Password</label>
-                {{ form.password1 }}
-                {% for error in form.password1.errors %}
+                {{ user_form.password1 }}
+                {% for error in user_form.password1.errors %}
                     <p class="error-message">{{ error }}</p>
                 {% endfor %}
             </div>
 
             <div class="form-group">
                 <label for="id_password2">Confirm Password</label>
-                {{ form.password2 }}
-                {% for error in form.password2.errors %}
+                {{ user_form.password2 }}
+                {% for error in user_form.password2.errors %}
                     <p class="error-message">{{ error }}</p>
                 {% endfor %}
             </div>
@@ -169,32 +170,58 @@
 
             <div class="form-group">
                 <label for="id_first_name">First Name</label>
-                {{ form.first_name }}
+                {{ user_form.first_name }}
             </div>
 
             <div class="form-group">
                 <label for="id_last_name">Last Name</label>
-                {{ form.last_name }}
+                {{ user_form.last_name }}
             </div>
 
             <div class="form-group">
                 <label for="id_bio">Bio</label>
-                {{ form.bio }}
+                {{ user_form.bio }}
             </div>
 
             <div class="form-group">
                 <label for="id_location">Location</label>
-                {{ form.location }}
+                {{ user_form.location }}
             </div>
 
             <div class="form-group">
                 <label for="id_url">Website URL</label>
-                {{ form.url }}
+                {{ user_form.url }}
             </div>
 
             <div class="form-group">
                 <label for="id_image">Profile Picture</label>
-                {{ form.image }}
+                {{ user_form.image }}
+            </div>
+
+
+            <!-- New Fields: Role, Skills, and Interests -->
+            <div class="form-group">
+                <label for="id_role">Role</label>
+                {{ profile_form.role }}
+                {% for error in profile_form.role.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_skills">Skills</label>
+                {{ profile_form.skills }}
+                {% for error in profile_form.skills.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_interests">Interests</label>
+                {{ profile_form.interests }}
+                {% for error in profile_form.interests.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
             </div>
 
             <button class="form-btn" type="submit">Sign Up</button>
@@ -205,5 +232,5 @@
         </div>
     </div>
 </body>
-
 </html>
+

@@ -11,13 +11,16 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
   <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
-  <title>Social Media: Edit Profile</title>
+  <title>LearnWise: Edit Profile</title>
   <style>
-   body {
-  background: linear-gradient(135deg, #89f7fe, #66a6ff);
-  background-attachment: fixed; /* Fix the background to the viewport */
-  background-size: cover; /* Cover the entire viewport */
-}
+    body {
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      background-attachment: fixed;
+      /* Fix the background to the viewport */
+      background-size: cover;
+      /* Cover the entire viewport */
+    }
+
     .preview-image {
       display: block;
       margin: 10px auto;
@@ -26,6 +29,7 @@
       border: 2px solid #ddd;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     .form-container {
       padding: 30px;
       background-color: #ffffff;
@@ -35,15 +39,18 @@
       width: 450px;
       max-width: 600px;
     }
+
     .form-header {
       text-align: center;
       font-size: 24px;
       color: #333;
     }
+
     .form-label {
       margin-top: 10px;
       font-weight: bold;
     }
+
     .form-btn {
       display: block;
       width: 100%;
@@ -56,6 +63,7 @@
       margin-top: 20px;
       font-size: 16px;
     }
+
     .form-btn:hover {
       background-color: rgb(52, 190, 105);
     }
@@ -72,28 +80,35 @@
           <hr>
 
           <span style="margin-top:5px; padding: 5px; font-size: 20px;">Current Profile</span><br>
-          <div class="side-menu__user-profile" style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; margin-top: 5px;">
+          <div class="side-menu__user-profile"
+            style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; margin-top: 5px;">
             <a href="#" class="side-menu__user-avatar" style="flex-shrink: 0; margin-right: 30px;">
-              <img src="{{ request.user.profile.image.url }}" alt="User Picture" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
+              <img src="{{ request.user.profile.image.url }}" alt="User Picture"
+                style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
             </a>
             <div class="side-menu__user-info" style="flex-grow: 1;">
               {% if user.profile.first_name %}
-              <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{request.user.profile.first_name|title }} {{request.user.profile.last_name|title }}</a>
+              <a href="{{request.user.username}}"
+                style="font-weight: bold; color: #333; text-decoration: none;">{{request.user.profile.first_name|title }} {{request.user.profile.last_name|title }}</a>
               {% else %}
-              <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
+              <a href="{{request.user.username}}"
+                style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
               {% endif %}
               <span style="display: block; color: #777; font-size: 14px;">@{{request.user.username}}</span>
-            </div> 
-            <a href="{% url 'profile' request.user %}" class="side-menu__user-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View Profile</a>
+            </div>
+            <a href="{% url 'profile' request.user %}" class="side-menu__user-button"
+              style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View
+              Profile</a>
           </div>
 
           {% if profile.image %}
-            <img src="{{ profile.image.url }}" alt="Current Image" class="preview-image">
+          <img src="{{ profile.image.url }}" alt="Current Image" class="preview-image">
           {% endif %}
 
           <span style="padding: 5px; font-size: 20px;">Change Picture</span><br>
           <label for="fileInput" style="display: block; text-align: center; cursor: pointer;">
-            <img src="{% static 'assets2/images/upload_area.png' %}" alt="Upload Area" style="width: 100%; max-width: 200px;">
+            <img src="{% static 'assets2/images/upload_area.png' %}" alt="Upload Area"
+              style="width: 100%; max-width: 200px;">
           </label>
           <input type="file" name="picture" id="fileInput" class="form-control" style="margin: 4px 0px;">
           <br>
@@ -121,6 +136,32 @@
           <div class="mb-3">
             <label for="url" class="form-label">URL</label>
             <input type="text" name="url" value="{{ request.user.profile.url }}" class="form-control">
+          </div>
+          
+          <div class="mb-3">
+            <label for="skills" class="form-label">Skills</label>
+            <textarea name="skills" class="form-control" rows="3"
+              placeholder="Enter your skills (e.g., Python, Data Analysis)">{{ request.user.profile.skills }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+            <select name="role" class="form-select" required>
+                <option value="" disabled {% if not request.user.profile.role %}selected{% endif %}>Select your role</option>
+                <option value="Mentor" {% if request.user.profile.role == "Mentor" %}selected{% endif %}>Mentor</option>
+                <option value="Learner" {% if request.user.profile.role == "Learner" %}selected{% endif %}>Learner</option>
+            </select>
+            {% if form.role.errors %}
+                <p class="error-message">{{ form.role.errors.0 }}</p>
+            {% endif %}
+        </div>
+        
+          
+
+          <div class="mb-3">
+            <label for="interests" class="form-label">Interests</label>
+            <textarea name="interests" class="form-control" rows="3"
+              placeholder="Enter your interests (e.g., Web Development, Machine Learning)">{{ request.user.profile.interests }}</textarea>
           </div>
 
           <button class="form-btn" type="submit">Update Profile</button>

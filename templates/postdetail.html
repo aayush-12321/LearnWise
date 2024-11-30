@@ -8,9 +8,23 @@ post details:
 
 <head>
     <style>
+        .role {
+            margin: 0px 15px;
+            font-size: 12px;
+        }
+
+        #mentor {
+            color: green;
+        }
+
+        #learner {
+            color: red;
+        }
+
         .date {
             font-size: 11px;
             color: #777;
+            margin:5px;
         }
 
         .comment-text {
@@ -317,6 +331,13 @@ post details:
                                 {% endif %}
                                 <span class="date">@{{post.user.username}}</span>
                             </div>
+                            {% if request.user.profile.role %}
+                            {% if post.user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor">{{ post.user.profile.role }}</span>
+                            {% elif post.user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner">{{ post.user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
                         </div>
                         <!-- <button class="post__more-options"> -->
                         <div class="post__more-options">
@@ -584,6 +605,13 @@ post details:
                                         </a>
                                         <span class="date">{{ comment.date }}</span>
                                     </div>
+                                    {% if comment.user.profile.role %}
+                            {% if comment.user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor">{{ comment.user.profile.role }}</span>
+                            {% elif comment.user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner">{{ comment.user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
                                 </div>
 
 

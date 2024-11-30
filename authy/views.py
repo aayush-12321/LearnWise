@@ -13,7 +13,7 @@ import os
 from post.models import Post, Follow, Stream
 from django.contrib.auth.models import User
 from authy.models import Profile
-from .forms import EditProfileForm, UserRegisterForm
+from .forms import EditProfileForm, UserRegisterForm,ProfileForm
 from django.urls import resolve
 from comment.models import Comment
 
@@ -91,6 +91,9 @@ def editProfile(request):
         profile.bio = request.POST.get('bio')
         profile.location = request.POST.get('location')
         profile.url = request.POST.get('url')
+        profile.skills = request.POST.get('skills')
+        profile.role = request.POST.get('role')
+        profile.interests = request.POST.get('interests')
         
         profile.save()
         messages.success(request, "Profile updated successfully")
@@ -152,15 +155,71 @@ def followers_followings_list(request, user_id, follow_type):
 
 
 
+# def register(request):
+#     if request.method == "POST":
+#         form = UserRegisterForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             user = form.save()
+#             messages.success(request, 'Your account has been created successfully!')
+
+#             # Automatically log in the user
+#             new_user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1'])
+#             if new_user is not None:
+#                 login(request, new_user)
+#                 return redirect('index')
+#             else:
+#                 messages.error(request, "There was an issue logging you in. Please try logging in manually.")
+#                 return redirect('sign-in')
+#         else:
+#             # Display form errors if validation fails
+#             for field, errors in form.errors.items():
+#                 for error in errors:
+#                     messages.error(request, f"{field}: {error}")
+
+#     else:
+#         if request.user.is_authenticated:
+#             return redirect('index')
+#         form = UserRegisterForm()
+
+#     context = {'form': form}
+#     return render(request, 'sign-up.html', context)
+
+
+from django.db import IntegrityError
+
 def register(request):
     if request.method == "POST":
-        form = UserRegisterForm(request.POST, request.FILES)
-        if form.is_valid():
-            user = form.save()
+        user_form = UserRegisterForm(request.POST, request.FILES)
+        profile_form = ProfileForm(request.POST)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            # Create the user
+            user = user_form.save()
+            
+            # Ensure the username is unique (it's automatically handled by Django)
+            # Check if a Profile already exists for this user
+            profile, created = Profile.objects.get_or_create(user=user)
+            
+            # If profile exists, update it, otherwise, set the fields from the form
+            profile.first_name = profile_form.cleaned_data.get('first_name', profile.first_name)
+            profile.last_name = profile_form.cleaned_data.get('last_name', profile.last_name)
+            profile.bio = profile_form.cleaned_data.get('bio', profile.bio)
+            profile.location = profile_form.cleaned_data.get('location', profile.location)
+            profile.url = profile_form.cleaned_data.get('url', profile.url)
+            profile.skills = profile_form.cleaned_data.get('skills', profile.skills)
+            profile.interests = profile_form.cleaned_data.get('interests', profile.interests)
+            profile.role=profile_form.cleaned_data.get('role', profile.role)
+
+            # Set the profile image if provided
+            if profile_form.cleaned_data.get('image'):
+                profile.image = profile_form.cleaned_data.get('image')
+
+            profile.save()  # Save the profile
+
             messages.success(request, 'Your account has been created successfully!')
 
             # Automatically log in the user
-            new_user = authenticate(username=form.cleaned_data['username'], password=form.cleaned_data['password1'])
+            new_user = authenticate(username=user_form.cleaned_data['username'], password=user_form.cleaned_data['password1'])
             if new_user is not None:
                 login(request, new_user)
                 return redirect('index')
@@ -169,17 +228,23 @@ def register(request):
                 return redirect('sign-in')
         else:
             # Display form errors if validation fails
-            for field, errors in form.errors.items():
+            for field, errors in user_form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            for field, errors in profile_form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
 
     else:
         if request.user.is_authenticated:
             return redirect('index')
-        form = UserRegisterForm()
+        user_form = UserRegisterForm()
+        profile_form = ProfileForm()  # Create an empty form for profile
 
-    context = {'form': form}
+    context = {'user_form': user_form, 'profile_form': profile_form}
     return render(request, 'sign-up.html', context)
+
+
 
 
 

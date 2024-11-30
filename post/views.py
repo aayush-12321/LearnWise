@@ -152,6 +152,7 @@ def PostDetail(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
     user = request.user
+    # print(user)
 
     # Identify liked and saved posts
     liked_post_ids = Post.objects.filter(likers=user).values_list('id', flat=True)

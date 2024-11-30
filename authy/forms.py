@@ -39,10 +39,13 @@ class EditProfileForm(forms.ModelForm):
         widget=forms.TextInput(attrs={"class": "input", "placeholder": "Address"}),
         required=False,
     )
+    skills = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your skills (e.g., Python, Data Analysis)'}),required=False, max_length=200)
+    interests = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your interests (e.g., Web Development, Machine Learning)'}),required=False, max_length=200)
+    
 
     class Meta:
         model = Profile
-        fields = ["image", "first_name", "last_name", "bio", "url", "location"]
+        fields = ["image", "first_name", "last_name", "bio", "url", "location",'role', 'skills', 'interests']
 
 
 
@@ -122,3 +125,19 @@ class UserRegisterForm(UserCreationForm):
             profile.save()
         
         return user
+
+##########
+
+class ProfileForm(forms.ModelForm):
+    skills = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your skills (e.g., Python, Data Analysis)'}),required=False, max_length=200)
+    interests = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your interests (e.g., Web Development, Machine Learning)'}),required=False, max_length=200)
+    role = forms.ChoiceField(
+        choices=Profile.ROLE_CHOICES,  # Use the choices defined in the Profile model
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        required=True
+    )
+    class Meta:
+        model = Profile
+        fields = ['role', 'skills', 'interests'] 
+
+#########

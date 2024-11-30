@@ -22,6 +22,21 @@ class Profile(models.Model):
     # favourite = models.ManyToManyField(Post, blank=True)
     favourite = models.ManyToManyField(Post, blank=True)
 
+    ############
+    # New fields
+    ROLE_CHOICES = [
+        ('Mentor', 'Mentor'),
+        ('Learner', 'Learner'),
+    ]
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, blank=False, default='Learner')
+    skills = models.TextField(help_text="List of skills you can share (separated by commas)", null=True, blank=True)
+    interests = models.TextField(help_text="Skills or areas you'd like to learn (separated by commas)", null=True, blank=True)
+    
+    
+    # Add relationships for rating/feedback (for Mentors)
+    ratings = models.ManyToManyField('Rating', blank=True, related_name='rated_profile')
+
+    # #########
 
     
     def save(self, *args, **kwargs):
@@ -39,6 +54,18 @@ class Profile(models.Model):
             img.thumbnail(output_size)
             img.save(self.image.path)
 
+############
+class Rating(models.Model):
+    mentor = models.ForeignKey(User, related_name="mentor_ratings", on_delete=models.CASCADE)
+    learner = models.ForeignKey(User, related_name="learner_ratings", on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField()  # Rating out of 5
+    feedback = models.TextField()  # Optional feedback from the learner
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Rating from {self.learner.username} to {self.mentor.username} - {self.rating}/5"
+
+##############
 
 def create_user_profile(sender, instance, created, **kwargs):
 	if created:

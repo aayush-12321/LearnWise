@@ -12,7 +12,22 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
   <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
-  <title>Social Media Search</title>
+  <title>LearnWise | Search</title>
+  <style>
+    
+    .role{
+        /* margin: 0px 15px; */
+        font-size: 12px;
+    }
+
+    #mentor{
+        color: green;
+    }
+    #learner{
+        color: red;
+    }
+  </style>
+
 </head>
 
 <body>
@@ -75,6 +90,14 @@
                   <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{username}}</a>
                   {% endif %}
                   <a href="{% url 'profile' user %}" style="display: block; color: #777; font-size: 14px;">@{{user.username}}</a>
+
+                  {% if user.profile.role %}
+                            {% if user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor">{{ user.profile.role }}</span>
+                            {% elif user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner">{{ user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
               </div>
               <a href="{% url 'profile' user %}" class="side-menu__user-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View Profile</a>
           </div>

@@ -7,6 +7,18 @@
         background-color: rgb(35, 167, 85) !important;
     }
 
+    .role{
+        margin: 0px 15px;
+        font-size: 12px;
+    }
+
+    #mentor{
+        color: green;
+    }
+    #learner{
+        color: red;
+    }
+
     .post__content {
         display: flex;
         justify-content: center;
@@ -361,6 +373,15 @@
                                 style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
                             {% endif %}
                             <span style="display: block; color: #777; font-size: 12px;">@{{post.user.username}}</span>
+
+                            {% if post.user.profile.role %}
+                            {% if post.user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor">{{ post.user.profile.role }}</span>
+                            {% elif post.user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner">{{ post.user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
+
                         </div>
                         <button class="post__more-options" style="background: none; border: none; cursor: pointer;">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -433,14 +454,14 @@
                     {% endif %} -->
                     {% if post.pictures.all %}
                     {% if post.pictures.count == 1 %}
-                   
+
                     <div class="post__single-image">
                         <a href="{% url 'post-details' post.id %}">
                             <img class="post__media" src="{{ post.pictures.first.image.url }}" alt="Post Content">
                         </a>
                     </div>
                     {% else %}
-                    
+
                     <div class="home_post_grid">
                         {% for picture in post.pictures.all %}
                         {% if forloop.counter <= 4 %}<a href="{% url 'post-details' post.id %}">
@@ -468,7 +489,7 @@
 
 
                     <!--  -->
-                   
+
 
 
 
@@ -598,6 +619,14 @@
                             </a>
                             {% endif %}
                             <span style="display: block; color: #777; font-size: 12px;">@{{ user.username }}</span>
+
+                            {% if user.profile.role %}
+                            {% if user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor" style="margin: 0px;">{{ user.profile.role }}</span>
+                            {% elif user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner" style="margin: 0px;" >{{ user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
                         </div>
 
                         {% if user in followings %}
@@ -673,6 +702,14 @@
                         {% endif %}
                     </span>
 
+                    {% if user.profile.role %}
+                            {% if user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor" style="margin: 0px;">{{ user.profile.role }}</span>
+                            {% elif user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner" style="margin: 0px;" >{{ user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
+
                 </div>
                 <a href="{% url 'profile' request.user %}" class="side-menu__user-button"
                     style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View
@@ -711,6 +748,13 @@
                             </a>
                             {% endif %}
                             <span style="display: block; color: #777; font-size: 12px;">@{{ user.username }}</span>
+                            {% if user.profile.role %}
+                            {% if user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor" style="margin: 0px;">{{ user.profile.role }}</span>
+                            {% elif user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner" style="margin: 0px;" >{{ user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
                         </div>
 
                         {% if user in followings %}
