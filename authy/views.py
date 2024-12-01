@@ -13,7 +13,7 @@ import os
 from post.models import Post, Follow, Stream
 from django.contrib.auth.models import User
 from authy.models import Profile
-from .forms import EditProfileForm, UserRegisterForm,ProfileForm
+from .forms import EditProfileForm, UserRegisterForm
 from django.urls import resolve
 from comment.models import Comment
 
@@ -190,9 +190,12 @@ from django.db import IntegrityError
 def register(request):
     if request.method == "POST":
         user_form = UserRegisterForm(request.POST, request.FILES)
-        profile_form = ProfileForm(request.POST)
+        # profile_form = ProfileForm(request.POST)
         
-        if user_form.is_valid() and profile_form.is_valid():
+        # if user_form.is_valid() and profile_form.is_valid():
+        #     # Create the user
+        #     user = user_form.save()
+        if user_form.is_valid():
             # Create the user
             user = user_form.save()
             
@@ -201,18 +204,20 @@ def register(request):
             profile, created = Profile.objects.get_or_create(user=user)
             
             # If profile exists, update it, otherwise, set the fields from the form
-            profile.first_name = profile_form.cleaned_data.get('first_name', profile.first_name)
-            profile.last_name = profile_form.cleaned_data.get('last_name', profile.last_name)
-            profile.bio = profile_form.cleaned_data.get('bio', profile.bio)
-            profile.location = profile_form.cleaned_data.get('location', profile.location)
-            profile.url = profile_form.cleaned_data.get('url', profile.url)
-            profile.skills = profile_form.cleaned_data.get('skills', profile.skills)
-            profile.interests = profile_form.cleaned_data.get('interests', profile.interests)
-            profile.role=profile_form.cleaned_data.get('role', profile.role)
+            profile.first_name = user_form.cleaned_data.get('first_name', profile.first_name)
+            profile.last_name = user_form.cleaned_data.get('last_name', profile.last_name)
+            profile.bio = user_form.cleaned_data.get('bio', profile.bio)
+            profile.location = user_form.cleaned_data.get('location', profile.location)
+            profile.url = user_form.cleaned_data.get('url', profile.url)
+            profile.skills = user_form.cleaned_data.get('skills', profile.skills)
+            profile.interests = user_form.cleaned_data.get('interests', profile.interests)
+            profile.role=user_form.cleaned_data.get('role', profile.role)
 
             # Set the profile image if provided
-            if profile_form.cleaned_data.get('image'):
-                profile.image = profile_form.cleaned_data.get('image')
+            if user_form.cleaned_data.get('image'):
+                profile.image = user_form.cleaned_data.get('image')
+                # if profile_form.cleaned_data.get('image'):
+                # profile.image = user_form.cleaned_data.get('image')
 
             profile.save()  # Save the profile
 
@@ -231,17 +236,18 @@ def register(request):
             for field, errors in user_form.errors.items():
                 for error in errors:
                     messages.error(request, f"{field}: {error}")
-            for field, errors in profile_form.errors.items():
-                for error in errors:
-                    messages.error(request, f"{field}: {error}")
+            # for field, errors in profile_form.errors.items():
+            #     for error in errors:
+            #         messages.error(request, f"{field}: {error}")
 
     else:
         if request.user.is_authenticated:
             return redirect('index')
         user_form = UserRegisterForm()
-        profile_form = ProfileForm()  # Create an empty form for profile
+        # profile_form = ProfileForm()  # Create an empty form for profile
 
-    context = {'user_form': user_form, 'profile_form': profile_form}
+    context = {'user_form': user_form}
+    # context = {'user_form': user_form, 'profile_form': profile_form}
     return render(request, 'sign-up.html', context)
 
 

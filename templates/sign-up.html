@@ -202,24 +202,24 @@
             <!-- New Fields: Role, Skills, and Interests -->
             <div class="form-group">
                 <label for="id_role">Role</label>
-                {{ profile_form.role }}
-                {% for error in profile_form.role.errors %}
+                {{ user_form.role }}
+                {% for error in user_form.role.errors %}
                     <p class="error-message">{{ error }}</p>
                 {% endfor %}
             </div>
 
             <div class="form-group">
                 <label for="id_skills">Skills</label>
-                {{ profile_form.skills }}
-                {% for error in profile_form.skills.errors %}
+                {{ user_form.skills }}
+                {% for error in user_form.skills.errors %}
                     <p class="error-message">{{ error }}</p>
                 {% endfor %}
             </div>
 
             <div class="form-group">
                 <label for="id_interests">Interests</label>
-                {{ profile_form.interests }}
-                {% for error in profile_form.interests.errors %}
+                {{ user_form.interests }}
+                {% for error in user_form.interests.errors %}
                     <p class="error-message">{{ error }}</p>
                 {% endfor %}
             </div>
