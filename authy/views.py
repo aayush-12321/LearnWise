@@ -82,7 +82,7 @@ def editProfile(request):
 
     if request.method == "POST":
         if len(request.FILES) != 0:
-            if profile.image and len(profile.image.path) > 0:
+            if profile.image and len(profile.image.path) > 0 and profile.image!="default.png":
                 os.remove(profile.image.path)  # Remove the old image if it exists
             profile.image = request.FILES['picture']
 

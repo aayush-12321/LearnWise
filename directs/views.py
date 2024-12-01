@@ -67,10 +67,30 @@ def SendDirect(request):
     to_user_username = request.POST.get('to_user')
     body = request.POST.get('body')
 
-    if request.method == "POST":
-        to_user = User.objects.get(username=to_user_username)
-        Message.sender_message(from_user, to_user, body)
+    strip_body = request.POST.get('body', '').strip()  # Use .strip() to remove leading and trailing spaces
+
+    if strip_body:
+
+        followings = from_user.following.all().select_related('following')
+        follow_users = [follow.following for follow in followings]
+        title = f"Followings of {from_user.username}"
+
+        if request.method == "POST":
+            try:
+                to_user = User.objects.get(username=to_user_username)
+                # print(to_user)
+                Message.sender_message(from_user, to_user, body)
+                return redirect('message')
+            except:
+                context = {
+                        'user': from_user,  # User being viewed
+                        'follow_users': follow_users,  # List of followers or followings
+                        'title': title,  # Title for the page
+                        }
+                return render(request, 'follow_list.html', context)
+    else:
         return redirect('message')
+
 
 def UserSearch(request):
     query = request.GET.get('q')

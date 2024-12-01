@@ -38,6 +38,10 @@
         #learner{
             background-color: red;
         }
+/* 
+        .profile-info{
+            margin: 10px 2px;
+        } */
 
         .profile-edit-btn {
             background-color: #007bff;
@@ -172,19 +176,19 @@
                     {% endif %}
                     <h5 style="font-size: 15px; color: gray; margin: 5px 0;">@{{profile.user.username}}</h5>
                     {% if profile.bio %}
-                    <p style="font-size: 14px; margin: 5px 0;">◉ {{profile.bio}}</p>
+                    <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.bio}}</p>
                     {% endif %}
                     {% if profile.location %}
-                    <p style="font-size: 14px; margin: 5px 0;">◉ {{profile.location}}</p>
+                    <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.location}}</p>
                     {% endif %}
                     {% if profile.skills %}
-                    <p style="font-size: 14px; margin: 5px 0;">◉ Skills: {{profile.skills}}</p>
+                    <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ Skills: {{profile.skills}}</p>
                     {% endif %}
                     {% if profile.interests %}
-                    <p style="font-size: 14px; margin: 5px 0;">◉ Interest: {{profile.interests}}</p>
+                    <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ Interest: {{profile.interests}}</p>
                     {% endif %}
                     {% if profile.url %}
-                    <p style="font-size: 14px; margin: 5px 0;">◉ <a href="{{profile.url}}"
+                    <p style="font-size: 14px; margin: 5px 0;" class="profile-info">◉ <a href="{{profile.url}}"
                             style="color: blue;">{{profile.url}}</a></p>
                     {% endif %}
 
