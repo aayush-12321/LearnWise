@@ -23,6 +23,11 @@ class Profile(models.Model):
     favourite = models.ManyToManyField(Post, blank=True)
 
     ############
+    # The reason "Learner" and "Mentor" are written twice in ROLE_CHOICES is because the first value 
+    # in each tuple represents the value that will be stored in the database, and the second value is the
+    # human-readable name that will be displayed in the interface (such as a form or a dropdown). In this case,
+    # both the stored value and the displayed name for each role are the same.
+
     # New fields
     ROLE_CHOICES = [
         ('Mentor', 'Mentor'),

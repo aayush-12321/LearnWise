@@ -1,12 +1,14 @@
 <html>
+
 <head>
     <style>
         #root {
             width: 100vw;
             height: 100vh;
-        }
+            }
     </style>
 </head>
+
 
 <body>
     <div id="root"></div>
@@ -21,57 +23,46 @@ window.onload = function () {
         return result;
     }
 
-    // Generate dynamic roomID and user details
+
+        // Generate a Token by calling a method.
+        // @param 1: appID
+        // @param 2: serverSecret
+        // @param 3: Room ID
+        // @param 4: User ID
+        // @param 5: Username
     const roomID = getUrlParams(window.location.href)['roomID'] || (Math.floor(Math.random() * 10000) + "");
     const userID = Math.floor(Math.random() * 10000) + "";
     const userName = "{{ name }}";
-    const appID = 44973584;
-    const serverSecret = "8b7f32c47f16aa26361d7bc9b0bc9845";
+    const appID = 1140653639;
+    const serverSecret = "523353706d5b54649dba868f34896aaf";
     const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, roomID, userID, userName);
 
-    // Generate the call link
-    const callLink = window.location.protocol + '//' + window.location.host + window.location.pathname + '?roomID=' + roomID;
-
-    // Send the generated link to the backend for delivery
-    fetch("{% url 'send-directs' %}", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": "{{ csrf_token }}"
-        },
-        body: JSON.stringify({
-            to_user: "{{ request.GET.to_user }}",  // Receiver's username
-            body: `Join the video call here: ${callLink}`
-        })
-    }).then(response => {
-        if (!response.ok) {
-            console.error('Failed to send the call link.');
-        }
-    });
-
-    // Initialize ZegoUIKitPrebuilt
-    const zp = ZegoUIKitPrebuilt.create(kitToken);
-    zp.joinRoom({
-        container: document.querySelector("#root"),
-        sharedLinks: [{
-            name: 'Personal link',
-            url: callLink,
-        }],
-        scenario: {
-            mode: ZegoUIKitPrebuilt.VideoConference,
-        },
-        turnOnMicrophoneWhenJoining: true,
-        turnOnCameraWhenJoining: true,
-        showMyCameraToggleButton: true,
-        showMyMicrophoneToggleButton: true,
-        showAudioVideoSettingsButton: true,
-        showScreenSharingButton: true,
-        showTextChat: true,
-        showUserList: true,
-        maxUsers: 2,
-        layout: "Auto",
-        showLayoutButton: false,
-    });
-};
+    
+        const zp = ZegoUIKitPrebuilt.create(kitToken);
+        zp.joinRoom({
+            container: document.querySelector("#root"),
+            sharedLinks: [{
+                name: 'Personal link',
+                url: window.location.protocol + '//' + window.location.host  + window.location.pathname + '?roomID=' + roomID,
+            }],
+            scenario: {
+                mode: ZegoUIKitPrebuilt.VideoConference,
+            },
+                
+           	turnOnMicrophoneWhenJoining: false,
+           	turnOnCameraWhenJoining: false,
+           	showMyCameraToggleButton: true,
+           	showMyMicrophoneToggleButton: true,
+           	showAudioVideoSettingsButton: true,
+           	showScreenSharingButton: true,
+           	showTextChat: true,
+           	showUserList: true,
+           	maxUsers: 50,
+           	layout: "Grid",
+           	showLayoutButton: true,
+         
+            });
+}
 </script>
+
 </html>
