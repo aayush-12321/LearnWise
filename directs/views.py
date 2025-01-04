@@ -92,20 +92,88 @@ def SendDirect(request):
         return redirect('message')
 
 
+# def UserSearch(request):
+#     query = request.GET.get('q')
+#     context = {}
+#     if query:
+#         users = User.objects.filter(Q(username__icontains=query))
+
+#         # Paginator
+#         paginator = Paginator(users, 8)
+#         page_number = request.GET.get('page')
+#         users_paginator = paginator.get_page(page_number)
+
+#         context = {
+#             'users': users_paginator,
+#             }
+
+#     return render(request, 'directs/search.html', context)
+
 def UserSearch(request):
-    query = request.GET.get('q')
-    context = {}
+    query = request.GET.get('q', '').strip()  # Search query
+    selected_skills = request.GET.getlist('skills')  # Selected skills for filtering
+    searched_skill = request.GET.get('searched_skill', None)  # Filter by searched skill
+    role_filter = request.GET.get('role', '')  # Role filter (Mentor/Learner)
+
+    # Base queryset: all users
+    users = User.objects.all()
+    filtered_users = User.objects.none()  # Start with an empty queryset
+    search_by_name_success = False
+
+    # Apply query filtering if provided
     if query:
-        users = User.objects.filter(Q(username__icontains=query))
+        # If searched_skill is checked and query length > 2, include skill-based search
+        if searched_skill and len(query) > 1:
+            skill_users = users.filter(profile__skills__icontains=query)
+            filtered_users = filtered_users | skill_users
+        else:
+            filtered_users = users.filter(
+                Q(username__icontains=query) |
+                Q(profile__first_name__icontains=query) |
+                Q(profile__last_name__icontains=query)
+            )
+            search_by_name_success = filtered_users.exists()
+    
+    # If no results from name search and skill search is enabled
+    if not search_by_name_success and len(query) > 1:
+        skill_users = users.filter(profile__skills__icontains=query)
+        filtered_users = filtered_users | skill_users
+        searched_skill = "searched_skill"  # Ensure the checkbox remains checked
 
-        # Paginator
-        paginator = Paginator(users, 8)
-        page_number = request.GET.get('page')
-        users_paginator = paginator.get_page(page_number)
+    # Apply skill filters if selected
+    if selected_skills:
+        skill_filters = Q()
+        for skill in selected_skills:
+            skill_filters |= Q(profile__skills__icontains=skill)
+        filtered_users = filtered_users.filter(skill_filters) if query else users.filter(skill_filters)
 
-        context = {
-            'users': users_paginator,
-            }
+    # Apply role filtering
+    if role_filter in ['Mentor', 'Learner']:
+        filtered_users = filtered_users.filter(profile__role=role_filter)
+
+    # Retrieve the 10 most used skills
+    all_skills = Profile.objects.values_list('skills', flat=True)
+    skill_counts = {}
+    for skill_list in all_skills:
+        if skill_list:
+            for skill in skill_list.split(','):
+                skill = skill.strip().lower()
+                skill_counts[skill] = skill_counts.get(skill, 0) + 1
+    most_used_skills = sorted(skill_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+
+    # Paginator
+    paginator = Paginator(filtered_users, 8)
+    page_number = request.GET.get('page')
+    users_paginator = paginator.get_page(page_number)
+
+    context = {
+        'users': users_paginator,
+        'most_used_skills': [skill[0] for skill in most_used_skills],
+        'selected_skills': selected_skills,
+        'role_filter': role_filter,
+        'searched_skill': searched_skill,  # Maintain checkbox state
+        'query': query,  # To retain the query in the template
+    }
 
     return render(request, 'directs/search.html', context)
 
