@@ -42,4 +42,7 @@ class Message(models.Model):
                 'unread': Message.objects.filter(user=user, reciepient__pk=message['reciepient'], is_read=False).count()
             })
         return users
+    
+    def __str__(self):
+        return f"{self.sender} messages to {self.reciepient}"
             

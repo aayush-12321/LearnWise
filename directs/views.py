@@ -162,7 +162,7 @@ def UserSearch(request):
     most_used_skills = sorted(skill_counts.items(), key=lambda x: x[1], reverse=True)[:10]
 
     # Paginator
-    paginator = Paginator(filtered_users, 8)
+    paginator = Paginator(filtered_users, 6)
     page_number = request.GET.get('page')
     users_paginator = paginator.get_page(page_number)
 

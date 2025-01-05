@@ -61,6 +61,7 @@ class PostImage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     post = models.ForeignKey(Post, related_name="pictures", on_delete=models.CASCADE)
     image = models.ImageField(upload_to=user_directory_path)
+    # video = models.ImageField(upload_to=user_directory_path,null=True,blank=True)
     uploaded = models.DateTimeField(auto_now_add=True)
 
 

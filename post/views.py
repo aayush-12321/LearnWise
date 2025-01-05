@@ -117,12 +117,63 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
+#before trying for file size limit
+# @login_required
+# def NewPost(request):
+#     # Define the maximum size in bytes (100 MB = 100 * 1024 * 1024)
+#     MAX_SIZE = 50 * 1024 * 1024
+
+#     if request.method == 'POST':
+#         caption = request.POST.get('caption', '')
+#         tags_form = request.POST.get('tags', '')
+#         pictures = request.FILES.getlist('pictures')
+
+#         if caption or pictures:
+#             post = Post.objects.create(
+#                 user=request.user,
+#                 caption=caption,
+#             )
+#             # Handle tags
+#             if tags_form:
+#                 tag_list = tags_form.split(',')
+#                 for tag in tag_list:
+#                     t, created = Tag.objects.get_or_create(title=tag.strip())
+#                     post.tags.add(t)
+
+#             # Save pictures
+#             for picture in pictures:
+#                 if picture.size > MAX_SIZE:
+#                     messages.error(request, 'Size of a file should be less than 100 MB.')
+
+#                 else:
+#                     PostImage.objects.create(post=post, image=picture)
+
+#             messages.success(request, 'Your post has been created!')
+#             return redirect('profile', request.user.username)
+#         else:
+#             messages.error(request, 'Please provide a caption or pictures.')
+
+#     return render(request, 'newpost.html')
+
 @login_required
 def NewPost(request):
+    # Define the maximum size in bytes (100 MB = 100 * 1024 * 1024)
+    MAX_SIZE = 50 * 1024 * 1024
+
     if request.method == 'POST':
         caption = request.POST.get('caption', '')
         tags_form = request.POST.get('tags', '')
         pictures = request.FILES.getlist('pictures')
+
+        # Check if any file exceeds the size limit
+        oversized_pictures = [picture.name for picture in pictures if picture.size > MAX_SIZE]
+
+        if oversized_pictures:
+            messages.error(
+                request,
+                f"The following files exceed the 100 MB limit: {', '.join(oversized_pictures)}. Post not created."
+            )
+            return render(request, 'newpost.html')  # Stop execution and return to form
 
         if caption or pictures:
             post = Post.objects.create(
@@ -136,16 +187,67 @@ def NewPost(request):
                     t, created = Tag.objects.get_or_create(title=tag.strip())
                     post.tags.add(t)
 
-            # Save pictures
+            # Save valid pictures
             for picture in pictures:
                 PostImage.objects.create(post=post, image=picture)
 
             messages.success(request, 'Your post has been created!')
             return redirect('profile', request.user.username)
+
         else:
             messages.error(request, 'Please provide a caption or pictures.')
 
     return render(request, 'newpost.html')
+
+
+
+
+# @login_required
+# def PostDetail(request, post_id):
+#     post = get_object_or_404(Post, id=post_id)
+
+#     user = request.user
+#     # print(user)
+
+#     # Identify liked and saved posts
+#     liked_post_ids = Post.objects.filter(likers=user).values_list('id', flat=True)
+#     saved_post_ids = Post.objects.filter(savers=user).values_list('id', flat=True)
+
+#     # Comments
+#     comments = Comment.objects.filter(post=post).order_by('-date')
+
+#     # Process media info for the post
+#     media_info = []
+#     for picture in post.pictures.all():
+#         media_url = picture.image.url
+#         is_video = media_url.lower().endswith(('.mp4', '.webm'))
+#         media_info.append({
+#             'url': media_url,
+#             'is_video': is_video
+#         })
+
+#     if request.method == "POST":
+#         form = NewCommentForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             comment = form.save(commit=False)
+#             comment.post = post
+#             comment.user = request.user
+#             comment.save()
+#             return HttpResponseRedirect(reverse('post-details', args=[post.id]))
+#     else:
+#         form = NewCommentForm()
+
+#     context = {
+#         'post': post,
+#         'form': form,
+#         'comments': comments,
+#         'liked_post_ids': list(liked_post_ids),
+#         'saved_post_ids': list(saved_post_ids),
+#         'media_info': media_info,  # Add media info to context
+#     }
+
+#     return render(request, 'postdetail.html', context)
+
 
 @login_required
 def PostDetail(request, post_id):
@@ -159,7 +261,18 @@ def PostDetail(request, post_id):
     saved_post_ids = Post.objects.filter(savers=user).values_list('id', flat=True)
 
     # Comments
-    comments = Comment.objects.filter(post=post).order_by('-date')
+    # comments = Comment.objects.filter(post=post).order_by('-date')
+
+    role_filter = request.GET.get('role', '')  # Role filter (Mentor/Learner)
+    if not role_filter in ['Mentor', 'Learner']:
+        comments = Comment.objects.filter(post=post).order_by('-date')
+    else:
+        comments = Comment.objects.filter(post=post).order_by('-date')
+        comments = comments.filter(user__profile__role=role_filter).order_by('-date')
+    
+    paginator = Paginator(comments, 5)
+    page_number = request.GET.get('page')
+    comments_paginator = paginator.get_page(page_number)
 
     # Process media info for the post
     media_info = []
@@ -185,7 +298,9 @@ def PostDetail(request, post_id):
     context = {
         'post': post,
         'form': form,
-        'comments': comments,
+        # 'comments': comments,
+        'comments': comments_paginator,
+        'role_filter': role_filter,
         'liked_post_ids': list(liked_post_ids),
         'saved_post_ids': list(saved_post_ids),
         'media_info': media_info,  # Add media info to context

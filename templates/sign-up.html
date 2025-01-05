@@ -118,6 +118,12 @@
             border-top: 1px solid #ddd;
             margin: 20px 0;
         }
+
+        .required {
+            color: red;
+            font-weight: bold;
+}
+
     </style>
 </head>
 
@@ -128,12 +134,17 @@
             <h2>Create Your Account</h2>
         </div>
 
+        <p style="font-size: 14px; color: #555; margin-bottom: 0.6rem;">
+            Fields marked with <span style="color: red;">*</span> are compulsory.
+        </p>        
+
         <form action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
             <!-- User Information Fields -->
             <div class="form-group">
-                <label for="id_username">Username</label>
+                <label for="id_username">Username <span class="required">*</span>
+                </label>
                 {{ user_form.username }}
                 {% for error in user_form.username.errors %}
                     <p class="error-message">{{ error }}</p>
@@ -141,7 +152,8 @@
             </div>
 
             <div class="form-group">
-                <label for="id_email">Email</label>
+                <label for="id_email">Email <span class="required">*</span>
+                </label>
                 {{ user_form.email }}
                 {% for error in user_form.email.errors %}
                     <p class="error-message">{{ error }}</p>
@@ -149,7 +161,8 @@
             </div>
 
             <div class="form-group">
-                <label for="id_password1">Password</label>
+                <label for="id_password1">Password <span class="required">*</span>
+                </label>
                 {{ user_form.password1 }}
                 {% for error in user_form.password1.errors %}
                     <p class="error-message">{{ error }}</p>
@@ -157,7 +170,8 @@
             </div>
 
             <div class="form-group">
-                <label for="id_password2">Confirm Password</label>
+                <label for="id_password2">Confirm Password <span class="required">*</span>
+                </label>
                 {{ user_form.password2 }}
                 {% for error in user_form.password2.errors %}
                     <p class="error-message">{{ error }}</p>
@@ -201,7 +215,8 @@
 
             <!-- New Fields: Role, Skills, and Interests -->
             <div class="form-group">
-                <label for="id_role">Role</label>
+                <label for="id_role">Role <span class="required">*</span>
+                </label>
                 {{ user_form.role }}
                 {% for error in user_form.role.errors %}
                     <p class="error-message">{{ error }}</p>

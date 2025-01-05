@@ -7,6 +7,7 @@ post details:
 {% block content %}
 
 <head>
+    <link rel="shortcut icon" href="{% static 'assets1/favicon-removebg-preview.svg' %}" type="image/x-icon">
     <style>
         .role {
             margin: 0px 15px;
@@ -103,6 +104,10 @@ post details:
             background-color: rgb(63, 224, 125);
             border: none;
             font-weight: bold;
+        }
+        .comment-section form .btn:hover{
+            background-color: rgb(50, 178, 99);
+
         }
 
         .post__buttons svg {
@@ -303,6 +308,11 @@ post details:
             object-fit: cover;
             object-position: center;
         }
+
+        .role_item{
+            margin-right: 1rem;
+        }
+
     </style>
 </head>
 <main class="main-container">
@@ -574,7 +584,7 @@ post details:
 
 
                     <!-- Comment Section -->
-                    <div class="comment-section mt-1">
+                    <div class="comment-section mt-1"  id="filter-section">
                         <!-- New Comment Form -->
                         <form method="POST">
                             {% csrf_token %}
@@ -592,6 +602,42 @@ post details:
                                 </div>
                             </div>
                         </form>
+
+                        <!--  -->
+                        <!-- <form method="GET"> -->
+                        <!-- <div id="filter-section"> -->
+                        <form method="GET" action="#filter-section">
+
+                            <p style="font-weight: 450;" >Filter by Role:</p>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <!-- Radio Buttons -->
+                                <div style="display: flex; gap: 10px;">
+                                    <label class="role_item">
+                                        <input type="radio" name="role" value=""
+                                            {% if not role_filter %}checked{% endif %}>
+                                        All
+                                    </label>
+                                    <label class="role_item">
+                                        <input type="radio" name="role" value="Mentor"
+                                            {% if role_filter == 'Mentor' %}checked{% endif %}>
+                                        Mentor
+                                    </label>
+                                    <label class="role_item">
+                                        <input type="radio" name="role" value="Learner"
+                                            {% if role_filter == 'Learner' %}checked{% endif %}>
+                                        Learner
+                                    </label>
+                                </div>
+                        
+                                <!-- Apply Filters Button -->
+                                <button type="submit" class="btn btn-primary " style="font-weight: 400; padding: 2px 10px; color: white;">
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </form>
+                        <!-- </div> -->
+                        
+                     
 
                         <!-- Display Comments -->
                         {% for comment in comments %}
@@ -639,7 +685,45 @@ post details:
                             <p class="comment-text" id="comment-body-{{ comment.id }}">{{ comment.body|linebreaks }}</p>
                         </div>
                         {% endfor %}
+
+                        <!--  -->
                     </div>
+
+                    <nav aria-label="Page navigation" class="pagination-container" >
+                        <ul class="pagination" style="justify-content: center; align-items: center; margin-top: 1rem;">
+                            {% if comments.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ comments.previous_page_number }}">Previous</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                            {% endif %}
+    
+                            {% for page_num in comments.paginator.page_range %}
+                            {% if page_num == comments.number %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+    
+                            {% if comments.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ comments.next_page_number }}">Next</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
 
                     <!-- Edit Comment Modal -->
                     <div class="modal fade" id="editCommentModal" tabindex="-1" aria-hidden="true">

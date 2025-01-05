@@ -90,6 +90,15 @@
           <h3>Create New Post</h3>
           <hr>
         </div>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    
+
         <span style="padding: 3px; font-size: 20px; margin-bottom: 1px;">Upload Picture</span><br>
         <label for="fileInput">
           <img src="{% static 'assets2/images/upload_area.png' %}" alt="Upload Area">
