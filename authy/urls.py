@@ -19,4 +19,12 @@ urlpatterns = [
     # path('sign-out/', auth_views.LogoutView.as_view(template_name="sign-out.html"), name='sign-out'), 
     path("n/logout", views.logout_view, name="logout"),
 
+
+    # path('ratings/<int:user_id>/', views.user_ratings, name='user_ratings'),
+    # path('rate/<int:user_id>/', views.rate_user, name='rate_user'),
+
+    path('rate/<int:user_id>/', views.rate_user, name='rate_user'),
+    path('ratings/<int:rated_user_id>/', views.user_ratings, name='user_ratings'),
+    path('delete-rating/<int:rating_id>/', views.delete_rating, name='delete_rating'),
+
 ]

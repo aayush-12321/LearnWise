@@ -12,7 +12,7 @@ import os
 
 from post.models import Post, Follow, Stream
 from django.contrib.auth.models import User
-from authy.models import Profile
+from authy.models import Profile,Rating
 from .forms import EditProfileForm, UserRegisterForm
 from django.urls import resolve
 from comment.models import Comment
@@ -152,6 +152,112 @@ def followers_followings_list(request, user_id, follow_type):
         'title': title,  # Title for the page
     }
     return render(request, 'follow_list.html', context)
+
+
+
+from django.db.models import Avg
+from django.db import models  # Ensure you add this import
+from .forms import RatingForm
+
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from .models import Rating, User
+from .forms import RatingForm
+
+@login_required
+def rate_user(request, user_id):
+    rated_user = get_object_or_404(User, id=user_id)
+
+    # Prevent users from rating their own profile
+    if rated_user == request.user:
+        return redirect('profile', username=request.user.username)
+
+    message = None
+    existing_rating = None
+
+    if request.method == 'POST':
+        form = RatingForm(request.POST)
+        if form.is_valid():
+            rate_type = form.cleaned_data['rate_type']
+            existing_rating = Rating.objects.filter(
+                reviewer=request.user, rated_user=rated_user, rate_type=rate_type
+            ).first()
+
+            if existing_rating:
+                # Update the existing rating for the same type
+                existing_rating.rating = form.cleaned_data['rating']
+                existing_rating.review = form.cleaned_data['review']
+                existing_rating.save()
+                message = f"Your {rate_type} rating has been updated."
+            else:
+                # Create a new rating for the specified type
+                new_rating = form.save(commit=False)
+                new_rating.reviewer = request.user
+                new_rating.rated_user = rated_user
+                new_rating.save()
+                message = f"You have successfully rated {rated_user.username} for {rate_type}."
+
+            return redirect('user_ratings', rated_user_id=rated_user.id)
+    else:
+        # Fetch the existing rating for pre-filling (if any)
+        existing_rating = Rating.objects.filter(
+            reviewer=request.user, rated_user=rated_user
+        ).first()
+        form = RatingForm(instance=existing_rating)
+
+    return render(request, 'rate_user.html', {
+        'form': form,
+        'rated_user': rated_user,
+        'message': message,
+        'existing_rating': existing_rating,
+    })
+
+def user_ratings(request, rated_user_id):
+    rated_user = get_object_or_404(User, id=rated_user_id)
+    rate_type_filter = request.GET.get('rate_type', '')  # Fetch filter value from GET
+    ratings = Rating.objects.filter(rated_user=rated_user)
+
+    # Apply filter only if a type is selected
+    if rate_type_filter:
+        ratings = ratings.filter(rate_type=rate_type_filter)
+
+    avg_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+
+    # If the user has rated this profile, show their ratings at the top
+    user_ratings = None
+    if request.user.is_authenticated:
+        # Fetch the ratings posted by the current user (both learning and mentorship if they exist)
+        user_ratings = ratings.filter(reviewer=request.user)
+        if user_ratings.exists():
+            # Exclude these user ratings from the main ratings list
+            ratings = ratings.exclude(id__in=user_ratings.values_list('id', flat=True))
+            # Add the user's ratings at the top
+            ratings = list(user_ratings) + list(ratings)
+
+    return render(request, 'user_ratings.html', {
+        'rated_user': rated_user,
+        'ratings': ratings,
+        'avg_rating': avg_rating,
+        'rate_type_filter': rate_type_filter,
+    })
+
+
+from django.http import JsonResponse
+
+@login_required
+def delete_rating(request, rating_id):
+    rating = get_object_or_404(Rating, id=rating_id)
+
+    if rating.reviewer != request.user:
+        return JsonResponse({'success': False, 'message': 'You cannot delete this rating.'}, status=403)
+
+    rated_user_username = rating.rated_user.username
+    rating.delete()
+    return redirect('profile', username=rated_user_username)
+
+
 
 
 

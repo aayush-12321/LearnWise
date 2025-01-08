@@ -137,6 +137,19 @@ class UserRegisterForm(UserCreationForm):
         
         return user
 
+
+from .models import Rating
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['rate_type', 'rating', 'review']
+        widgets = {
+            'rating': forms.NumberInput(attrs={'min': 1, 'max': 5}),
+            'review': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write your review here...'}),
+        }
+
+
 ##########
 
 # class ProfileForm(forms.ModelForm):

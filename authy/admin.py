@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile
+from .models import Profile, Rating
 # class ProfileAdmin(admin.ModelAdmin):
 #     list_filter = ('creator', 'normal_user')
 
@@ -7,6 +7,7 @@ from .models import Profile
 #     prepopulated_fields = {"slug":("package_name",)}
 
 admin.site.register(Profile)
+admin.site.register(Rating)
 # admin.site.register(Contact)
 # admin.site.register(Review)
 # admin.site.register(GetInTouch)
