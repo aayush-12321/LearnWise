@@ -144,7 +144,7 @@ class Rating(models.Model):
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='given_ratings')
     rated_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_ratings')
     rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])  # Rating from 1 to 5
-    review = models.TextField()
+    review = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     rate_type = models.CharField(max_length=20, choices=RATING_CHOICES)
 

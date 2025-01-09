@@ -2,20 +2,7 @@ from django import forms
 from authy.models import Profile
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-
-
-
-# class EditProfileForm(forms.ModelForm):
-#     image = forms.ImageField(required=True)
-#     first_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'input', 'placeholder': 'First Name'}), required=True)
-#     last_name = forms.CharField(widget=forms.TextInput(attrs={'class': 'input', 'placeholder': 'Last Name'}), required=True)
-#     bio = forms.CharField(widget=forms.TextInput(attrs={'class': 'input', 'placeholder': 'Bio'}), required=True)
-#     url = forms.CharField(widget=forms.TextInput(attrs={'class': 'input', 'placeholder': 'URL'}), required=True)
-#     location = forms.CharField(widget=forms.TextInput(attrs={'class': 'input', 'placeholder': 'Address'}), required=True)
-
-#     class Meta:
-#         model = Profile
-#         fields = ['image', 'first_name', 'last_name', 'bio', 'url', 'location']
+from .models import Rating
 
 class EditProfileForm(forms.ModelForm):
     image = forms.ImageField(required=False)
@@ -46,48 +33,6 @@ class EditProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["image", "first_name", "last_name", "bio", "url", "location",'role', 'skills', 'interests']
-
-
-
-
-
-# class UserRegisterForm(UserCreationForm):
-#     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'prompt srch_explore'}), max_length=50, required=True)
-#     # username = forms.EmailInput(widget=forms.TextInput(attrs={'placeholder': 'Username'}), max_length=50, required=True)
-
-#     email = forms.EmailField(widget=forms.TextInput(attrs={'placeholder': 'Email', 'class': 'prompt srch_explore'}))
-#     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Enter Password', 'class': 'prompt srch_explore'}))
-#     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password', 'class': 'prompt srch_explore'}))
-#     # email = forms.EmailField()
-
-#     class Meta:
-#         model = User
-#         fields = ['username', 'email', 'password1', 'password2']
-
-
-
-# class UserRegisterForm(UserCreationForm):
-#     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Username', 'class': 'prompt srch_explore'}), max_length=50, required=True)
-#     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'prompt srch_explore'}))
-#     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Enter Password', 'class': 'prompt srch_explore'}))
-#     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Confirm Password', 'class': 'prompt srch_explore'}))
-    
-#     # New fields
-#     first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name'}), required=False, max_length=30)
-#     last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}), required=False, max_length=30)
-#     bio = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Tell us about yourself'}), required=False)
-#     location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Location'}), required=False, max_length=100)
-#     url = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Website URL'}), required=False)
-#     image = forms.ImageField(required=False)
-
-#     class Meta:
-#         model = User
-#         fields = ['username', 'email', 'password1', 'password2', 'first_name', 'last_name', 'bio', 'location', 'url', 'image']
-
-
-
-
-
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'prompt srch_explore'}))
@@ -137,17 +82,27 @@ class UserRegisterForm(UserCreationForm):
         
         return user
 
-
-from .models import Rating
-
 class RatingForm(forms.ModelForm):
+    MAX_REVIEW_LENGTH = 100  
+
     class Meta:
         model = Rating
-        fields = ['rate_type', 'rating', 'review']
+        fields = ['review', 'rating', 'rate_type']
         widgets = {
-            'rating': forms.NumberInput(attrs={'min': 1, 'max': 5}),
-            'review': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write your review here...'}),
+            'review': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Write your review here...','class': 'review-textarea'}),
         }
+
+    def clean_review(self):
+        review = self.cleaned_data.get('review')
+        if review and len(review) > self.MAX_REVIEW_LENGTH:
+            raise forms.ValidationError(f"Review cannot exceed {self.MAX_REVIEW_LENGTH} characters.")
+        return review
+    
+    def clean_rating(self):
+        rating = self.cleaned_data.get('rating')
+        if not rating:  # Check if rating is None or empty
+            raise forms.ValidationError("Please select a rating.")
+        return rating
 
 
 ##########

@@ -20,8 +20,15 @@
     <link rel="stylesheet" href="{% static 'assets3/css/reset.css' %}">
     <link rel="stylesheet" href="{% static 'assets3/css/styles.css' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
+        .role-and-ratings {
+            display: flex;        
+            align-items: center;  
+            gap: 10px;           
+        }
         .role {
             padding: 10px;
             border-radius: 4px;
@@ -29,6 +36,25 @@
             color: white;
             margin: 10px;
             font-size: 15px;
+        }
+
+        .ratings-link {
+            text-decoration: none; 
+            color: white;
+            background-color: #0056b3;
+            padding: 10px;
+            border-radius: 4px;
+            width: 72px;
+            margin: 10px;
+            font-size: 15px;
+            transition: background-color 0.3s ease, color 0.3s ease; 
+            text-decoration: underline;
+        }
+
+        .ratings-link:hover{
+            color: #f1f1f1;
+            background-color: #007bff;
+            text-decoration: none;
         }
 
         #mentor{
@@ -124,6 +150,17 @@
             line-height: 1.4;
             /* Improves readability */
         }
+
+    .checked {
+    color: gold;
+    }
+
+    .stars{
+        margin-bottom: 0.7rem;
+        margin-top: 0.7rem;
+        font-size: 2rem;
+    }
+
     </style>
 
 </head>
@@ -162,14 +199,34 @@
                 <!-- Profile User Settings -->
                 <div class="profile-user-settings"
                     style="width: 100%; margin-bottom: 20px; margin-top: -80px; margin-left: 110px;">
-                    {% if profile.role %}
-                    {% if profile.role == "Mentor" %}
-                    <p class="role mentor" id="mentor">{{ profile.role }}</p>
-                    {% elif profile.role == "Learner" %}
-                    <p class="role learner" id="learner">{{ profile.role }}</p>
-                    {% endif %}
-                    {% endif %}
-
+                    
+                    <div class="role-and-ratings">
+                        {% if profile.role %}
+                            {% if profile.role == "Mentor" %}
+                                <p class="role mentor" id="mentor">{{ profile.role }}</p>
+                            {% elif profile.role == "Learner" %}
+                                <p class="role learner" id="learner">{{ profile.role }}</p>
+                            {% endif %}
+                        {% endif %}
+                    
+                        <a href="{% url 'user_ratings' profile_user.id %}" class="ratings-link">Ratings</a>
+                    </div>
+                    
+                    <div class="rating">
+                        <p>Average Rating: {{ avg_rating|floatformat:2  }} ( {{ total_ratings }} )</p>
+                        <div class="stars">
+                            {% for i in stars_range %}
+                                {% if i <= avg_rating_int %}
+                                    <span class="fa fa-star checked"></span>  <!-- Full star -->
+                                {% elif i == next_full_star and half_star %}
+                                    <span class="fa fa-star-half-o checked"></span>  <!-- Half star -->
+                                {% else %}
+                                    <span class="fa fa-star"></span>  <!-- Empty star -->
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                                                   
                     {% if profile.first_name %}
                     <h6 class="profile-user-name" style="font-size: 20px; margin: 0;">{{profile.first_name}}
                         {{profile.last_name}}</h6>
@@ -260,8 +317,6 @@
 
 
                     {% endif %}
-
-                    <a href="{% url 'user_ratings' profile_user.id %}">Ratings</a>
 
 
                 </div>

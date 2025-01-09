@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -19,7 +18,7 @@
         margin-bottom: 20px;
     }
 
-        .star-rating {
+    .star-rating {
         display: flex;
         flex-direction: row-reverse; /* Keep stars filling from right to left */
         gap: 5px;
@@ -30,30 +29,32 @@
     }
 
 
-        .star-rating input {
-            display: none; /* Hide radio inputs */
-        }
+    .star-rating input {
+        display: none; /* Hide radio inputs */
+    }
 
-        .star-rating label {
-            font-size: 1.5em;
-            color: #ccc; /* Default gray color for stars */
-            cursor: pointer;
-            transition: color 0.3s;
-        }
+    .star-rating label {
+        font-size: 1.5em;
+        color: #ccc; /* Default gray color for stars */
+        cursor: pointer;
+        transition: color 0.3s;
+    }
 
-        /* Highlight stars on hover */
-        .star-rating label:hover,
-        .star-rating label:hover ~ label {
-            color: #FFD700; /* Highlight all stars from hovered star to the right */
-        }
+    /* Highlight stars on hover */
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        color: #FFD700; /* Highlight all stars from hovered star to the right */
+    }
 
-        /* Highlight stars when selected */
-        .star-rating input:checked + label,
-        .star-rating input:checked + label ~ label {
-            color: #FFD700; /* Highlight all stars from selected star to the right */
-        }
+    /* Highlight stars when selected */
+    .star-rating input:checked + label,
+    .star-rating input:checked + label ~ label {
+        color: #FFD700; /* Highlight all stars from selected star to the right */
+    }
 
-
+    .review-textarea {
+    padding: 0.2rem;
+    }
 
     button[type="submit"] {
         background-color: #4CAF50;
@@ -85,6 +86,22 @@
         background-color: #007bff;
         color: white;
     }
+
+    .error{
+        margin-bottom: 0.3rem;
+        color: red;
+        font-size: 0.9em;
+    }
+
+    .error_{
+        margin-bottom: 0.3rem;
+        color: red;
+        font-size: 0.6em;
+    }
+
+    #rate_type{
+        margin-bottom: 0.8rem;
+    }
 </style>
 {% endblock style %}
 
@@ -95,7 +112,7 @@
     <p style="color: green;">{{ message }}</p>
     {% endif %}
 
-    <h2>Rate {{ rated_user.username }}</h2>
+    <a href="{% url 'profile' rated_user.username %}" style="text-decoration: none; color: rgb(51, 51, 51);"><h2>Rate {{ rated_user.profile.first_name }} : </h2></a>
 
     {% if message %}
         <p style="color: red;">{{ message }}</p>
@@ -105,7 +122,7 @@
         {% csrf_token %}
         <div class="star-rating">
             <input type="radio" id="star-5" name="rating" value="5">
-            <label for="star-5">&#9733;</label>
+            <label for="star-5">&#9733; <span class="error_">*</span></label>
             <input type="radio" id="star-4" name="rating" value="4">
             <label for="star-4">&#9733;</label>
             <input type="radio" id="star-3" name="rating" value="3">
@@ -115,17 +132,28 @@
             <input type="radio" id="star-1" name="rating" value="1">
             <label for="star-1">&#9733;</label>
         </div>
+
+        {% if form.rating.errors %}
+        <div class="error">
+            * {{ form.rating.errors|join:", " }}
+        </div>
+        {% endif %}
         
         
               
         
-        <label for="rate_type">Rating Type:</label>
+        <label for="rate_type">Rating For: <span class="error">*</span></label>
         <select name="rate_type" id="rate_type">
             <option value="mentorship" {% if existing_rating and existing_rating.rate_type == "mentorship" %}selected{% endif %}>Mentorship</option>
             <option value="learning" {% if existing_rating and existing_rating.rate_type == "learning" %}selected{% endif %}>Learning</option>
         </select>
 
         {{ form.review }}
+        {% if form.review.errors %}
+            <div class="error">
+                * {{ form.review.errors|join:", " }}
+            </div>
+        {% endif %}
 
         <button type="submit">Submit Rating</button>
     </form>

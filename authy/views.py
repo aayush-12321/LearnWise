@@ -17,6 +17,15 @@ from .forms import EditProfileForm, UserRegisterForm
 from django.urls import resolve
 from comment.models import Comment
 
+from django.db.models import Avg
+from django.db import models  # Ensure you add this import
+from .forms import RatingForm
+from django.http import JsonResponse
+from django.db.models import Q
+from .models import Rating, User
+from .forms import RatingForm
+from django.db.models import Count
+
 def UserProfile(request, username):
     # Get the profile user (the one whose profile is being viewed)
     profile_user = get_object_or_404(User, username=username)
@@ -37,6 +46,16 @@ def UserProfile(request, username):
     following_count = Follow.objects.filter(follower=profile_user).count()
     followers_count = Follow.objects.filter(following=profile_user).count()
     follow_status = Follow.objects.filter(following=profile_user, follower=request.user).exists()
+
+    # Calculate the average rating for the profile user
+    avg_rating = Rating.objects.filter(rated_user=profile_user).aggregate(Avg('rating'))['rating__avg']
+    avg_rating = avg_rating or 0  # Default to 0 if no ratings
+    avg_rating_int = int(avg_rating)  # Full stars
+    half_star = (avg_rating - avg_rating_int) >= 0.5  # Check if it's a half star
+    stars_range = range(1, 6)  # Assuming a 5-star rating system
+    next_full_star = avg_rating_int + 1 if half_star else avg_rating_int
+    total_ratings = Rating.objects.filter(rated_user=profile_user).count()
+
 
     posts_with_media_info = []
     for post in posts:
@@ -73,6 +92,12 @@ def UserProfile(request, username):
         'posts_paginator': posts_paginator,
         'follow_status': follow_status,
         'posts_with_media_info': posts_with_media_info,
+        'avg_rating': avg_rating,
+        'avg_rating_int': avg_rating_int,  # Full stars
+        'half_star': half_star,            # Whether to show a half star
+        'stars_range': stars_range,        # Range for stars
+        'next_full_star': next_full_star,
+        'total_ratings': total_ratings,
 
     }
     return render(request, 'profile.html', context)
@@ -153,19 +178,6 @@ def followers_followings_list(request, user_id, follow_type):
     }
     return render(request, 'follow_list.html', context)
 
-
-
-from django.db.models import Avg
-from django.db import models  # Ensure you add this import
-from .forms import RatingForm
-
-from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.db.models import Q
-from .models import Rating, User
-from .forms import RatingForm
-
 @login_required
 def rate_user(request, user_id):
     rated_user = get_object_or_404(User, id=user_id)
@@ -214,11 +226,50 @@ def rate_user(request, user_id):
         'existing_rating': existing_rating,
     })
 
+# def user_ratings(request, rated_user_id):
+#     rated_user = get_object_or_404(User, id=rated_user_id)
+#     rate_type_filter = request.GET.get('rate_type', '')  # Fetch filter value from GET
+#     ratings = Rating.objects.filter(rated_user=rated_user)
+    
+#     rating_counts = Rating.objects.filter(rated_user=rated_user).values('rate_type').annotate(count=Count('id'))
+#     rating_type_counts = {item['rate_type']: item['count'] for item in rating_counts}
+    
+
+#     # Apply filter only if a type is selected
+#     if rate_type_filter:
+#         ratings = ratings.filter(rate_type=rate_type_filter)
+
+#     avg_rating = ratings.aggregate(Avg('rating'))['rating__avg']
+
+#     # If the user has rated this profile, show their ratings at the top
+#     user_ratings = None
+#     if request.user.is_authenticated:
+#         # Fetch the ratings posted by the current user (both learning and mentorship if they exist)
+#         user_ratings = ratings.filter(reviewer=request.user)
+#         if user_ratings.exists():
+#             # Exclude these user ratings from the main ratings list
+#             ratings = ratings.exclude(id__in=user_ratings.values_list('id', flat=True))
+#             # Add the user's ratings at the top
+#             ratings = list(user_ratings) + list(ratings)
+
+#     return render(request, 'user_ratings.html', {
+#         'rated_user': rated_user,
+#         'ratings': ratings,
+#         'avg_rating': avg_rating,
+#         'rate_type_filter': rate_type_filter,
+#         'rating_type_counts': rating_type_counts,
+#     })
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 def user_ratings(request, rated_user_id):
     rated_user = get_object_or_404(User, id=rated_user_id)
     rate_type_filter = request.GET.get('rate_type', '')  # Fetch filter value from GET
     ratings = Rating.objects.filter(rated_user=rated_user)
-
+    
+    rating_counts = Rating.objects.filter(rated_user=rated_user).values('rate_type').annotate(count=Count('id'))
+    rating_type_counts = {item['rate_type']: item['count'] for item in rating_counts}
+    
     # Apply filter only if a type is selected
     if rate_type_filter:
         ratings = ratings.filter(rate_type=rate_type_filter)
@@ -236,15 +287,26 @@ def user_ratings(request, rated_user_id):
             # Add the user's ratings at the top
             ratings = list(user_ratings) + list(ratings)
 
+    # Pagination setup
+    paginator = Paginator(ratings, 6)  # Show 10 ratings per page
+    page = request.GET.get('page')
+
+    try:
+        ratings_page = paginator.page(page)
+    except PageNotAnInteger:
+        # If the page is not an integer, deliver the first page.
+        ratings_page = paginator.page(1)
+    except EmptyPage:
+        # If the page is out of range, deliver the last page of results.
+        ratings_page = paginator.page(paginator.num_pages)
+
     return render(request, 'user_ratings.html', {
         'rated_user': rated_user,
-        'ratings': ratings,
+        'ratings': ratings_page,
         'avg_rating': avg_rating,
         'rate_type_filter': rate_type_filter,
+        'rating_type_counts': rating_type_counts,
     })
-
-
-from django.http import JsonResponse
 
 @login_required
 def delete_rating(request, rating_id):
@@ -253,11 +315,11 @@ def delete_rating(request, rating_id):
     if rating.reviewer != request.user:
         return JsonResponse({'success': False, 'message': 'You cannot delete this rating.'}, status=403)
 
-    rated_user_username = rating.rated_user.username
+    rated_user_id = rating.rated_user.id  # Save the rated user's ID before deletion
     rating.delete()
-    return redirect('profile', username=rated_user_username)
 
-
+    # Redirect to the user_ratings view with the rated user's ID
+    return redirect(reverse('user_ratings', args=[rated_user_id]))
 
 
 
