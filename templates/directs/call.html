@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call</title>
+    <style>
+        #video-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f0f0f0;
+        }
+        video {
+            border: 2px solid #000;
+            margin: 10px;
+            width: 45%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="video-grid">
+        <video id="local-video" autoplay muted></video>
+        <video id="remote-video" autoplay></video>
+    </div>
+
+    <script>
+        const localVideo = document.getElementById('local-video');
+        const remoteVideo = document.getElementById('remote-video');
+
+        const peerConnectionConfig = {
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" }
+            ]
+        };
+
+        let peerConnection;
+
+        async function startCall() {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            localVideo.srcObject = stream;
+
+            peerConnection = new RTCPeerConnection(peerConnectionConfig);
+
+            stream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, stream);
+            });
+
+            peerConnection.ontrack = (event) => {
+                const [remoteStream] = event.streams;
+                remoteVideo.srcObject = remoteStream;
+            };
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    sendSignal({
+                        type: 'new-ice-candidate',
+                        candidate: event.candidate,
+                    });
+                }
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+
+            sendSignal({ type: 'video-offer', sdp: offer });
+        }
+
+        function sendSignal(message) {
+            // Use WebSocket or API call to send `message` to the server and the other participant.
+            console.log('Signal Sent:', message);
+        }
+
+        // Call the function to start the call
+        startCall();
+    </script>
+</body>
+</html>
+{% endblock content %}

@@ -1,195 +1,910 @@
-{% extends 'base.html' %}
+post details:
+
+{% extends 'base.html'%}
 {% load static %}
+
 {% load crispy_forms_tags %}
-
 {% block content %}
+
 <head>
+    <link rel="shortcut icon" href="{% static 'assets1/favicon-removebg-preview.svg' %}" type="image/x-icon">
     <style>
-        
+        .role {
+            margin: 0px 15px;
+            font-size: 12px;
+        }
 
-.date {
-    font-size: 11px
-}
+        #mentor {
+            color: green;
+        }
 
-.comment-text {
-    font-size: 12px
-}
+        #learner {
+            color: red;
+        }
 
-.fs-12 {
-    font-size: 12px
-}
+        .date {
+            font-size: 11px;
+            color: #777;
+            margin:5px;
+        }
 
-.shadow-none {
-    box-shadow: none
-}
+        .comment-text {
+            font-size: 14px;
+            color: #333;
+        }
 
-.name {
-    color: #007bff
-}
+        .shadow-none {
+            box-shadow: none;
+        }
 
-.cursor:hover {
-    color: blue
-}
+        .name {
+            color: #0c0c0c;
+            font-weight: bold;
+            font-size: 14px;
+            text-decoration: none;
+        }
 
-.cursor {
-    cursor: pointer
-}
+        .cursor:hover {
+            color: blue;
+        }
+
+        .cursor {
+            cursor: pointer;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-top: 10px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #3897f0;
+            box-shadow: 0 0 8px rgba(56, 151, 240, 0.3);
+        }
+
+        .comment-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .comment-box {
+            border-radius: 10px;
+            padding: 10px;
+            background-color: #ffffff;
+            box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+        }
+
+        .user-info img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .comment-box .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .comment-section form .btn {
+            border-radius: 20px;
+            padding: 5px 15px;
+            background-color: rgb(63, 224, 125);
+            border: none;
+            font-weight: bold;
+        }
+        .comment-section form .btn:hover{
+            background-color: rgb(50, 178, 99);
+
+        }
+
+        .post__buttons svg {
+            fill: #333;
+            transition: fill 0.2s ease;
+        }
+
+        .post__buttons svg:hover {
+            fill: #3897f0;
+        }
 
 
+        .post__content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* height: 300px; */
+            /* Set a fixed height if desired */
+            width: 100%;
+            /* Make the container full width */
+        }
 
-textarea {
+        .post__media {
+            max-width: 100%;
+            /* max-height: 100%; */
+            /* Optional: limit the height */
+            border-radius: 8px;
+        }
+
+        .side-menu__suggestion-button:hover,
+        .side-menu__user-button:hover {
+            background-color: rgb(35, 167, 85) !important;
+        }
+
+        .post__content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* height: 300px; */
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .post__media {
+            max-width: 100%;
+            /* max-height: 100%; */
+            /* Optional: limit the height */
+            border-radius: 8px;
+        }
+
+        /* for caption */
+        .caption-placeholder {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .post__caption {
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+
+        /*  */
+        :root {
+            --like-color: #FF5C5C;
+            /* Red color for like button */
+            --save-color: #4CAF50;
+            /* Green color for save button */
+            --comment-color: rgb(0, 123, 255);
+            /* Blue color for comment button */
+
+        }
+
+        .post__buttons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            /* Adds space between the buttons */
+        }
+
+        .post__button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Default icon color */
+        .post__button svg path {
+            fill: #333;
+            /* Initial color (black) */
+            transition: fill 0.3s ease;
+        }
+
+        /* Filled Like Button */
+        .post__button--like.filled svg path {
+            fill: var(--like-color);
+            /* Red for like when selected */
+        }
+
+        /* Filled Save Button */
+        .post__button--save.filled svg path {
+            fill: var(--save-color);
+            /* Green for save when selected */
+        }
+
+        /* Filled Comment Button */
+        .post__button--comment.filled svg path {
+            fill: var(--comment-color);
+            /* Yellow for comment when selected */
+        }
+
+        /* Hover Effects */
+        .post__button--like:hover {
+            background-color: rgba(255, 92, 92, 0.2);
+        }
+
+        .post__button--save:hover {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+
+        .post__button--comment:hover {
+            background-color: rgba(75, 129, 182, 0.2);
+        }
+
+        /* Grid layout for the images */
+        /* .post__grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 10px; 
+    }
+    .post__grid-item img {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #dbdbdb;
-        border-radius: 5px;
-        box-sizing: border-box;
-        font-size: 14px;
-        margin-top: 10px;
-        resize: vertical; /* Allows resizing vertically only */
-        min-height: 100px; /* Minimum height for the textarea */
-    }
-    
-    textarea:focus {
-        outline: none;
-        border-color: #3897f0;
-    }
+        height: 250;
+        border-radius: 9px; 
+        box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+    } */
+        /* Grid layout for the images */
+        .post__grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 11px;
+        }
+
+        .post__grid-item img {
+            width: 100%;
+            height: 270px;
+            border-radius: 9px;
+            box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+            object-position: center;
+        }
+
+        /* Single image styling (optional if needed) */
+        .post__single-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 9px;
+            box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+            object-fit: contain;
+            object-position: center;
+        }
+
+        .post__grid .post__grid-item:hover img {
+            transform: scale(1.05);
+            /* Slight zoom effect on hover */
+            transition: transform 0.3s ease;
+            /* Smooth transition */
+        }
+
+        /* Video styling for single media */
+        .post__single-video {
+            width: 100%;
+            height: auto;
+            border-radius: 9px;
+            box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+            object-fit: contain;
+            object-position: center;
+        }
+
+        /* Video styling for grid layout */
+        .post__grid-video {
+            width: 100%;
+            height: 270px;
+            border-radius: 9px;
+            box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .role_item{
+            margin-right: 1rem;
+        }
+
     </style>
 </head>
-    <main class="main-container">
-        <section class="content-container">
-            <div class="contendt">
-
-
-                <div class="posts">
-
-                    <article class="post">
-                        <div class="post__header" style="display: flex; align-items: center; justify-content: space-between;">
-                            <div class="post__profile" style="display: flex; align-items: center;">
-                                {% if post.user.profile.image %}
-                                <a href="{{post.user.profile.image.url}}" class="post__avatar" style="margin-right: 10px;">
-                                    <img src="{{post.user.profile.image.url}}" alt="User Picture" style="border-radius: 50%; width: 40px; height: 40px;">
-                                </a>
+<main class="main-container">
+    <section class="content-container">
+        <div class="content">
+            <div class="posts">
+                <article class="post"
+                    style="border: 1.5px solid #ddd; border-radius: 8px; padding: 10px; margin-bottom: 15px; box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3); ">
+                    <!-- Post Header -->
+                    <div class="post__header"
+                        style="display: flex; align-items: center; justify-content: space-between;">
+                        <div class="post__profile" style="display: flex; align-items: center;">
+                            {% if post.user.profile.image %}
+                            <a href="{{post.user.profile.image.url}}" class="post__avatar" style="margin-right: 10px;">
+                                <img src="{{post.user.profile.image.url}}" alt="User Picture"
+                                    style="border-radius: 50%; width: 40px; height: 40px;">
+                            </a>
+                            {% endif %}
+                            <div>
+                                {% if post.user.profile.first_name %}
+                                <a href="{% url 'profile' post.user %}"
+                                    class="name">{{post.user.profile.first_name|title}}
+                                    {{post.user.profile.last_name|title}}</a>
+                                {% else %}
+                                <a href="{% url 'profile' post.user %}" class="name">{{post.user.username}}</a>
                                 {% endif %}
-                                
-                                    {% if post.user.profile.first_name %}
-                                    <a href="{% url 'profile' post.user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{post.user.profile.first_name|title}} {{post.user.profile.last_name|title}}</a>
-                                    {% else %}
-                                    <a href="{% url 'profile' post.user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
-                                    {% endif %} 
-                                    <span style="display: block; color: #777; font-size: 12px;">@{{post.user.username}}</span>
+                                <span class="date">@{{post.user.username}}</span>
                             </div>
-                            <button class="post__more-options" style="background: none; border: none; cursor: pointer;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="6.5" cy="11.5" r="1.5" fill="#333"/>
-                                    <circle cx="12" cy="11.5" r="1.5" fill="#333"/>
-                                    <circle cx="17.5" cy="11.5" r="1.5" fill="#333"/>
+                            {% if request.user.profile.role %}
+                            {% if post.user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor">{{ post.user.profile.role }}</span>
+                            {% elif post.user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner">{{ post.user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                        <!-- <button class="post__more-options"> -->
+                        <div class="post__more-options">
+                            <!-- SVG icon code -->
+                            <!-- <button class="post__more-options" style="background: none; border: none; cursor: pointer;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="6.5" cy="11.5" r="1.5" fill="#333" />
+                                    <circle cx="12" cy="11.5" r="1.5" fill="#333" />
+                                    <circle cx="17.5" cy="11.5" r="1.5" fill="#333" />
                                 </svg>
-                            </button>
-                        </div>
-                
-                        <!-- Caption -->
-                        <div class="post__caption" style="margin-top: 10px; font-size: 14px; color: #555;">
-                             {{post.caption}}
-                        </div>
-                        <p style="font-size: 13px;">{% for tag in post.tags.all %}
-                            <a href="{{ tag.get_absolute_url }}" style="text-decoration: none;">
-                                #{{ tag }}
-                            </a>
-                            {% endfor %}
-                        </p>
-                
-                        <!-- Post Image -->
-                        <div class="post__content" style="margin-top: 10px;">
-                            <a href="{% url 'post-details' post.id %}">
-                                <img class="post__media" src="{{ post.picture.url }}" alt="Post Content" style="width: 100%; border-radius: 8px;">
-                            </a>
-                        </div>
-                
-                        <div class="post__footer" style="margin-top: 10px;">
-                            <div class="post__buttons" style="display: flex; align-items: center;">
-                                <a href="{% url 'like' post.id %}" class="post__button" style="margin-right: 10px;">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M11.4995 21.2609C11.1062 21.2609 10.7307 21.1362 10.4133 20.9001C8.2588 19.3012 3.10938 15.3239 1.81755 12.9143C0.127895 9.76543 1.14258 5.72131 4.07489 3.89968C5.02253 3.31177 6.09533 3 7.18601 3C8.81755 3 10.3508 3.66808 11.4995 4.85726C12.6483 3.66808 14.1815 3 15.8131 3C16.9038 3 17.9766 3.31177 18.9242 3.89968C21.8565 5.72131 22.8712 9.76543 21.186 12.9143C19.8942 15.3239 14.7448 19.3012 12.5902 20.9001C12.2684 21.1362 11.8929 21.2609 11.4995 21.2609ZM7.18601 4.33616C6.34565 4.33616 5.5187 4.57667 4.78562 5.03096C2.43888 6.49183 1.63428 9.74316 2.99763 12.2819C4.19558 14.5177 9.58639 18.6242 11.209 19.8267C11.3789 19.9514 11.6158 19.9514 11.7856 19.8267C13.4082 18.6197 18.799 14.5133 19.997 12.2819C21.3603 9.74316 20.5557 6.48738 18.209 5.03096C17.4804 4.57667 16.6534 4.33616 15.8131 4.33616C14.3425 4.33616 12.9657 5.04878 12.0359 6.28696L11.4995 7.00848L10.9631 6.28696C10.0334 5.04878 8.6611 4.33616 7.18601 4.33616Z" fill="#333" stroke="#333" stroke-width="0.6"/>
-                                    </svg>
-                                </a>
-                                <button class="post__button">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M21.2959 20.8165L20.2351 16.8602C20.1743 16.6385 20.2047 16.3994 20.309 16.1907C21.2351 14.3342 21.5438 12.117 20.9742 9.80402C20.2003 6.67374 17.757 4.16081 14.6354 3.33042C13.7833 3.10869 12.9442 3 12.1312 3C6.29665 3 1.74035 8.47365 3.31418 14.5647C4.04458 17.3819 7.05314 20.2992 9.88344 20.9861C10.6486 21.173 11.4008 21.26 12.1312 21.26C13.7006 21.26 15.1701 20.8557 16.4614 20.1601C16.6049 20.0818 16.7657 20.0383 16.9222 20.0383C17.0005 20.0383 17.0787 20.047 17.157 20.0688L21.009 21.0991C21.0307 21.1035 21.0525 21.1078 21.0699 21.1078C21.2177 21.1078 21.3351 20.9687 21.2959 20.8165ZM19.0178 17.1863L19.6178 19.4253L17.4831 18.8558C17.3005 18.8079 17.1135 18.7819 16.9222 18.7819C16.557 18.7819 16.1875 18.8775 15.8571 19.0558C14.6963 19.6818 13.4441 19.9992 12.1312 19.9992C11.4834 19.9992 10.8269 19.9166 10.1791 19.7601C7.78354 19.1775 5.14453 16.6037 4.53586 14.2473C3.90111 11.7865 4.40109 9.26057 5.90536 7.31719C7.40964 5.3738 9.6791 4.26081 12.1312 4.26081C12.8529 4.26081 13.5876 4.35646 14.3137 4.5521C16.9961 5.26511 19.0786 7.39544 19.7525 10.1084C20.2264 12.0213 20.0308 13.9299 19.183 15.6298C18.9395 16.1168 18.8787 16.6689 19.0178 17.1863Z" fill="var(--text-dark)" stroke="var(--text-dark)" stroke-width="0.7"/>
+                            </button> -->
+
+                            {% if post.user.username == user.username %}
+                            <div class="dropdown">
+                                <button class="post__more-options" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="6.5" cy="11.5" r="1.5" fill="#333" />
+                                        <circle cx="12" cy="11.5" r="1.5" fill="#333" />
+                                        <circle cx="17.5" cy="11.5" r="1.5" fill="#333" />
                                     </svg>
                                 </button>
-                                <button class="post__button">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path fill-rule="evenodd" clip-rule="evenodd" d="M22.8555 3.44542C22.6978 3.16703 22.3962 3 22.0714 3L2.91369 3.01392C2.52859 3.01392 2.19453 3.25055 2.05997 3.60781C1.96254 3.86764 1.98574 4.14603 2.11565 4.37338C2.16669 4.45689 2.23165 4.53577 2.31052 4.60537L9.69243 10.9712L11.4927 20.5338C11.5623 20.9096 11.8499 21.188 12.2304 21.2483C12.6062 21.3086 12.9774 21.1323 13.1723 20.8029L22.8509 4.35018C23.0179 4.06715 23.0179 3.72381 22.8555 3.44542ZM4.21748 4.39194H19.8164L10.4255 9.75089L4.21748 4.39194ZM12.6248 18.9841L11.1122 10.948L20.5171 5.58436L12.6248 18.9841Z" fill="var(--text-dark)" stroke="var(--text-dark)" stroke-width="0.3"/>
-                                    </svg>
-                                </button>
-                                <!-- Additional buttons like comment and share can go here -->
-                            </div>
-                
-                            <div class="post__likes" style="margin-top: 10px;">
-                                <span style="font-size: 14px; color: #555;">{{post.likes}} likes</span>
-                            </div>
-                
-                            <span class="post__date-time" style="font-size: 12px; color: #999;">{{post.posted}}</span>
 
-                            <div class="container mt-1">
-                                <div class="d-flex justify-content-right row">
-                                    <div class="col-md-8 col-lg-8">
-                                        <div class="d-flex flex-column comment-section">
-                                            <form method="POST">
-                                                {% csrf_token %}
-                                                <div class="bg-light p-2" style="border-radius: 10px; padding: 10px;">
-                                                    <div class="d-flex flex-row align-items-start" style="margin-bottom: 10px;">
-                                                        <div class="side-menu__user-profile" style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
-                                                            <a href="#" class="side-menu__user-avatar" style="flex-shrink: 0; margin-right: 10px;">
-                                                                <img src="{{ request.user.profile.image.url }}" alt="User Picture" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
-                                                            </a>
-                                                            <div class="side-menu__user-info" style="flex-grow: 1;">
-                                                                {% if user.profile.first_name %}
-                                                                <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{request.user.profile.first_name|title }} {{request.user.profile.last_name|title }}</a>
-                                                                {% else %}
-                                                                <a href="{{request.user.username}}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.username}}</a>
-                                                                {% endif %}
-                                                                <span style="display: block; color: #777; font-size: 14px;">@{{request.user.username}}</span>
-                                                            </div>
-                                                            <!-- <a href="{% url 'profile' request.user %}" class="side-menu__user-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View Profile</a> -->
-                                                        </div>
-                                                        <textarea name="body" placeholder="Write your comment here..." id="{{ form.body.id_for_label }}">{{ form.body.value|default_if_none:'' }}</textarea>
+                                <ul class="dropdown-menu">
 
-                                                    </div>
-                                                    <div class="mt-2 text-right">
-                                                        <button class="btn btn-primary btn-sm shadow-none" type="submit" style="border-radius: 20px; padding: 5px 10px; background-color: rgb(63, 224, 125);">Post comment</button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                            
-                                            {% for comment in comments %}
-                                                <div class="bg-white p-2" style="border-radius: 10px; margin-top: 10px; padding: 10px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);">
-                                                    <div class="d-flex flex-row user-info" style="align-items: center; margin-bottom: 5px;">
-                                                        <img class="rounded-circle" src="{{comment.user.profile.image.url}}" width="30" height="30" style="margin-right: 10px;">
-                                                        <a href="{% url 'profile' comment.user %}" style="text-decoration: none; color: #333;">
-                                                            <div class="d-flex flex-column justify-content-start ml-2">
-                                                                <span class="d-block font-weight-bold name" style="font-size: 14px;">{{comment.user.first_name}} {{comment.user.last_name}}</span>
-                                                                <span class="date text-black-50" style="font-size: 12px;">{{comment.date}}</span>
-                                                            </div>
-                                                        </a>
-                                                    </div>
-                                                    <div class="mt-2">
-                                                        <p class="comment-text" style="margin: 0; font-size: 14px;">{{ comment.body }}</p>
-                                                    </div>
-                                                </div>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
+
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'edit_post' post.id %}">Edit Post</a>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item text-danger"
+                                            onclick="openDeleteModal('{{ post.id }}')">Delete Post</button>
+                                    </li>
+
+                                </ul>
+                            </div>
+                            {% endif %}
+
+                            <!-- </button> -->
+                        </div>
+                    </div>
+
+                    <!-- Delete Confirmation Modal -->
+                    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">Delete Post?</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete this post? This action cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <form id="deleteForm" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
                                 </div>
                             </div>
-                            
+                        </div>
+                    </div>
+
+
+                    <!-- Caption -->
+                    <!-- Caption Section (displayed always if available) -->
+                    {% if post.caption %}
+                    <div class="post__caption" style="margin-bottom: 10px;">
+                        <p style="font-size: 14px; color: #555;">{{ post.caption|linebreaks }}</p>
+                    </div>
+                    {% endif %}
+                    <p style="font-size: 13px;">
+                        {% for tag in post.tags.all %}
+                        <a href="{{ tag.get_absolute_url }}" style="text-decoration: none; color: #007bff;">#{{tag}}</a>
+                        {% endfor %}
+                    </p>
+
+
+
+                    <!-- {% if post.pictures.all %}
+                    {% if post.pictures.count == 1 %}
+                  
+                    <div class="post__single-image">
+                        <a href="{{ post.pictures.first.image.url }}" target="_blank">
+                            <img class="post__media" src="{{ post.pictures.first.image.url }}" alt="Post Content">
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="post__grid">
+                        {% for picture in post.pictures.all %}
+                        <div class="post__grid-item">
+                            <a href="{{ picture.image.url }}" target="_blank">
+                                <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                   
+                    {% endif %}
+                    {% endif %} -->
+
+                    {% if media_info %}
+                    {% if media_info|length == 1 %}
+                    <!-- Single Media (Image or Video) Full-Width Layout -->
+                    <div class="post__single-image">
+                        {% with media_info.0 as media %}
+                        {% if media.is_video %}
+                        <!-- Single Video -->
+                        <video controls class="post__single-video">
+                            <source src="{{ media.url }}" type="video/mp4" loading="lazy">
+                            Your browser does not support the video tag.
+                        </video>
+                        {% else %}
+                        <!-- Single Image -->
+                        <a href="{{ media.url }}" target="_blank">
+                            <img src="{{ media.url }}" alt="Post Content" loading="lazy">
+                        </a>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% else %}
+                    <!-- Multiple Media (Images and Videos) Grid Layout -->
+                    <div class="post__grid">
+                        {% for media in media_info %}
+                        <div class="post__grid-item">
+                            {% if media.is_video %}
+                            <!-- Video in Grid -->
+                            <video controls class="post__grid-video">
+                                <source src="{{ media.url }}" type="video/mp4" loading="lazy">
+                                Your browser does not support the video tag.
+                            </video>
+                            {% else %}
+                            <!-- Image in Grid -->
+                            <a href="{{ media.url }}" target="_blank">
+                                <img src="{{ media.url }}" alt="Post Content" loading="lazy">
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% endif %}
+
+
+                    <!-- Like and Comment Section -->
+
+                    <!-- <div class="post__footer">
+                        <div class="post__buttons"> -->
+
+                    <!-- Like, comment, and share buttons with SVGs -->
+
+                    <div class="post__footer" style="margin-top: 10px;">
+
+                        <div class="post__buttons" style="display: flex; align-items: center;">
+                            <a href="{% url 'like' post.id %}"
+                                class="post__button post__button--like {% if post.id in liked_post_ids %}filled{% endif %}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.42 3.42 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5 18.58 5 20 6.42 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                                </svg>
+                            </a>
+
+                            <a href="{% url 'favourite' post.id %}"
+                                class="post__button post__button--save {% if post.id in saved_post_ids %}filled{% endif %}">
+                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z" />
+                                </svg>
+                            </a>
+
+
+                        </div>
+
+                        <div class="post__interaction" style="display: flex; align-items: center; margin-top: 10px;">
+                            <div class="post__likes" style="margin-right: 10px;">
+                                <a href="{% url 'post-likers' post.id %}"
+                                    style="font-size: 14px; color: #555; text-decoration: none;"
+                                    onmouseover="this.style.color='blue'" onmouseout="this.style.color='#555'">
+                                    {{ post.likes }} likes
+                                </a>
+
+
+                            </div>
+
+                            <div class="post__comments">
+                                <a href="#" style="font-size: 14px; color: #555; text-decoration: none;">
+                                    {{post.comment.count}} comments
+                                </a>
                             </div>
                         </div>
-                    </article>
+                        <span class="post__date-time">{{post.posted}}</span>
+                    </div>
 
-                </div>
+                    <!-- Comment Section -->
+                    <!-- <div class="comment-section mt-1">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="bg-light p-2">
+                                <div class="d-flex flex-row align-items-start">
+                                    <a href="#" class="side-menu__user-avatar">
+                                        <img src="{{ request.user.profile.image.url }}" alt="User Picture">
+                                    </a>
+                                    <textarea name="body" placeholder="Write your comment here..."
+                                        id="{{ form.body.id_for_label }}">{{ form.body.value|default_if_none:'' }}</textarea>
+                                </div>
+                                <div class="text-right mt-2">
+                                    <button class="btn btn-primary btn-sm shadow-none" type="submit">Post
+                                        Comment</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        {% for comment in comments %}
+                        <div class="comment-box">
+                            <div class="user-info">
+                                <img src="{{comment.user.profile.image.url}}">
+                                <div>
+                                    <a href="{% url 'profile' comment.user %}"
+                                        class="name">{{comment.user.profile.first_name}}
+                                        {{comment.user.profile.last_name}}</a>
+                                    <span class="date">{{comment.date}}</span>
+                                </div>
+                            </div>
+                            <p class="comment-text">{{ comment.body|linebreaks }}</p>
+                        </div>
+                        {% endfor %}
+                    </div> -->
+
+
+                    <!-- Comment Section -->
+                    <div class="comment-section mt-1"  id="filter-section">
+                        <!-- New Comment Form -->
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="bg-light p-2">
+                                <div class="d-flex flex-row align-items-start">
+                                    <a href="#" class="side-menu__user-avatar">
+                                        <img src="{{ request.user.profile.image.url }}" alt="User Picture">
+                                    </a>
+                                    <textarea name="body" placeholder="Write your comment here..."
+                                        id="{{ form.body.id_for_label }}">{{ form.body.value|default_if_none:'' }}</textarea>
+                                </div>
+                                <div class="text-right mt-2">
+                                    <button class="btn btn-primary btn-sm shadow-none" type="submit">Post
+                                        Comment</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <!--  -->
+                        <!-- <form method="GET"> -->
+                        <!-- <div id="filter-section"> -->
+                        <form method="GET" action="#filter-section">
+
+                            <p style="font-weight: 450;" >Filter by Role:</p>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <!-- Radio Buttons -->
+                                <div style="display: flex; gap: 10px;">
+                                    <label class="role_item">
+                                        <input type="radio" name="role" value=""
+                                            {% if not role_filter %}checked{% endif %}>
+                                        All
+                                    </label>
+                                    <label class="role_item">
+                                        <input type="radio" name="role" value="Mentor"
+                                            {% if role_filter == 'Mentor' %}checked{% endif %}>
+                                        Mentor
+                                    </label>
+                                    <label class="role_item">
+                                        <input type="radio" name="role" value="Learner"
+                                            {% if role_filter == 'Learner' %}checked{% endif %}>
+                                        Learner
+                                    </label>
+                                </div>
+                        
+                                <!-- Apply Filters Button -->
+                                <button type="submit" class="btn btn-primary " style="font-weight: 400; padding: 2px 10px; color: white;">
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </form>
+                        <!-- </div> -->
+                        
+                     
+
+                        <!-- Display Comments -->
+                        {% for comment in comments %}
+                        <div class="comment-box" id="comment-{{ comment.id }}">
+                            <div class="user-info d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ comment.user.profile.image.url }}">
+                                    <div class="ms-2">
+                                        <a href="{% url 'profile' comment.user %}" class="name">
+                                            {{ comment.user.profile.first_name }} {{ comment.user.profile.last_name }}
+                                        </a>
+                                        <span class="date">{{ comment.date }}</span>
+                                    </div>
+                                    {% if comment.user.profile.role %}
+                            {% if comment.user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor">{{ comment.user.profile.role }}</span>
+                            {% elif comment.user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner">{{ comment.user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
+                                </div>
+
+
+                                {% if comment.user == request.user %}
+                                <div class="dropdown">
+                                    <button class="btn btn-sm" data-bs-toggle="dropdown"
+                                        aria-expanded="false">⋮</button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <!-- <button class="dropdown-item"
+                                                onclick="openEditCommentModal('{{ comment.id }}', '{{ comment.body|escapejs }}')">
+                                                Edit
+                                            </button> -->
+                                            <button class="dropdown-item"
+                                                onclick="openEditCommentModal('{{ comment.id }}', '{{ comment.body|escapejs }}')">Edit</button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item text-danger"
+                                                onclick="openDeleteCommentModal('{{ comment.id }}')">Delete</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <p class="comment-text" id="comment-body-{{ comment.id }}">{{ comment.body|linebreaks }}</p>
+                        </div>
+                        {% endfor %}
+
+                        <!--  -->
+                    </div>
+
+                    <nav aria-label="Page navigation" class="pagination-container" >
+                        <ul class="pagination" style="justify-content: center; align-items: center; margin-top: 1rem;">
+                            {% if comments.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ comments.previous_page_number }}">Previous</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                            {% endif %}
+    
+                            {% for page_num in comments.paginator.page_range %}
+                            {% if page_num == comments.number %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+    
+                            {% if comments.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ comments.next_page_number }}">Next</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+
+                    <!-- Edit Comment Modal -->
+                    <div class="modal fade" id="editCommentModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Comment</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <textarea id="editCommentBody" class="form-control" rows="3"></textarea>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="saveCommentButton">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete Comment Confirmation Modal -->
+                    <!-- Delete Confirmation Modal -->
+                    <div class="modal fade" id="deleteCommentModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">Delete Comment?</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete this comment? This action cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-danger"
+                                        id="confirmDeleteButton">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </article>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
+</main>
+
 
 {% endblock content %}
+
+
+{% block script %}
+
+<script>
+    // Open delete post Modal
+    function openDeleteModal(postId) {
+        const deleteForm = document.getElementById("deleteForm");
+        deleteForm.action = `/${postId}/delete/`; // Dynamic action URL
+        const deleteModal = new bootstrap.Modal(document.getElementById("deleteModal"));
+        deleteModal.show();
+    }
+
+
+    // Open Edit Comment Modal
+    function openEditCommentModal(commentId, commentBody) {
+        const editCommentModal = new bootstrap.Modal(document.getElementById("editCommentModal"));
+        const editCommentBody = document.getElementById("editCommentBody");
+        const saveCommentButton = document.getElementById("saveCommentButton");
+
+        // Populate the textarea with the existing comment text
+        editCommentBody.value = commentBody;
+
+        // Update the save button's action
+        saveCommentButton.onclick = function () {
+            saveComment(commentId);
+        };
+
+        // Open the modal
+        editCommentModal.show();
+    }
+
+    // Save Edited Comment
+    function saveComment(commentId) {
+        const newBody = document.getElementById("editCommentBody").value.trim();
+
+        if (!newBody) {
+            alert("Comment cannot be empty.");
+            return;
+        }
+
+        fetch(`/comment/${commentId}/edit/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ body: newBody }),
+        })
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success) {
+                    // Reload the page to reflect the change
+                    window.location.reload();
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                alert("An error occurred while saving the comment.");
+            });
+    }
+
+
+    //scroll to edited comment
+    window.onload = function () {
+        // Check if there is a commentId in the URL (for example, '?comment_id=5')
+        const urlParams = new URLSearchParams(window.location.search);
+        const commentId = urlParams.get('comment_id');
+
+        if (commentId) {
+            // Find the comment with the ID and scroll to it
+            const commentElement = document.getElementById(`comment-${commentId}`);
+            if (commentElement) {
+                commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                commentElement.classList.add('highlight'); // Optional: add a highlight class to visually mark it
+            }
+        }
+    };
+
+
+
+
+    // Open Delete Comment Modal
+    function openDeleteCommentModal(commentId) {
+        const deleteButton = document.getElementById("confirmDeleteButton");
+        // Set the commentId on the delete button
+        deleteButton.setAttribute("data-comment-id", commentId);
+
+        // Open the modal
+        const deleteModal = new bootstrap.Modal(document.getElementById("deleteCommentModal"));
+        deleteModal.show();
+    }
+
+    // Handle the deletion on confirmation
+    document.getElementById("confirmDeleteButton").onclick = function () {
+        const commentId = this.getAttribute("data-comment-id");
+
+        fetch(`/comment/${commentId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // If the deletion is successful, remove the comment from the DOM
+                    const commentElement = document.getElementById(`comment-${commentId}`);
+                    if (commentElement) {
+                        commentElement.remove();
+                    }
+                    // Close the modal after successful deletion
+                    bootstrap.Modal.getInstance(document.getElementById("deleteCommentModal")).hide();
+                } else {
+                    alert(data.error || "Failed to delete the comment.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                alert("An error occurred while deleting the comment.");
+            });
+    }
+
+
+</script>
+
+{% endblock script %}

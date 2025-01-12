@@ -101,6 +101,18 @@
                   <a href="{% url 'delete-notification' notification.id %}" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></a>
               </div>
                 {% endif %}
+              
+                {% if notification.notification_types == 4 %}
+                <div class="alert alert-info">
+                    <a href="{% url 'profile' notification.sender.username %}">
+                        <!-- {{ notification.sender.username }} -->
+                        {{ notification.sender.profile.first_name|title }} {{ notification.sender.profile.last_name|title }}
+                          
+                    </a> added a new post: 
+                    <a href="{% url 'post-detail' notification.post.id %}">{{ notification.post.title|truncatewords:10 }}</a>.
+                </div>
+                {% endif %}
+                
 
             {% endfor %}
 

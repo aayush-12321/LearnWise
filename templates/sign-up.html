@@ -1,60 +1,251 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
-  <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
-  <title>Network | Register</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'assets1/favicon-removebg-preview.svg' %}" type="image/x-icon">
+    <title>Register | LearnWise</title>
+    <style>
+        /* Basic page styling */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #89f7fe, #66a6ff);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 35px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .form-header img {
+            width: 80px;
+            margin-bottom: 10px;
+        }
+
+        .form-header h2 {
+            color: #333;
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: #f9f9f9;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #66a6ff;
+            outline: none;
+            background-color: #eaf6ff;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .form-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #66a6ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-btn:hover {
+            background-color: #578dcc;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: #66a6ff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+
+        .required {
+            color: red;
+            font-weight: bold;
+}
+
+    </style>
 </head>
 
 <body>
-
-  <div id="wrapper">
-    <div class="container">
-      <div class="phone-app-demo" style="display: none;"></div>
-      <div class="form-data">
-        <form action="" method="POST">
-          {% csrf_token %}
-          <div class="logo">
+    <div class="form-container">
+        <div class="form-header">
             <img src="{% static 'assets2/images/logo-transparent.png' %}" alt="logo">
-          </div>
-          <!-- <input type="text" placeholder="Phone number, username, or email"> -->
-          <!-- <input type="password" placeholder="Password"> -->
-          {{form.username}}
-          {{form.email}}
-          {{form.password1}}
-          {{form.password2}}
-          <button class="form-btn" type="submit"  style="border-radius: 15px; background-color: rgb(63, 224, 125);">Sign-Up</button>
-
-
-          <!-- <a href="index.html" class="form-btn" type="submit">Log in</a> -->
-          <!-- <span class="has-separator">Or</span>
-          <a class="facebook-login" href="#">
-            <i class="fab fa-facebook-square"></i> Log in with Facebook
-          </a> -->
-          <a class="password-reset" href="#">Forgot password?</a>
-        </form>
-        <div class="sign-up">
-          Already have an account? <a href="{% url 'sign-in' %}">Sign In</a>
+            <h2>Create Your Account</h2>
         </div>
-        <!-- <div class="get-the-app">
-          <span>Get the app.</span>
-          <div class="badges">
-            <img src="{% static 'assets2/images/app-store.png' %}" alt="app-store badge">
-            <img src="{% static 'assets2/images/google-play.png' %}" alt="google-play badge">
-          </div>
-        </div> -->
-      </div>
+
+        <p style="font-size: 14px; color: #555; margin-bottom: 0.6rem;">
+            Fields marked with <span style="color: red;">*</span> are compulsory.
+        </p>        
+
+        <form action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- User Information Fields -->
+            <div class="form-group">
+                <label for="id_username">Username <span class="required">*</span>
+                </label>
+                {{ user_form.username }}
+                {% for error in user_form.username.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_email">Email <span class="required">*</span>
+                </label>
+                {{ user_form.email }}
+                {% for error in user_form.email.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password1">Password <span class="required">*</span>
+                </label>
+                {{ user_form.password1 }}
+                {% for error in user_form.password1.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_password2">Confirm Password <span class="required">*</span>
+                </label>
+                {{ user_form.password2 }}
+                {% for error in user_form.password2.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Profile Information Fields -->
+            <hr>
+            <h4>Profile Information</h4>
+
+            <div class="form-group">
+                <label for="id_first_name">First Name</label>
+                {{ user_form.first_name }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_last_name">Last Name</label>
+                {{ user_form.last_name }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_bio">Bio</label>
+                {{ user_form.bio }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_location">Location</label>
+                {{ user_form.location }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_url">Website URL</label>
+                {{ user_form.url }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_image">Profile Picture</label>
+                {{ user_form.image }}
+            </div>
+
+
+            <!-- New Fields: Role, Skills, and Interests -->
+            <div class="form-group">
+                <label for="id_role">Role <span class="required">*</span>
+                </label>
+                {{ user_form.role }}
+                {% for error in user_form.role.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_skills">Skills</label>
+                {{ user_form.skills }}
+                {% for error in user_form.skills.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_interests">Interests</label>
+                {{ user_form.interests }}
+                {% for error in user_form.interests.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <button class="form-btn" type="submit">Sign Up</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="{% url 'sign-in' %}">Sign In</a>
+        </div>
     </div>
-
-
-  </div>
-
 </body>
-
 </html>
+

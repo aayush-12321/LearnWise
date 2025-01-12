@@ -1,5 +1,7 @@
-from directs.views import inbox, Directs, SendDirect, UserSearch, NewConversation
+from directs.views import inbox, Directs, SendDirect, UserSearch, NewConversation, map_view,CallView,GenerateToken,videocall,joinVideoCall
 from django.urls import path
+
+from directs.consumers import CallConsumer
 
 urlpatterns = [
     path('', inbox, name="message"),
@@ -7,4 +9,16 @@ urlpatterns = [
     path('send/', SendDirect, name="send-directs"),
     path('search/', UserSearch, name="search-users"),
     path('new/<username>', NewConversation, name="conversation"),
+    path('map/', map_view, name='map_view'),
+    path('call/<username>', CallView, name="call"),
+    path('generate-token/', GenerateToken, name="generate-token"),
+    path('videocall/', videocall, name="videocall"),
+
+    # path('videocall/', joinVideoCall, name="join-videocall"),
+
+    
+]
+
+websocket_urlpatterns = [
+    path('ws/call/<room_name>/', CallConsumer.as_asgi()),
 ]

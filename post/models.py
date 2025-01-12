@@ -6,12 +6,18 @@ from django.utils.text import slugify
 from django.urls import reverse
 import uuid
 from notification.models import Notification
-
+from django.db import models
+import uuid
+from django.utils import timezone
 
 
 # uploading user files to a specific directory
+# def user_directory_path(instance, filename):
+#     return 'user_{0}/{1}'.format(instance.user.id, filename)
+
 def user_directory_path(instance, filename):
-    return 'user_{0}/{1}'.format(instance.user.id, filename)
+    # Access the user through the related post
+    return f"user_{instance.post.user.id}/{filename}"
 
 
 class Tag(models.Model):
@@ -33,51 +39,40 @@ class Tag(models.Model):
             self.slug = slugify(self.title)
         return super().save(*args, **kwargs)
 
-# class PostFileContent(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     file = models.FileField(upload_to=user_directory_path, verbose_name="Choose File")
-
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    picture = models.ImageField(upload_to=user_directory_path, verbose_name="Picture")
     caption = models.CharField(max_length=10000, verbose_name="Caption")
     posted = models.DateField(auto_now_add=True)
+    # posted = models.DateTimeField(auto_now_add=True) 
     tags = models.ManyToManyField(Tag, related_name="tags")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # likes = models.ManyToManyField(User,blank=True , related_name='likes')
-    likes=models.IntegerField(default=0)
-
+    likes = models.IntegerField(default=0)
+    likers = models.ManyToManyField(User, blank=True, related_name='liked_posts')
+    savers = models.ManyToManyField(User, blank=True, related_name='saved_posts')
 
     def get_absolute_url(self):
         return reverse("post-details", args=[str(self.id)])
+    
+    def get_likers_names(self):
+        return [liker.username for liker in self.likers.all()]
+    
+    def __str__(self):
+        return f"{self.user.username} posts {self.caption[:7]}"
 
-    # def __str__(self):
-    #     return str(self.caption)
-
-
-class Likes(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="post_likes")
-
-    def user_liked_post(sender, instance, *args, **kwargs):
-        like = instance
-        post = like.post
-        sender = like.user
-        notify = Notification(post=post, sender=sender, user=post.user)
-        notify.save()
-
-    def user_unliked_post(sender, instance, *args, **kwargs):
-        like = instance
-        post = like.post
-        sender = like.user
-        notify = Notification.objects.filter(post=post, sender=sender, notification_types=1)
-        notify.delete()
+class PostImage(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    post = models.ForeignKey(Post, related_name="pictures", on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=user_directory_path)
+    # video = models.ImageField(upload_to=user_directory_path,null=True,blank=True)
+    uploaded = models.DateTimeField(auto_now_add=True)
 
 
 class Follow(models.Model):
-    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower')
-    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following')
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers')
 
+    def __str__(self):
+        return f"{self.follower.username} follows {self.following.username}"
     def user_follow(sender, instance, *args, **kwargs):
         follow = instance
         sender = follow.follower
@@ -91,6 +86,12 @@ class Follow(models.Model):
         following = follow.following
         notify = Notification.objects.filter(sender=sender, user=following, notification_types=3)
         notify.delete()
+    
+    # def followers_names(self):
+    #     return [follower.username for follower in self.follower.all()]
+    
+    # def followings_names(self):
+    #     return [followings.username for followings in self.following.all()]
 
 class Stream(models.Model):
     following = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='stream_following')
@@ -109,9 +110,5 @@ class Stream(models.Model):
 
 
 post_save.connect(Stream.add_post, sender=Post)
-
-post_save.connect(Likes.user_liked_post, sender=Likes)
-post_delete.connect(Likes.user_unliked_post, sender=Likes)
-
 post_save.connect(Follow.user_follow, sender=Follow)
 post_delete.connect(Follow.user_unfollow, sender=Follow)

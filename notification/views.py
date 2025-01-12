@@ -2,6 +2,13 @@
 from django.shortcuts import render, redirect
 from notification.models import Notification
 
+from django.http import JsonResponse
+
+def mark_as_seen(request):
+    if request.method == 'POST':
+        Notification.objects.filter(user=request.user, is_seen=False).update(is_seen=True)
+        return JsonResponse({'status': 'success'})
+
 def ShowNotification(request):
     user = request.user
     notifications = Notification.objects.filter(user=user).order_by('-date')

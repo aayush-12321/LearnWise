@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block content %}
+<br><br>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://kit.fontawesome.com/fc1e235b2e.js"></script>
+  <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
+  <title>LearnWise : Liked By</title>
+
+  <style>
+    .role {
+            margin: 0px 15px;
+            font-size: 12px;
+        }
+
+        #mentor {
+            color: green;
+        }
+
+        #learner {
+            color: red;
+        }
+  </style>
+</head>
+
+<body>
+
+  <div id="wrapper">
+    <div class="container">
+      <div class="phone-app-ddemo"></div>
+      <div class="form-data">
+ 
+      
+        <form action="" method="POST" enctype="multipart/form-data">
+          <div class="logo" style="text-align: center;">
+            <h3 style="margin: 0; font-size: 24px; color: #333;">Liked By</h3><hr>
+        </div>
+
+        {% for user in likers %}
+             
+            <div class="side-menu__user-profile" style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+              <a href="{% url 'profile' user %}" class="side-menu__user-avatar" style="flex-shrink: 0; margin-right: 10px;">
+                  <img src="{{ user.profile.image.url }}" alt="User Picture" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #ddd;">
+              </a>
+              <div class="side-menu__user-info" style="flex-grow: 1;">
+                  {% if user.profile.first_name %}
+                  <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{user.profile.first_name|title }} {{user.profile.last_name|title }}</a>
+                  {% else %}
+                  <a href="{% url 'profile' user %}" style="font-weight: bold; color: #333; text-decoration: none;">{{username}}</a>
+                  {% endif %}
+                  <span style="display: block; color: #777; font-size: 14px;">@{{user.username}}</span>
+                  {% if user.profile.role %}
+                            {% if user.profile.role == "Mentor" %}
+                            <span class="role mentor" id="mentor" style="margin: 0px;">{{ user.profile.role }}</span>
+                            {% elif user.profile.role == "Learner" %}
+                            <span class="role learner" id="learner" style="margin: 0px;">{{ user.profile.role }}</span>
+                            {% endif %}
+                            {% endif %}
+              </div>
+              <a href="{% url 'profile' user %}" class="side-menu__user-button" style="padding: 5px 10px; background-color: rgb(63, 224, 125); color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;">View Profile</a>
+          </div>
+
+          {% empty %}
+        <p style="text-align: center; color: #777; font-size: 16px;">No one has liked.</p>
+
+        {% endfor %}
+        
+          
+        </form>
+        
+      </div>
+    </div>
+
+  </div>
+
+</body>
+
+</html>
+{% endblock content %}
