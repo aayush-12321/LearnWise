@@ -90,14 +90,18 @@
           <h3>Create New Post</h3>
           <hr>
         </div>
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+        
+        {% if error_message %}
+            <div class="alert alert-danger">
+                {{ error_message }}
+            </div>
         {% endif %}
-    
+        
+        {% if success_message %}
+            <div class="alert alert-success">
+                {{ success_message }}
+            </div>
+        {% endif %}
 
         <span style="padding: 3px; font-size: 20px; margin-bottom: 1px;">Upload Picture</span><br>
         <label for="fileInput">

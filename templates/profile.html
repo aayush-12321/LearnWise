@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_tags %}
 {% block content %}
 <!DOCTYPE html>
 <html lang="en">
@@ -21,7 +22,7 @@
     <link rel="stylesheet" href="{% static 'assets3/css/styles.css' %}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600">
     <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         .role-and-ratings {
@@ -151,7 +152,7 @@
             /* Improves readability */
         }
 
-    .checked {
+    /* .checked {
     color: gold;
     }
 
@@ -159,7 +160,32 @@
         margin-bottom: 0.7rem;
         margin-top: 0.7rem;
         font-size: 2rem;
+    } */
+
+    .fa-star {
+        color: gray; /* Default color for empty stars */
+        font-size: 24px; /* Adjust size if needed */
+        text-decoration: none;
+        margin-top: 5px;
     }
+
+    .fa-star.checked {
+        color: gold; /* Color for full stars */
+    }
+
+    .fa-star-half-o.checked {
+        color: gold; /* Color for half stars */
+    }
+
+    .fa-star:hover {
+        color: lightgray; /* Optional hover effect for empty stars */
+    }
+
+    .fa-star.checked:hover,
+    .fa-star-half-o.checked:hover {
+        color: darkorange; /* Optional hover effect for filled/half stars */
+    }
+
 
     </style>
 
@@ -216,19 +242,22 @@
                         <p>Average Rating: {{ avg_rating|floatformat:2  }} ( {{ total_ratings }} )</p>
                         <div class="stars">
                             {% for i in stars_range %}
+                            <a href="{% get_user_rating_url profile_user request.user %}" style="text-decoration: none;">
                                 {% if i <= avg_rating_int %}
-                                    <span class="fa fa-star checked"></span>  <!-- Full star -->
+                                    <span class="fa fa-star checked"></span>  <!-- Full Star -->
                                 {% elif i == next_full_star and half_star %}
-                                    <span class="fa fa-star-half-o checked"></span>  <!-- Half star -->
+                                    <span class="fa fa-star fa-star-half-o checked"></span>  <!-- Half Star -->
                                 {% else %}
-                                    <span class="fa fa-star"></span>  <!-- Empty star -->
+                                    <span class="fa fa-star"></span>  <!-- Empty Star -->
                                 {% endif %}
-                            {% endfor %}
+                            </a>
+                        {% endfor %}
+                         
                         </div>
                     </div>
                                                    
                     {% if profile.first_name %}
-                    <h6 class="profile-user-name" style="font-size: 20px; margin: 0;">{{profile.first_name}}
+                    <h6 class="profile-user-name" style="font-size: 20px; margin: 0; font-weight: 450; margin: 8px 0px;">{{profile.first_name}}
                         {{profile.last_name}}</h6>
                     {% endif %}
                     <h5 style="font-size: 15px; color: gray; margin: 5px 0;">@{{profile.user.username}}</h5>
@@ -340,13 +369,13 @@
                         {% if item.media_info %}
                         {% if item.media_info.is_video %}
                         <!-- Display video if the first media is a video -->
-                        <video controls class="gallery-video">
+                        <video controls class="gallery-video" loading="lazy">
                             <source src="{{ item.media_info.url }}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                         {% else %}
                         <!-- Display image if the first media is an image -->
-                        <img src="{{ item.media_info.url }}" class="gallery-image" alt="Post Image">
+                        <img src="{{ item.media_info.url }}" class="gallery-image" alt="Post Image" loading="lazy">
                         {% endif %}
                         {% else %}
                         <!-- Display caption if no media is available -->
@@ -380,6 +409,42 @@
 
         </div>
     </main>
+
+    <nav aria-label="Page navigation" class="pagination-container" >
+        <ul class="pagination" style="justify-content: center; align-items: center; margin-top: 1rem;">
+            {% if posts_with_media_info.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ posts_with_media_info.previous_page_number }}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+            {% endif %}
+
+            {% for page_num in posts_with_media_info.paginator.page_range %}
+            {% if page_num == posts_with_media_info.number %}
+            <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if posts.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ posts_with_media_info.next_page_number }}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
 
 
     {% endblock content %}

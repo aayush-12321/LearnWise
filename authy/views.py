@@ -77,19 +77,18 @@ def UserProfile(request, username):
 
         # posts_with_media_info.sort(key=lambda x: x['post'].posted, reverse=True)
 
-    # Pagination
-    paginator = Paginator(posts, 8)
+    paginator = Paginator(posts_with_media_info, 6)
     page_number = request.GET.get('page')
-    posts_paginator = paginator.get_page(page_number)
+    posts_with_media_info = paginator.get_page(page_number)
 
     context = {
         'profile_user': profile_user,  # The user whose profile is being viewed
         'profile': profile,           # Profile object for the viewed user
-        'posts': posts,               # Posts to display
+        # 'posts': posts_paginator,               # Posts to display
         'posts_count': posts_count,
         'following_count': following_count,
         'followers_count': followers_count,
-        'posts_paginator': posts_paginator,
+        # 'posts_paginator': posts_paginator,
         'follow_status': follow_status,
         'posts_with_media_info': posts_with_media_info,
         'avg_rating': avg_rating,

@@ -462,13 +462,13 @@ post details:
                         {% if media.is_video %}
                         <!-- Single Video -->
                         <video controls class="post__single-video">
-                            <source src="{{ media.url }}" type="video/mp4">
+                            <source src="{{ media.url }}" type="video/mp4" loading="lazy">
                             Your browser does not support the video tag.
                         </video>
                         {% else %}
                         <!-- Single Image -->
                         <a href="{{ media.url }}" target="_blank">
-                            <img src="{{ media.url }}" alt="Post Content">
+                            <img src="{{ media.url }}" alt="Post Content" loading="lazy">
                         </a>
                         {% endif %}
                         {% endwith %}
@@ -481,13 +481,13 @@ post details:
                             {% if media.is_video %}
                             <!-- Video in Grid -->
                             <video controls class="post__grid-video">
-                                <source src="{{ media.url }}" type="video/mp4">
+                                <source src="{{ media.url }}" type="video/mp4" loading="lazy">
                                 Your browser does not support the video tag.
                             </video>
                             {% else %}
                             <!-- Image in Grid -->
                             <a href="{{ media.url }}" target="_blank">
-                                <img src="{{ media.url }}" alt="Post Content">
+                                <img src="{{ media.url }}" alt="Post Content" loading="lazy">
                             </a>
                             {% endif %}
                         </div>

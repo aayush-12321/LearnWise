@@ -97,13 +97,13 @@
                     {% if item.media_info %}
                     {% if item.media_info.is_video %}
                     <!-- Display video if the first media is a video -->
-                    <video controls class="gallery-video">
+                    <video controls class="gallery-video" loading="lazy">
                         <source src="{{ item.media_info.url }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                     {% else %}
                     <!-- Display image if the first media is an image -->
-                    <img src="{{ item.media_info.url }}" class="gallery-image" alt="Post Image">
+                    <img src="{{ item.media_info.url }}" class="gallery-image" alt="Post Image" loading="lazy">
                     {% endif %}
                     {% else %}
                     <!-- Display caption if no media is available -->

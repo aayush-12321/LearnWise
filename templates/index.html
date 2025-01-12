@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load media_tags %}
 {% block content %}
 <style>
     .side-menu__suggestion-button:hover,
@@ -452,7 +453,63 @@
                     </div>
                     {% endif %}
                     {% endif %} -->
+                    
+
+                    {% load media_tags %}
+
                     {% if post.pictures.all %}
+                        {% if post.pictures.count == 1 %}
+                            <!-- Single Media -->
+                            <div class="post__single-image">
+                                <a href="{% url 'post-details' post.id %}">
+                                    {% with media=post.pictures.first %}
+                                        {% if media|is_image %}
+                                            <img class="post__media" src="{{ media.image.url }}" alt="Post Content" loading="lazy">
+                                        {% elif media|is_video %}
+                                            <video class="post__media" controls>
+                                                <source src="{{ media.image.url }}" type="video/mp4" loading="lazy">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        {% endif %}
+                                    {% endwith %}
+                                </a>
+                            </div>
+                        {% else %}
+                            <!-- Multiple Media -->
+                            <div class="home_post_grid">
+                                {% for media in post.pictures.all %}
+                                    {% if forloop.counter <= 4 %}
+                                        <a href="{% url 'post-details' post.id %}">
+                                            <div class="post__grid-item">
+                                                {% if media|is_image %}
+                                                    <img class="post__media" src="{{ media.image.url }}" alt="Post Content" loading="lazy">
+                                                {% elif media|is_video %}
+                                                    <video class="post__media" controls>
+                                                        <source src="{{ media.image.url }}" type="video/mp4" loading="lazy">
+                                                        Your browser does not support the video tag.
+                                                    </video>
+                                                {% endif %}
+                                            </div>
+                                        </a>
+                                    {% endif %}
+                    
+                                    <!-- Display the remaining media count if there are more than 4 -->
+                                    {% if forloop.counter == 4 and post.pictures.count > 4 %}
+                                        <a href="{% url 'post-details' post.id %}">
+                                            <div class="gallery-item-info">
+                                                <span class="remaining-pictures">+{{ post.pictures.count|add:-4 }}</span>
+                                            </div>
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    
+
+                    <!--  -->
+
+                    <!-- {% if post.pictures.all %}
                     {% if post.pictures.count == 1 %}
 
                     <div class="post__single-image">
@@ -484,7 +541,7 @@
                             {% endfor %}
                     </div>
                     {% endif %}
-                    {% endif %}
+                    {% endif %} -->
 
 
 

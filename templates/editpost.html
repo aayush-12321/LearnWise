@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load media_tags %}
 {% block content %}
 <style>
    /* Body Styling */
@@ -75,7 +76,7 @@ h4 {
   gap: 15px;
 }
 
-.pictures-grid img {
+.pictures-grid img,video {
   width: 100%;
   height: auto;
   object-fit: cover;
@@ -101,17 +102,46 @@ h4 {
           {% csrf_token %}
           <h3>Edit Post</h3>
           <hr>
-  
+          
+          {% if error_message %}
+              <div class="alert alert-danger">
+                  {{ error_message }}
+              </div>
+          {% endif %}
+
+          {% if success_message %}
+              <div class="alert alert-success">
+                  {{ success_message }}
+              </div>
+          {% endif %}
+
           <!-- Existing Pictures with Option to Remove -->
           <h4>Existing Pictures</h4>
-          <div class="pictures-grid">
+          <!-- <div class="pictures-grid">
             {% for picture in post.pictures.all %}
             <label>
               <img src="{{ picture.image.url }}" alt="Post Image">
               <input type="checkbox" name="remove_images" value="{{ picture.id }}"> Remove
             </label>
             {% endfor %}
-          </div>
+          </div> -->
+
+          <div class="pictures-grid">
+            {% for picture in post.pictures.all %}
+                <label>
+                    {% if picture|is_image %}
+                        <img src="{{ picture.image.url }}" alt="Post Image" loading="lazy">
+                    {% elif picture|is_video %}
+                        <video controls>
+                            <source src="{{ picture.image.url }}" type="video/mp4" loading="lazy">
+                            Your browser does not support the video tag.
+                        </video>
+                    {% endif %}
+                    <input type="checkbox" name="remove_images" value="{{ picture.id }}"> Remove
+                </label>
+            {% endfor %}
+        </div>
+        
   
           <!-- Upload New Pictures -->
           <label for="fileInput">Add New Picture(s):</label>
