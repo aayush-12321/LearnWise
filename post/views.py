@@ -332,6 +332,7 @@ def post_likers(request, post_id):
         'likers': likers,
     }
     return render(request, 'likers.html', context)
+    
 @login_required
 def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id, user=request.user)  # Ensure the user can only edit their own posts
@@ -457,6 +458,7 @@ def edit_post(request, post_id):
 #     return render(request, 'editpost.html', {'post': post})
 
 @csrf_exempt
+@login_required
 def delete_post(request, post_id):
     if request.user.is_authenticated:
         if request.method == 'POST':  

@@ -1,25 +1,76 @@
-<!-- templates/user_location/map_view.html -->
 {% extends 'base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+
+
+{% block style %}
+<style>
+    #map {
+        width: 100%;
+        height: 600px;
+        border: 1px solid black;
+        margin-bottom: 20px;
+    }
+    
+</style>
+{% endblock style %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Network</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        #map {
-            width: 100%;
-            height: 600px;
-            border: 1px solid black;
-        }
-    </style>
-</head>
-<body>
-    <h1>User Location Map</h1>
+
+
+    <h1 style="text-align: center;">User Location Map</h1>
     <div id="map">{{ map|safe }}</div>
-</body>
-</html>
+
+    <nav aria-label="Page navigation" class="pagination-container" >
+        <ul class="pagination" style="justify-content: center; align-items: center; margin-top: 1rem;">
+            {% if profiles_page.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ profiles_page.previous_page_number }}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Previous</span>
+            </li>
+            {% endif %}
+
+            {% for page_num in profiles_page.paginator.page_range %}
+            {% if page_num == profiles_page.number %}
+            <li class="page-item active">
+                <span class="page-link">{{ page_num }}</span>
+            </li>
+            {% else %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+
+            {% if profiles_page.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ profiles_page.next_page_number }}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next</span>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+
 {% endblock content %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        {% for profile_id, profile_url in profile_urls.items %}
+            var profileLink = document.getElementById('profile-link-{{ profile_id }}');
+            if (profileLink) {
+                profileLink.addEventListener('click', function() {
+                    window.location.href = '{{ profile_url }}';
+                });
+            }
+        {% endfor %}
+    });
+</script>
+{% endblock script %}
+

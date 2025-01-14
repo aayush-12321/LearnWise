@@ -434,7 +434,7 @@
             {% endif %}
             {% endfor %}
 
-            {% if posts.has_next %}
+            {% if posts_with_media_info.has_next %}
             <li class="page-item">
                 <a class="page-link" href="?page={{ posts_with_media_info.next_page_number }}">Next</a>
             </li>

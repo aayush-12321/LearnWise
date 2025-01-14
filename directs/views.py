@@ -1,7 +1,9 @@
 
 from django.shortcuts import redirect, render, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from directs.models import Message
+from post.models import Follow
 from django.contrib.auth.models import User
 from authy.models import Profile
 from django.db.models import Q
@@ -17,6 +19,10 @@ import branca
 import time
 from django.utils.html import escape
 from django.http import JsonResponse
+from django.utils.html import escape
+import time
+from django.core.exceptions import ObjectDoesNotExist
+
 
 @login_required
 def inbox(request):
@@ -189,6 +195,68 @@ def NewConversation(request, username):
     return redirect('message')
 
 
+# def geocode_with_retry(loc, address, max_retries=3):
+#     retries = 0
+#     while retries < max_retries:
+#         try:
+#             return loc.geocode(address, timeout=10)
+#         except (GeocoderTimedOut, GeocoderUnavailable):
+#             retries += 1
+#             time.sleep(1)
+#     return None
+
+# def map_view(request):
+#     # Assuming logged-in user's profile can be accessed through request.user.profile
+#     user_profile = Profile.objects.filter(user=request.user).first()
+    
+#     if not user_profile:
+#         return render(request, 'directs/not_found.html')
+
+#     loc = Nominatim(user_agent="GetLoc")
+#     user_location = f"{user_profile.location}, Nepal"
+#     geocode_result = geocode_with_retry(loc, user_location)
+
+#     if geocode_result:
+#         user_latitude, user_longitude = geocode_result.latitude, geocode_result.longitude
+#     else:
+#         user_latitude, user_longitude = 27.6800062, 85.3857303  # Default location if geocoding fails
+
+#     # Initialize a Folium map
+#     m = folium.Map(location=[user_latitude, user_longitude], zoom_start=10, control_scale=True)
+
+#     # Retrieve all profiles and add markers, excluding the logged-in user’s profile
+#     profiles = Profile.objects.exclude(user=request.user)
+#     for profile in profiles:
+#         location_str = f"{profile.location}, Nepal"
+#         loc_result = geocode_with_retry(loc, location_str)
+
+#         if loc_result:
+#             lat, lon = loc_result.latitude, loc_result.longitude
+#             distance = geodesic((user_latitude, user_longitude), (lat, lon)).km
+
+#             # Profile details for popup
+#             # profile_image_url = profile.image.url if profile.image.url else '/path/to/default/image.jpg'
+#             profile_name = escape(profile.user.username)
+#             profile_bio = escape(profile.bio or "No bio available")
+
+#             popup_content = f"""
+#                 <div style="text-align: center;">
+                   
+#                     <p><strong>{profile_name}</strong></p>
+#                     <p><em>{profile_bio}</em></p>
+#                     <p>Location: {escape(profile.location)}</p>
+#                     <p>Distance: {distance:.2f} km</p>
+#                 </div>
+#             """
+#             iframe = branca.element.IFrame(html=popup_content, width=250, height=150)
+#             folium.Marker([lat, lon], popup=folium.Popup(iframe)).add_to(m)
+
+#     # Render the map in HTML
+#     m = m._repr_html_()  # Convert map to HTML
+
+#     return render(request, 'directs/map_view.html', {'map': m})
+
+
 def geocode_with_retry(loc, address, max_retries=3):
     retries = 0
     while retries < max_retries:
@@ -199,13 +267,16 @@ def geocode_with_retry(loc, address, max_retries=3):
             time.sleep(1)
     return None
 
-def map_view(request):
-    # Assuming logged-in user's profile can be accessed through request.user.profile
-    user_profile = Profile.objects.filter(user=request.user).first()
-    
-    if not user_profile:
-        return render(request, 'directs/not_found.html')
 
+# todo: --> map -- multiple profile with same location -- register
+
+@login_required
+def map_view(request):
+    try:
+        user_profile = Profile.objects.get(user=request.user)
+    except ObjectDoesNotExist:
+        return redirect('sign-in')  # Redirect to the login page if the profile is not found
+    
     loc = Nominatim(user_agent="GetLoc")
     user_location = f"{user_profile.location}, Nepal"
     geocode_result = geocode_with_retry(loc, user_location)
@@ -215,12 +286,24 @@ def map_view(request):
     else:
         user_latitude, user_longitude = 27.6800062, 85.3857303  # Default location if geocoding fails
 
+    # Get the users that the logged-in user is following
+    following_users = Follow.objects.filter(follower=request.user).values_list('following', flat=True)
+
+    # Filter profiles with valid locations and in the following list
+    valid_profiles = Profile.objects.filter(user__in=following_users, location__isnull=False).exclude(location__exact="")
+    valid_profiles = valid_profiles.order_by('user__first_name')  # Order alphabetically by first name
+
+    # Paginate the valid profiles
+    paginator = Paginator(valid_profiles, 10)  # Show 10 profiles per page
+    page_number = request.GET.get('page')
+    profiles_page = paginator.get_page(page_number)
+
     # Initialize a Folium map
     m = folium.Map(location=[user_latitude, user_longitude], zoom_start=10, control_scale=True)
 
-    # Retrieve all profiles and add markers, excluding the logged-in user’s profile
-    profiles = Profile.objects.exclude(user=request.user)
-    for profile in profiles:
+    profile_urls = {}
+
+    for profile in profiles_page:  # Only include profiles on the current page
         location_str = f"{profile.location}, Nepal"
         loc_result = geocode_with_retry(loc, location_str)
 
@@ -228,28 +311,36 @@ def map_view(request):
             lat, lon = loc_result.latitude, loc_result.longitude
             distance = geodesic((user_latitude, user_longitude), (lat, lon)).km
 
-            # Profile details for popup
-            # profile_image_url = profile.image.url if profile.image.url else '/path/to/default/image.jpg'
-            profile_name = escape(profile.user.username)
+            # Get first and last names from the Profile model
+            first_name = profile.first_name.capitalize() if profile.first_name else ""
+            last_name = profile.last_name.capitalize() if profile.last_name else ""
+
+            # Use username only if both first and last names are absent
+            full_name = f"{first_name} {last_name}".strip() or escape(profile.user.username)
             profile_bio = escape(profile.bio or "No bio available")
+            profile_url = reverse('profile', args=[profile.user.username])
+            profile_urls[profile.user.id] = profile_url
 
             popup_content = f"""
                 <div style="text-align: center;">
-                   
-                    <p><strong>{profile_name}</strong></p>
-                    <p><em>{profile_bio}</em></p>
+                <strong id="profile-link-{profile.user.id}" 
+                        style="cursor: pointer; text-decoration: underline; color: rgb(51, 51, 51);">
+                    {escape(full_name)}
+                </strong>
                     <p>Location: {escape(profile.location)}</p>
                     <p>Distance: {distance:.2f} km</p>
                 </div>
             """
-            iframe = branca.element.IFrame(html=popup_content, width=250, height=150)
-            folium.Marker([lat, lon], popup=folium.Popup(iframe)).add_to(m)
 
-    # Render the map in HTML
+            # Add the marker and popup
+            iframe = branca.element.IFrame(html=popup_content, width=250, height=150)
+            popup = folium.Popup(iframe)
+            marker = folium.Marker([lat, lon], popup=popup)
+            m.add_child(marker)
+
     m = m._repr_html_()  # Convert map to HTML
 
-    return render(request, 'directs/map_view.html', {'map': m})
-
+    return render(request, 'directs/map_view.html', {'map': m, 'profiles_page': profiles_page, 'profile_urls': profile_urls})
 
 @login_required
 def CallView(request, username):
