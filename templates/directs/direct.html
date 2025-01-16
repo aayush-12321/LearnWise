@@ -122,6 +122,28 @@
 					<div class="position-relative">
 						<div class="chat-messages p-4"
 							style="background-color: #e5ddd5; height: 70vh; overflow-y: scroll;">
+							
+							<nav aria-label="Page navigation" class="pagination-container">
+								<ul class="pagination" style="justify-content: center; align-items: center; margin-top: 1rem;">
+									{% if directs.has_previous %}
+									<li class="page-item">
+										<a class="page-link" href="?page=1">First</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="?page={{ directs.previous_page_number }}">Previous</a>
+									</li>
+									{% else %}
+									<li class="page-item disabled">
+										<span class="page-link">First</span>
+									</li>
+									<li class="page-item disabled">
+										<span class="page-link">Previous</span>
+									</li>
+									{% endif %}
+							
+								</ul>
+							</nav>
+
 							{% for direct in directs %}
 							{% if direct.sender == request.user %}
 							<div class="chat-message-right pb-2">
@@ -129,7 +151,8 @@
 									<div class="message bg-primary text-white rounded p-2 mb-1"
 										style="max-width: 75%; font-size: 14px;">
 										{{direct.body}}
-										<div class="text-right text-muted small mt-1">{{direct.date|date:"H:i"}}</div>
+										<!-- <div class="text-right text-muted small mt-1">{{direct.date|date:"H:i"}}</div> -->
+										<div class="text-right text-muted small mt-1">{{ direct.date|date:"y/m/d H:i" }}</div>
 									</div>
 									<img src="{{ direct.sender.profile.image.url }}" class="rounded-circle ml-2"
 										alt="img" width="40" height="40">
@@ -143,12 +166,28 @@
 									<div class="message bg-light rounded p-2 mb-1"
 										style="max-width: 75%; font-size: 14px;">
 										{{direct.body}}
-										<div class="text-right text-muted1 small mt-1">{{direct.date|date:"H:i"}}</div>
+										<!-- <div class="text-right text-muted1 small mt-1">{{direct.date|date:"H:i"}}</div> -->
+										<div class="text-right text-muted1 small mt-1">{{ direct.date|date:"y/m/d H:i" }}</div>
 									</div>
 								</div>
 							</div>
 							{% endif %}
 							{% endfor %}
+
+
+						<nav aria-label="Page navigation" class="pagination-container">
+							<ul class="pagination" style="justify-content: center; align-items: center; margin-top: 1rem;">
+								{% if directs.has_next %}
+								<li class="page-item">
+									<a class="page-link" href="?page={{ directs.next_page_number }}">Next</a>
+								</li>
+								<li class="page-item">
+									<a class="page-link" href="?page={{ directs.paginator.num_pages }}">Last</a>
+								</li>
+								{% endif %}
+							</ul>
+						</nav>
+
 						</div>
 					</div>
 

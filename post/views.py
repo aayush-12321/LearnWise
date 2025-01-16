@@ -260,6 +260,36 @@ def PostDetail(request, post_id):
 
     return render(request, 'postdetail.html', context)
 
+# @login_required
+# def Tags(request, tag_slug):
+#     tag = get_object_or_404(Tag, slug=tag_slug)
+#     posts = Post.objects.filter(tags=tag).order_by('-posted')
+
+#     posts_with_media_info = []
+#     for post in posts:
+#         # Fetch the first picture or video from the post
+#         first_picture = post.pictures.first()
+#         media_info = None
+#         if first_picture:
+#             media_url = first_picture.image.url
+#             is_video = media_url.lower().endswith(('.mp4', '.webm'))
+#             media_info = {
+#                 'url': media_url,
+#                 'is_video': is_video
+#             }
+
+#         posts_with_media_info.append({
+#             'post': post,
+#             'media_info': media_info,
+#         })
+
+#     context = {
+#         'posts_with_media_info': posts_with_media_info,
+#         'tag': tag,
+#     }
+#     return render(request, 'tag.html', context)
+
+
 @login_required
 def Tags(request, tag_slug):
     tag = get_object_or_404(Tag, slug=tag_slug)
@@ -283,8 +313,12 @@ def Tags(request, tag_slug):
             'media_info': media_info,
         })
 
+    paginator = Paginator(posts_with_media_info, 6)
+    page_number = request.GET.get('page')
+    tags_paginator = paginator.get_page(page_number)
+
     context = {
-        'posts_with_media_info': posts_with_media_info,
+        'posts_with_media_info': tags_paginator,
         'tag': tag,
     }
     return render(request, 'tag.html', context)
@@ -327,9 +361,16 @@ def post_likers(request, post_id):
     
     # Get the usernames of the likers
     likers = post.likers.all()  # Assuming likers is a ManyToManyField
+
+    paginator = Paginator(likers, 4)
+    page_number = request.GET.get('page')
+    likers_paginator = paginator.get_page(page_number)
+
     context = {
         'post': post,
-        'likers': likers,
+        # 'likers': likers,
+        'likers': likers_paginator,
+        
     }
     return render(request, 'likers.html', context)
     

@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'assets2/style.css' %}">
     <link rel="shortcut icon" href="{% static 'assets1/favicon-removebg-preview.svg' %}" type="image/x-icon">
+    <!-- Include Leaflet CSS and JS -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script> -->
+
     <title>Register | LearnWise</title>
     <style>
         /* Basic page styling */
@@ -197,10 +201,33 @@
                 {{ user_form.bio }}
             </div>
 
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label for="id_location">Location</label>
                 {{ user_form.location }}
-            </div>
+            </div> -->
+            
+            <!-- <div class="form-group">
+                <label for="id_location">Location</label>
+                {{ user_form.location }}
+                <div id="map" style="height: 400px;"></div>
+            </div> -->
+
+            <!-- <div class="form-group">
+                <label for="id_location">Location (select from map or type manually)</label>
+                {{ user_form.location }}
+                <div id="map" style="height: 400px;"></div>
+                {{ user_form.manual_location }}
+            </div> -->
+
+               
+        <div class="form-group">
+            <label for="id_location">Location (select from map or type manually)</label>
+            {{ user_form.location }}
+            <button type="button" id="show-map-btn">Select Location from Map</button>
+            <div id="map" style="height: 400px; display: none;"></div>
+            <button type="button" id="remove-marker-btn" style="display: none;">Remove Selected Location</button>
+            {{ user_form.manual_location }}
+        </div>
 
             <div class="form-group">
                 <label for="id_url">Website URL</label>
@@ -248,4 +275,104 @@
     </div>
 </body>
 </html>
+<!-- 
+<script>
+    var map = L.map('map').setView([27.7, 85.3], 10); // Default location
 
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var marker;
+
+    map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lon = e.latlng.lng;
+
+        if (marker) {
+            marker.setLatLng(e.latlng);
+        } else {
+            marker = L.marker(e.latlng).addTo(map);
+        }
+
+        document.getElementById('id_location').value = lat + ',' + lon;
+    });
+</script> -->
+<!-- 
+<script>
+    var map = L.map('map').setView([27.7, 85.3], 10); // Default location
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var marker;
+
+    map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lon = e.latlng.lng;
+
+        if (marker) {
+            marker.setLatLng(e.latlng);
+        } else {
+            marker = L.marker(e.latlng).addTo(map);
+        }
+
+        document.getElementById('id_location').value = lat + ',' + lon;
+    });
+</script> -->
+
+<script>
+    document.getElementById('show-map-btn').addEventListener('click', function() {
+        var mapContainer = document.getElementById('map');
+        mapContainer.style.display = 'block';
+        this.style.display = 'none'; // Hide the button after showing the map
+
+        // Load Leaflet CSS dynamically
+        var leafletCSS = document.createElement('link');
+        leafletCSS.rel = 'stylesheet';
+        leafletCSS.href = 'https://unpkg.com/leaflet/dist/leaflet.css';
+        document.head.appendChild(leafletCSS);
+
+        // Load Leaflet JS dynamically
+        var leafletScript = document.createElement('script');
+        leafletScript.src = 'https://unpkg.com/leaflet/dist/leaflet.js';
+        leafletScript.onload = function() {
+            initializeMap();
+        };
+        document.head.appendChild(leafletScript);
+    });
+
+    function initializeMap() {
+        var map = L.map('map').setView([27.7, 85.3], 10); // Default location
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        var marker;
+
+        map.on('click', function(e) {
+            var lat = e.latlng.lat;
+            var lon = e.latlng.lng;
+
+            if (marker) {
+                marker.setLatLng(e.latlng);
+            } else {
+                marker = L.marker(e.latlng).addTo(map);
+            }
+
+            document.getElementById('id_location').value = lat + ',' + lon;
+            document.getElementById('remove-marker-btn').style.display = 'block'; // Show the remove button
+        });
+
+        document.getElementById('remove-marker-btn').addEventListener('click', function() {
+            if (marker) {
+                map.removeLayer(marker);
+                marker = null;
+                document.getElementById('id_location').value = '';
+                this.style.display = 'none'; // Hide the remove button
+            }
+        });
+    }
+</script>

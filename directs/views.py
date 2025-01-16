@@ -1,5 +1,5 @@
 
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404,HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from directs.models import Message
@@ -44,6 +44,7 @@ def inbox(request):
     context = {
         'directs':directs,
         'messages': messages,
+        # 'messages': message_paginator,
         'active_direct': active_direct,
         'profile': profile,
     }
@@ -61,8 +62,24 @@ def Directs(request, username):
     for message in messages:
             if message['user'].username == username:
                 message['unread'] = 0
+    
+    directs = directs.order_by('date')  # Order alphabetically by first name
+
+    paginator = Paginator(directs, 4)
+    page_number = request.GET.get('page')
+    message_paginator = paginator.get_page(page_number)
+
+        # Determine the last page number
+    last_page_number = paginator.num_pages
+
+    # Redirect to the last page if no page number is provided or invalid
+    if not page_number or not page_number.isdigit() or int(page_number) > last_page_number:
+        return HttpResponseRedirect(f'?page={last_page_number}')
+
+
     context = {
-        'directs': directs,
+        # 'directs': directs,
+        'directs': message_paginator,
         'messages': messages,
         'active_direct': active_direct,
     }
@@ -267,8 +284,15 @@ def geocode_with_retry(loc, address, max_retries=3):
             time.sleep(1)
     return None
 
-
-# todo: --> map -- multiple profile with same location -- register
+def reverse_geocode_with_retry(loc, latitude, longitude, max_retries=3):
+    retries = 0
+    while retries < max_retries:
+        try:
+            return loc.reverse((latitude, longitude), timeout=10)
+        except (GeocoderTimedOut, GeocoderUnavailable):
+            retries += 1
+            time.sleep(1)
+    return None
 
 @login_required
 def map_view(request):
@@ -291,56 +315,77 @@ def map_view(request):
 
     # Filter profiles with valid locations and in the following list
     valid_profiles = Profile.objects.filter(user__in=following_users, location__isnull=False).exclude(location__exact="")
-    valid_profiles = valid_profiles.order_by('user__first_name')  # Order alphabetically by first name
+    # print(valid_profiles)
+    valid_profiles = valid_profiles.order_by('first_name')  # Order alphabetically by first name
+    # print(valid_profiles)
 
     # Paginate the valid profiles
-    paginator = Paginator(valid_profiles, 10)  # Show 10 profiles per page
+    valid_profiles = valid_profiles.order_by('first_name')  # Order alphabetically by first name
+    # print(valid_profiles)
+    paginator = Paginator(valid_profiles, 5)  # Show 5 profiles per page
     page_number = request.GET.get('page')
-    profiles_page = paginator.get_page(page_number)
+    profiles_page = paginator.get_page(page_number) 
 
     # Initialize a Folium map
     m = folium.Map(location=[user_latitude, user_longitude], zoom_start=10, control_scale=True)
 
     profile_urls = {}
+    location_groups = {}
 
     for profile in profiles_page:  # Only include profiles on the current page
-        location_str = f"{profile.location}, Nepal"
-        loc_result = geocode_with_retry(loc, location_str)
+        try:
+            lat, lon = map(float, profile.location.split(','))
+            reverse_geocode_result = reverse_geocode_with_retry(loc, lat, lon)
+            human_readable_location = reverse_geocode_result.address if reverse_geocode_result else profile.location
+        except ValueError:
+            location_str = f"{profile.location}"
+            loc_result = geocode_with_retry(loc, location_str)
+            if loc_result:
+                lat, lon = loc_result.latitude, loc_result.longitude
+                human_readable_location = location_str
+            else:
+                continue  # Skip profiles with invalid location
 
-        if loc_result:
-            lat, lon = loc_result.latitude, loc_result.longitude
-            distance = geodesic((user_latitude, user_longitude), (lat, lon)).km
+        distance = geodesic((user_latitude, user_longitude), (lat, lon)).km
 
-            # Get first and last names from the Profile model
+        if (lat, lon) not in location_groups:
+            location_groups[(lat, lon)] = []
+
+        # Append the profile to the appropriate location group
+        location_groups[(lat, lon)].append((profile, human_readable_location))
+
+    # Iterate over location groups and add markers to the map
+    for (lat, lon), profiles in location_groups.items():
+        popup_content = "<div style='text-align: center;'>"
+        for profile, human_readable_location in profiles:
             first_name = profile.first_name.capitalize() if profile.first_name else ""
             last_name = profile.last_name.capitalize() if profile.last_name else ""
-
-            # Use username only if both first and last names are absent
             full_name = f"{first_name} {last_name}".strip() or escape(profile.user.username)
             profile_bio = escape(profile.bio or "No bio available")
             profile_url = reverse('profile', args=[profile.user.username])
             profile_urls[profile.user.id] = profile_url
 
-            popup_content = f"""
-                <div style="text-align: center;">
+            popup_content += f"""
                 <strong id="profile-link-{profile.user.id}" 
                         style="cursor: pointer; text-decoration: underline; color: rgb(51, 51, 51);">
                     {escape(full_name)}
                 </strong>
-                    <p>Location: {escape(profile.location)}</p>
-                    <p>Distance: {distance:.2f} km</p>
-                </div>
+                <p>Location: {escape(human_readable_location)}</p>
+                <p>Distance: {distance:.2f} km</p>
+                <hr>
             """
+        popup_content += "</div>"
 
-            # Add the marker and popup
-            iframe = branca.element.IFrame(html=popup_content, width=250, height=150)
-            popup = folium.Popup(iframe)
-            marker = folium.Marker([lat, lon], popup=popup)
-            m.add_child(marker)
+        # Add the marker and popup
+        iframe = branca.element.IFrame(html=popup_content, width=250, height=150)
+        popup = folium.Popup(iframe)
+        marker = folium.Marker([lat, lon], popup=popup)
+        m.add_child(marker)
 
     m = m._repr_html_()  # Convert map to HTML
 
     return render(request, 'directs/map_view.html', {'map': m, 'profiles_page': profiles_page, 'profile_urls': profile_urls})
+
 
 @login_required
 def CallView(request, username):

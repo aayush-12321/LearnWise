@@ -26,6 +26,7 @@ from .models import Rating, User
 from .forms import RatingForm
 from django.db.models import Count
 
+@login_required
 def UserProfile(request, username):
     # Get the profile user (the one whose profile is being viewed)
     profile_user = get_object_or_404(User, username=username)
@@ -101,6 +102,7 @@ def UserProfile(request, username):
     }
     return render(request, 'profile.html', context)
 
+@login_required
 def editProfile(request):
     profile = request.user.profile  # Retrieve the profile of the logged-in user
 
@@ -113,7 +115,10 @@ def editProfile(request):
         profile.first_name = request.POST.get('first_name')
         profile.last_name = request.POST.get('last_name')
         profile.bio = request.POST.get('bio')
-        profile.location = request.POST.get('location')
+        # profile.location = request.POST.get('location')
+        manual_location = request.POST.get('manual_location')
+        map_location = request.POST.get('location')
+        profile.location = manual_location if manual_location else map_location
         profile.url = request.POST.get('url')
         profile.skills = request.POST.get('skills')
         profile.role = request.POST.get('role')
@@ -129,7 +134,7 @@ def editProfile(request):
     return render(request, 'editprofile.html', context)
 
 
-
+@login_required
 def follow(request, username, option):
     user = request.user
     following = get_object_or_404(User, username=username)
@@ -151,7 +156,7 @@ def follow(request, username, option):
     except User.DoesNotExist:
         return HttpResponseRedirect(reverse('profile', args=[username]))
 
-
+@login_required
 def followers_followings_list(request, user_id, follow_type):
     # Get the user whose profile is being viewed
     user = get_object_or_404(User, id=user_id)
@@ -170,9 +175,14 @@ def followers_followings_list(request, user_id, follow_type):
         follow_users = []
         title = "Invalid follow type"
 
+    paginator = Paginator(follow_users, 4)
+    page_number = request.GET.get('page')
+    follow_paginator = paginator.get_page(page_number)
+
     context = {
         'user': user,  # User being viewed
-        'follow_users': follow_users,  # List of followers or followings
+        # 'follow_users': follow_users,  # List of followers or followings
+        'follow_users': follow_paginator,  # List of followers or followings
         'title': title,  # Title for the page
     }
     return render(request, 'follow_list.html', context)
@@ -260,7 +270,7 @@ def rate_user(request, user_id):
 #     })
 
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+@login_required
 def user_ratings(request, rated_user_id):
     rated_user = get_object_or_404(User, id=rated_user_id)
     rate_type_filter = request.GET.get('rate_type', '')  # Fetch filter value from GET
@@ -374,7 +384,7 @@ def register(request):
             profile.first_name = user_form.cleaned_data.get('first_name', profile.first_name)
             profile.last_name = user_form.cleaned_data.get('last_name', profile.last_name)
             profile.bio = user_form.cleaned_data.get('bio', profile.bio)
-            profile.location = user_form.cleaned_data.get('location', profile.location)
+            # profile.location = user_form.cleaned_data.get('location', profile.location)
             profile.url = user_form.cleaned_data.get('url', profile.url)
             profile.skills = user_form.cleaned_data.get('skills', profile.skills)
             profile.interests = user_form.cleaned_data.get('interests', profile.interests)
@@ -385,6 +395,14 @@ def register(request):
                 profile.image = user_form.cleaned_data.get('image')
                 # if profile_form.cleaned_data.get('image'):
                 # profile.image = user_form.cleaned_data.get('image')
+
+            # Use manual location if provided, otherwise use map location
+            manual_location = user_form.cleaned_data.get('manual_location')
+            if manual_location:
+                profile.location = manual_location
+            else:
+                profile.location = user_form.cleaned_data.get('location',profile.location)
+
 
             profile.save()  # Save the profile
 

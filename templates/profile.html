@@ -265,7 +265,9 @@
                     <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.bio}}</p>
                     {% endif %}
                     {% if profile.location %}
-                    <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.location}}</p>
+                    <!-- <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.location}}</p> -->
+                    <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ Address : {{profile.location|human_readable_location}}</p>
+                     
                     {% endif %}
                     {% if profile.skills %}
                     <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ Skills: {{profile.skills}}</p>
