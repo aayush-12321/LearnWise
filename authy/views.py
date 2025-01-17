@@ -161,16 +161,20 @@ def followers_followings_list(request, user_id, follow_type):
     # Get the user whose profile is being viewed
     user = get_object_or_404(User, id=user_id)
 
+    # Determine the display name
+    display_name = f"{user.profile.first_name.title()} {user.profile.last_name.title()}" if user.profile.first_name and user.profile.last_name else user.username
+
     if follow_type == 'followers':
         # Fetch all users who follow this user
         followers = user.followers.all().select_related('follower')
         follow_users = [follow.follower for follow in followers]
-        title = f"Followers of {user.username}"
+        title = f"Followers of {display_name}"
     elif follow_type == 'followings':
         # Fetch all users this user is following
         followings = user.following.all().select_related('following')
         follow_users = [follow.following for follow in followings]
-        title = f"Followings of {user.username}"
+        # title = f"Followings of {user.username}"
+        title = f"Followings of {display_name}"
     else:
         follow_users = []
         title = "Invalid follow type"

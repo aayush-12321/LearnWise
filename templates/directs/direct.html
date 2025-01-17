@@ -132,13 +132,7 @@
 									<li class="page-item">
 										<a class="page-link" href="?page={{ directs.previous_page_number }}">Previous</a>
 									</li>
-									{% else %}
-									<li class="page-item disabled">
-										<span class="page-link">First</span>
-									</li>
-									<li class="page-item disabled">
-										<span class="page-link">Previous</span>
-									</li>
+								
 									{% endif %}
 							
 								</ul>
@@ -196,8 +190,17 @@
 							{% csrf_token %}
 							<div class="input-group">
 								<input type="hidden" name="to_user" value="{{active_direct}}">
-								<input name="body" type="text" class="form-control" placeholder="Type your message"
-									style="border-radius: 20px; padding: 10px;">
+								<!-- <input name="body" type="text" class="form-control" placeholder="Type your message"
+									style="border-radius: 20px; padding: 10px;"> -->
+									<input name="body" 
+										type="text" 
+										class="form-control" 
+										placeholder="Type your message"
+										style="border-radius: 20px; padding: 10px;" 
+										id="message-input" 
+										required>
+									<span id="error-message" style="color: red; display: none;">Message cannot be empty or spaces only.</span>
+
 								<div class="input-group-append">
 									<button class="btn btn-primary" type="submit"
 										style="border-radius: 20px; margin-left: 10px;">Send</button>

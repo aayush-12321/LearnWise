@@ -12,6 +12,12 @@ class NewPostform(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['picture', 'caption', 'tags']
+    
+    def clean_body(self):
+        caption = self.cleaned_data.get('caption')
+        if len(caption) > 3000:
+            raise forms.ValidationError("Caption text cannot exceed 3000 characters.")
+        return caption
 
 # from django.core.exceptions import ValidationError
 

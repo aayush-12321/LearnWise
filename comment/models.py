@@ -4,12 +4,14 @@ from django.contrib.auth.models import User
 from post.models import Post
 from django.db.models.signals import post_save, post_delete
 from notification.models import Notification
+from django.core.validators import MaxLengthValidator
 
 
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comment")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    body = models.TextField()
+    # body = models.TextField()
+    body = models.TextField(validators=[MaxLengthValidator(2000)])
     date = models.DateTimeField(auto_now_add=True, null=True)
 
     # def __str__(self):

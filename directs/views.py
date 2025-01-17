@@ -15,7 +15,7 @@ from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 from geopy.distance import geodesic
 import folium
 import branca
-# from .models import User  # Assuming user data is stored in a model called User
+
 import time
 from django.utils.html import escape
 from django.http import JsonResponse
@@ -35,20 +35,28 @@ def inbox(request):
     if messages:
         message = messages[0]
         active_direct = message['user'].username
-        directs = Message.objects.filter(user=request.user, reciepient=message['user'])
+        directs = Message.objects.filter(user=request.user, reciepient=message['user']).order_by('date')
         directs.update(is_read=True)
 
         for message in messages:
             if message['user'].username == active_direct:
                 message['unread'] = 0
-    context = {
-        'directs':directs,
-        'messages': messages,
-        # 'messages': message_paginator,
-        'active_direct': active_direct,
-        'profile': profile,
-    }
-    return render(request, 'directs/direct.html', context)
+
+        paginator = Paginator(directs, 10)
+        page_number = request.GET.get('page')
+        if not page_number:
+            page_number = paginator.num_pages  # Redirect to the last page if no page number is provided
+        directs_paginated = paginator.get_page(page_number)
+
+        context = {
+            'directs': directs_paginated,
+            'messages': messages,
+            'active_direct': active_direct,
+            'profile': profile,
+        }
+        return render(request, 'directs/direct.html', context)
+    else:
+        return render(request, 'directs/direct.html', {'profile': profile})
 
 
 @login_required
@@ -56,18 +64,22 @@ def Directs(request, username):
     user  = request.user
     messages = Message.get_message(user=user)
     active_direct = username
-    directs = Message.objects.filter(user=user, reciepient__username=username)  
+    directs = Message.objects.filter(user=user, reciepient__username=username).order_by('date')
     directs.update(is_read=True)
 
     for message in messages:
             if message['user'].username == username:
                 message['unread'] = 0
     
-    directs = directs.order_by('date')  # Order alphabetically by first name
+    # directs = directs.order_by('date')
 
-    paginator = Paginator(directs, 4)
+    paginator = Paginator(directs, 10)
     page_number = request.GET.get('page')
-    message_paginator = paginator.get_page(page_number)
+    try:
+        message_paginator = paginator.get_page(page_number)
+    except EmptyPage:
+        message_paginator = paginator.page(paginator.num_pages)
+    # message_paginator = paginator.get_page(page_number)
 
         # Determine the last page number
     last_page_number = paginator.num_pages
@@ -85,6 +97,46 @@ def Directs(request, username):
     }
     return render(request, 'directs/direct.html', context)
 
+# @login_required
+# def Directs(request, username):
+#     user = request.user
+#     messages = Message.get_message(user=user)
+#     active_direct = username
+#     directs = Message.objects.filter(user=user, reciepient__username=username)
+
+#     directs.update(is_read=True)
+
+#     for message in messages:
+#         if message['user'].username == username:
+#             message['unread'] = 0
+
+#     # Ordering by date
+#     directs = directs.order_by('date')
+
+#     # Debugging - log the order of the messages
+#     for direct in directs:
+#         print(direct.date)  # This will log the date values in the terminal to verify ordering.
+
+#     paginator = Paginator(directs, 10)
+#     page_number = request.GET.get('page')
+#     message_paginator = paginator.get_page(page_number)
+
+#     # Determine the last page number
+#     last_page_number = paginator.num_pages
+
+#     # Redirect to the last page if no page number is provided or invalid
+#     if not page_number or not page_number.isdigit() or int(page_number) > last_page_number:
+#         return HttpResponseRedirect(f'?page={last_page_number}')
+
+#     context = {
+#         'directs': message_paginator,
+#         'messages': messages,
+#         'active_direct': active_direct,
+#     }
+#     return render(request, 'directs/direct.html', context)
+
+
+@login_required
 def SendDirect(request):
     from_user = request.user
     to_user_username = request.POST.get('to_user')
@@ -92,29 +144,48 @@ def SendDirect(request):
 
     strip_body = request.POST.get('body', '').strip()  # Use .strip() to remove leading and trailing spaces
 
-    if strip_body:
+    followings = from_user.following.all().select_related('following')
+    follow_users = [follow.following for follow in followings]
+    title = f"Followings of {from_user.username}"
 
-        followings = from_user.following.all().select_related('following')
-        follow_users = [follow.following for follow in followings]
-        title = f"Followings of {from_user.username}"
-
-        if request.method == "POST":
-            try:
-                to_user = User.objects.get(username=to_user_username)
-                # print(to_user)
+    if request.method == "POST":
+        try:
+            to_user = User.objects.get(username=to_user_username)
+            if strip_body:
                 Message.sender_message(from_user, to_user, body)
-                return redirect('message')
-            except:
-                context = {
-                        'user': from_user,  # User being viewed
-                        'follow_users': follow_users,  # List of followers or followings
-                        'title': title,  # Title for the page
-                        }
-                return render(request, 'follow_list.html', context)
+
+            # Fetch all messages between users and calculate the last page
+            all_messages = Message.objects.filter(
+                user=from_user, reciepient=to_user
+            ).order_by('date')
+            paginator = Paginator(all_messages, 10)
+            last_page = paginator.num_pages
+
+            # Redirect to the last page of the conversation
+            return redirect(f'/message/?page={last_page}')
+
+        except User.DoesNotExist:
+            context = {
+                'user': from_user,  # User being viewed
+                'follow_users': follow_users,  # List of followers or followings
+                'title': title,  # Title for the page
+            }
+            return render(request, 'follow_list.html', context)
     else:
         return redirect('message')
 
-
+@login_required
+def NewConversation(request, username):
+    from_user = request.user
+    body = ''
+    try:
+        to_user = User.objects.get(username=username)
+    except Exception as e:
+        return redirect('search-users')
+    if from_user != to_user:
+        Message.sender_message(from_user, to_user, body)
+    return redirect('message')
+    
 # def UserSearch(request):
 #     query = request.GET.get('q')
 #     context = {}
@@ -132,6 +203,7 @@ def SendDirect(request):
 
 #     return render(request, 'directs/search.html', context)
 
+@login_required
 def UserSearch(request):
     query = request.GET.get('q', '').strip()  # Search query
     selected_skills = request.GET.getlist('skills')  # Selected skills for filtering
@@ -199,17 +271,7 @@ def UserSearch(request):
     }
 
     return render(request, 'directs/search.html', context)
-
-def NewConversation(request, username):
-    from_user = request.user
-    body = ''
-    try:
-        to_user = User.objects.get(username=username)
-    except Exception as e:
-        return redirect('search-users')
-    if from_user != to_user:
-        Message.sender_message(from_user, to_user, body)
-    return redirect('message')
+    
 
 
 # def geocode_with_retry(loc, address, max_retries=3):

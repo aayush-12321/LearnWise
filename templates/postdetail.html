@@ -1,14 +1,12 @@
-post details:
-
 {% extends 'base.html'%}
 {% load static %}
 
 {% load crispy_forms_tags %}
-{% block content %}
 
-<head>
-    <link rel="shortcut icon" href="{% static 'assets1/favicon-removebg-preview.svg' %}" type="image/x-icon">
-    <style>
+
+{% block style %}
+
+<style>
         .role {
             margin: 0px 15px;
             font-size: 12px;
@@ -313,8 +311,15 @@ post details:
             margin-right: 1rem;
         }
 
+        .error{
+            color: red;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
     </style>
-</head>
+    {% endblock style %}
+
+{% block content %}
 <main class="main-container">
     <section class="content-container">
         <div class="content">
@@ -589,6 +594,13 @@ post details:
                         <form method="POST">
                             {% csrf_token %}
                             <div class="bg-light p-2">
+                                {% if form.body.errors %}
+                                <div class="error">
+                                    {% for error in form.body.errors %}
+                                        <p>* {{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
                                 <div class="d-flex flex-row align-items-start">
                                     <a href="#" class="side-menu__user-avatar">
                                         <img src="{{ request.user.profile.image.url }}" alt="User Picture">
@@ -727,6 +739,13 @@ post details:
 
                     <!-- Edit Comment Modal -->
                     <div class="modal fade" id="editCommentModal" tabindex="-1" aria-hidden="true">
+                        {% if form.body.errors %}
+                        <div class="error">
+                            {% for error in form.body.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">

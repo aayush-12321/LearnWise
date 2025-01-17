@@ -157,7 +157,7 @@ def index(request):
 @login_required
 def NewPost(request):
     # Define the maximum size in bytes (50 MB = 50 * 1024 * 1024)
-    MAX_SIZE = 50 * 1024 * 1024
+    MAX_SIZE = 100 * 1024 * 1024
     MAX_FILES = 20  # Maximum number of files
     error_message = ''  # Initialize error_message
     success_message = ''  # Initialize success_message
@@ -174,8 +174,12 @@ def NewPost(request):
         # Check if any file exceeds the size limit
         oversized_pictures = [picture.name for picture in pictures if picture.size > MAX_SIZE]
         if oversized_pictures:
-            error_message = f"The following files exceed the 50 MB limit: {', '.join(oversized_pictures)}. Post not created."
+            error_message = f"The following files exceed the 100 MB limit: {', '.join(oversized_pictures)}. Post not created."
             return render(request, 'newpost.html', {'error_message': error_message})  # Stop execution and return to form
+
+        if len(caption) > 3000:
+            error_message = "Caption cannot exceed 3000 characters."
+            return render(request, 'newpost.html', {'error_message': error_message})
 
         if caption or pictures:
             post = Post.objects.create(
@@ -203,8 +207,11 @@ def NewPost(request):
 
 @login_required
 def PostDetail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    try:
+        post = get_object_or_404(Post, id=post_id)
 
+    except:
+        return HttpResponseRedirect(reverse('index'))
     user = request.user
     # print(user)
 
@@ -379,7 +386,7 @@ def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id, user=request.user)  # Ensure the user can only edit their own posts
     
     # Define the maximum size in bytes (50 MB = 50 * 1024 * 1024)
-    MAX_SIZE = 50 * 1024 * 1024
+    MAX_SIZE = 100 * 1024 * 1024
     MAX_FILES = 20  # Maximum number of files
 
     if request.method == 'POST':
@@ -404,6 +411,11 @@ def edit_post(request, post_id):
         if oversized_pictures:
             error_message = f"The following files exceed the 50 MB limit: {', '.join(oversized_pictures)}. Post not updated."
             return render(request, 'editpost.html', {'post': post, 'error_message': error_message})  # Return with error message
+
+        # Check if the caption exceeds the character limit
+        if len(caption) > 3000:
+            error_message = "Caption cannot exceed 3000 characters."
+            return render(request, 'editpost.html', {'post': post, 'error_message': error_message})
 
         # Check if removing caption without picture or removing picture without caption
         has_existing_images = post.pictures.exclude(id__in=remove_images).exists()  # Remaining images after removal
@@ -529,6 +541,9 @@ def edit_comment(request, comment_id):
 
             if not new_body:
                 return JsonResponse({"success": False, "error": "Comment body cannot be empty."})
+            
+            if len(new_body) > 2000:
+                return JsonResponse({"success": False, "error": "Comment body cannot exceed 2000 characters"})
 
             comment.body = new_body
             comment.save()
