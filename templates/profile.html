@@ -266,8 +266,12 @@
                     {% endif %}
                     {% if profile.location %}
                     <!-- <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.location}}</p> -->
-                    <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ Address : {{profile.location|human_readable_location}}</p>
-                     
+                    <!-- <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ Address : {{profile.location|human_readable_location}}</p>
+                      -->
+                      <a href="{% url 'location' profile_user %}?location={{ profile.location|urlencode }}" 
+                      style="text-decoration: none; color: inherit; font-size: 14px; margin: 10px 0px;" class="profile-info">
+                      ◉ Address : {{ profile.location|human_readable_location }}
+                   </a>
                     {% endif %}
                     {% if profile.skills %}
                     <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ Skills: {{profile.skills}}</p>

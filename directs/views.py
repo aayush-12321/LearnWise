@@ -185,23 +185,6 @@ def NewConversation(request, username):
     if from_user != to_user:
         Message.sender_message(from_user, to_user, body)
     return redirect('message')
-    
-# def UserSearch(request):
-#     query = request.GET.get('q')
-#     context = {}
-#     if query:
-#         users = User.objects.filter(Q(username__icontains=query))
-
-#         # Paginator
-#         paginator = Paginator(users, 8)
-#         page_number = request.GET.get('page')
-#         users_paginator = paginator.get_page(page_number)
-
-#         context = {
-#             'users': users_paginator,
-#             }
-
-#     return render(request, 'directs/search.html', context)
 
 @login_required
 def UserSearch(request):
@@ -364,7 +347,7 @@ def map_view(request):
         return redirect('sign-in')  # Redirect to the login page if the profile is not found
     
     loc = Nominatim(user_agent="GetLoc")
-    user_location = f"{user_profile.location}, Nepal"
+    user_location = f"{user_profile.location}"
     geocode_result = geocode_with_retry(loc, user_location)
 
     if geocode_result:
@@ -428,8 +411,7 @@ def map_view(request):
             profile_urls[profile.user.id] = profile_url
 
             popup_content += f"""
-                <strong id="profile-link-{profile.user.id}" 
-                        style="cursor: pointer; text-decoration: underline; color: rgb(51, 51, 51);">
+                <strong style="color: rgb(51, 51, 51);">
                     {escape(full_name)}
                 </strong>
                 <p>Location: {escape(human_readable_location)}</p>
@@ -448,6 +430,57 @@ def map_view(request):
 
     return render(request, 'directs/map_view.html', {'map': m, 'profiles_page': profiles_page, 'profile_urls': profile_urls})
 
+@login_required
+def location(request,username): 
+    user = get_object_or_404(User, username=username)
+    # print(user)
+    loc = Nominatim(user_agent="GetLoc")
+    location_query = request.GET.get('location')# Get the location query from the URL
+    geocode_result = geocode_with_retry(loc, location_query)
+
+    if location_query:
+        # Geocode the provided location
+        geocode_result = geocode_with_retry(loc, location_query)
+        if geocode_result:
+            user_latitude, user_longitude = geocode_result.latitude, geocode_result.longitude
+        else:
+            user_latitude, user_longitude = 27.6800062, 85.3857303  # Default location if geocoding fails
+        # Initialize a Folium map for the specific location
+
+        try:
+            lat, lon = map(float, location_query.split(','))
+            reverse_geocode_result = reverse_geocode_with_retry(loc, lat, lon)
+            human_readable_location = reverse_geocode_result.address if reverse_geocode_result else location_query
+
+        except ValueError:
+            location_str = location_query
+            loc_result = geocode_with_retry(loc, location_str)
+            if loc_result:
+                    lat, lon = loc_result.latitude, loc_result.longitude
+                    human_readable_location = location_str
+            else:
+                return HttpResponseRedirect(reverse('profile', args=[user.username]))
+
+        popup_content = f"""
+            <div style="text-align: center; width: 250px; font-size: 14px;">
+                    <strong id="profile-link-{user.id}" 
+                            style="cursor: pointer; color: rgb(51, 51, 51);">
+                        {escape(user.username)}
+                    </strong>
+                
+                <p>Location: {escape(human_readable_location)}</p>
+            </div>
+        """
+
+        m = folium.Map(location=[user_latitude, user_longitude], zoom_start=10, control_scale=True)
+        folium.Marker([user_latitude, user_longitude], popup=popup_content).add_to(m)
+
+        profiles_page=1
+        profile_urls=user.username
+
+    m = m._repr_html_()  # Convert map to HTML
+
+    return render(request, 'directs/map_view.html', {'map': m})
 
 @login_required
 def CallView(request, username):

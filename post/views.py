@@ -267,36 +267,6 @@ def PostDetail(request, post_id):
 
     return render(request, 'postdetail.html', context)
 
-# @login_required
-# def Tags(request, tag_slug):
-#     tag = get_object_or_404(Tag, slug=tag_slug)
-#     posts = Post.objects.filter(tags=tag).order_by('-posted')
-
-#     posts_with_media_info = []
-#     for post in posts:
-#         # Fetch the first picture or video from the post
-#         first_picture = post.pictures.first()
-#         media_info = None
-#         if first_picture:
-#             media_url = first_picture.image.url
-#             is_video = media_url.lower().endswith(('.mp4', '.webm'))
-#             media_info = {
-#                 'url': media_url,
-#                 'is_video': is_video
-#             }
-
-#         posts_with_media_info.append({
-#             'post': post,
-#             'media_info': media_info,
-#         })
-
-#     context = {
-#         'posts_with_media_info': posts_with_media_info,
-#         'tag': tag,
-#     }
-#     return render(request, 'tag.html', context)
-
-
 @login_required
 def Tags(request, tag_slug):
     tag = get_object_or_404(Tag, slug=tag_slug)
@@ -555,9 +525,6 @@ def edit_comment(request, comment_id):
             return JsonResponse({"success": False, "error": "Comment not found or not authorized."})
 
     return JsonResponse({"success": False, "error": "Invalid request method."})
-
-
-
 
 @login_required
 @csrf_exempt
