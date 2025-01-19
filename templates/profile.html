@@ -187,6 +187,90 @@
     }
 
 
+    .profile-image img{
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 5px solid white;
+        position: relative;
+        top: -65px;
+        right: 300px;
+        margin-left: 20%;
+    }
+
+    .role-and-ratings{
+        margin-top: -65px;
+    }
+/* Styles for widths below 970px */
+@media (max-width: 970px) {
+    .profile {
+        margin: 10px auto; /* Ensure the container stays centered */
+        padding: 10px; /* Slightly reduce padding */
+        box-sizing: border-box; /* Include padding in width calculations */
+    }
+
+    .container{
+        margin-left: 0%;
+    }
+
+    .profile-container {
+        margin: 0 auto; /* Center the container */
+        padding: 10px; /* Add some internal spacing */
+    }
+
+    .profile-user-settings {
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+        align-items: flex-start; /* Align items to the left */
+        text-align: left; /* Align text to the left */
+        padding: 10px;
+        margin-left: 5%;
+        width: 100%; 
+        margin-bottom: 20px; 
+        margin-top: -120px; 
+        margin-left: 10%;
+    }
+
+    .role-and-ratings{
+        margin-top: 10px;
+    }
+
+/* Profile image specific styling */
+.profile-image img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 5px solid white;
+    position: relative;
+    top: -65px;
+    right: 40%;
+    margin-left: 20%;
+}
+}
+/* Styles for widths below 640px */
+@media (max-width: 640px) {
+    .profile {
+        margin: 5px auto; /* Further reduce margins for smaller screens */
+        padding: 5px; /* Reduce padding for tighter spacing */
+    }
+
+    .profile-container {
+        padding: 5px; /* Adjust internal spacing */
+    }
+
+    .profile-user-settings {
+        padding: 5px;
+    }
+
+    .profile-image,
+    .cover-image {
+        margin: 0 auto;
+        max-width: 90%; /* Slightly smaller for very small screens */
+        height: auto;
+    }
+}
+
+
     </style>
 
 </head>
@@ -208,8 +292,7 @@
                 <!-- Profile Image -->
                 <div class="profile-image" style="text-align: center; margin-bottom: 20px; z-index: 1;">
                     <a href="{{ profile.image.url }}">
-                        <img src="{{ profile.image.url }}" alt="Profile Image"
-                            style="width: 200px; height: 200px; border-radius: 50%; border: 5px solid white; position: relative; top: -65px; right: 300px;">
+                    <img src="{{ profile.image.url }}" alt="Profile Image">
                     </a>
 
                 </div>
@@ -223,8 +306,7 @@
 
 
                 <!-- Profile User Settings -->
-                <div class="profile-user-settings"
-                    style="width: 100%; margin-bottom: 20px; margin-top: -80px; margin-left: 110px;">
+                <div class="profile-user-settings">
                     
                     <div class="role-and-ratings">
                         {% if profile.role %}
@@ -260,7 +342,7 @@
                     <h6 class="profile-user-name" style="font-size: 20px; margin: 0; font-weight: 450; margin: 8px 0px;">{{profile.first_name}}
                         {{profile.last_name}}</h6>
                     {% endif %}
-                    <h5 style="font-size: 15px; color: gray; margin: 5px 0;">@{{profile.user.username}}</h5>
+                    <h5 class="profile-user-name" style="font-size: 15px; color: gray; margin: 5px 2px;">@{{profile.user.username}}</h5>
                     {% if profile.bio %}
                     <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.bio}}</p>
                     {% endif %}
@@ -284,7 +366,7 @@
                             style="color: blue;">{{profile.url}}</a></p>
                     {% endif %}
 
-                    <div style="margin-top: 15px;">
+                    <div style="margin-top: 15px; margin-bottom: 8px;">
                         {% if request.user.is_authenticated and request.user == profile.user %}
                         <a href="{% url 'editprofile' %}" class="btn profile-edit-btn">Edit Profile</a>
                         <a href="{% url 'logout' %}" id="logout" class="btn profile-edit-btn">Logout</a>
@@ -297,7 +379,7 @@
                 </div>
 
                 <!-- Profile Stats -->
-                <div class="profile-stats" style="width: 100%; text-align: center; margin-bottom: 20px;">
+                <div class="profile-stats" style="width: 100%; text-align: center; margin-bottom: 8px;">
                     <ul style="list-style: none; padding: 0; margin: 0; display: flex; justify-content: space-around;">
                         <li><span class="profile-stat-count" style="font-weight: bold;">{{posts_count}}</span> posts
                         </li>
@@ -326,7 +408,7 @@
                 </div>
 
                 <!-- Follow and Message Buttons -->
-                <div style="margin-top: 20px; text-align: center; width: 100%;">
+                <div style="margin-top: 10px; text-align: center; width: 100%;">
 
                     <a href="{% url 'profile' profile.user %}" class="btn profile-edit-btn profile-page-btn"
                         style="color: white; background-color: rgb(63, 224, 125); border-radius: 5px; padding: 8px 12px; text-align: center; text-decoration: none; flex-grow: 1;">Posts</a>
