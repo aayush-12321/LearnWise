@@ -48,7 +48,14 @@ def inbox(request):
             page_number = paginator.num_pages  # Redirect to the last page if no page number is provided
         directs_paginated = paginator.get_page(page_number)
 
+        active_profile=Profile.objects.get(user__username=active_direct)
+        # print(active_profile)
+        first_name = active_profile.first_name.capitalize()
+        last_name = active_profile.last_name.capitalize()
+        full_name = f"{first_name} {last_name}" if first_name and last_name else active_direct if active_direct else ""
+
         context = {
+            'full_name': full_name,
             'directs': directs_paginated,
             'messages': messages,
             'active_direct': active_direct,
@@ -88,9 +95,13 @@ def Directs(request, username):
     if not page_number or not page_number.isdigit() or int(page_number) > last_page_number:
         return HttpResponseRedirect(f'?page={last_page_number}')
 
-
+    active_profile=Profile.objects.get(user__username=username)
+    first_name = active_profile.first_name.capitalize()
+    last_name = active_profile.last_name.capitalize()
+    full_name = f"{first_name} {last_name}" if first_name and last_name else active_direct if active_direct else ""
     context = {
         # 'directs': directs,
+        'full_name': full_name,
         'directs': message_paginator,
         'messages': messages,
         'active_direct': active_direct,
@@ -141,9 +152,13 @@ def SendDirect(request):
     from_user = request.user
     to_user_username = request.POST.get('to_user')
     body = request.POST.get('body')
+    max_length = 2000
 
     strip_body = request.POST.get('body', '').strip()  # Use .strip() to remove leading and trailing spaces
 
+    if len(strip_body) > max_length:
+        return redirect('message')
+        
     followings = from_user.following.all().select_related('following')
     follow_users = [follow.following for follow in followings]
     title = f"Followings of {from_user.username}"

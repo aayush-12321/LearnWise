@@ -2,7 +2,7 @@ from django import template
 from django.urls import reverse
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
-
+import time
 
 register = template.Library()
 

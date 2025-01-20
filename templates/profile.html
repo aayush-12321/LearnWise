@@ -196,6 +196,7 @@
         top: -65px;
         right: 300px;
         margin-left: 20%;
+        object-fit: cover;
     }
 
     .role-and-ratings{
@@ -246,6 +247,10 @@
     right: 40%;
     margin-left: 20%;
 }
+
+#learner,#mentor,.ratings-link{
+        margin-top: 22px;
+    }
 }
 /* Styles for widths below 640px */
 @media (max-width: 640px) {
@@ -267,6 +272,10 @@
         margin: 0 auto;
         max-width: 90%; /* Slightly smaller for very small screens */
         height: auto;
+    }
+    
+    #learner,#mentor,.ratings-link{
+        margin-top: 22px;
     }
 }
 
@@ -309,6 +318,7 @@
                 <div class="profile-user-settings">
                     
                     <div class="role-and-ratings">
+                        <a href="{% url 'user_ratings' profile_user.id %}" class="ratings-link">Ratings</a>
                         {% if profile.role %}
                             {% if profile.role == "Mentor" %}
                                 <p class="role mentor" id="mentor">{{ profile.role }}</p>
@@ -317,7 +327,6 @@
                             {% endif %}
                         {% endif %}
                     
-                        <a href="{% url 'user_ratings' profile_user.id %}" class="ratings-link">Ratings</a>
                     </div>
                     
                     <div class="rating">
@@ -347,9 +356,7 @@
                     <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.bio}}</p>
                     {% endif %}
                     {% if profile.location %}
-                    <!-- <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.location}}</p> -->
-                    <!-- <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ Address : {{profile.location|human_readable_location}}</p>
-                      -->
+                  
                       <a href="{% url 'location' profile_user %}?location={{ profile.location|urlencode }}" 
                       style="text-decoration: none; color: inherit; font-size: 14px; margin: 10px 0px;" class="profile-info">
                       ◉ Address : {{ profile.location|human_readable_location }}
