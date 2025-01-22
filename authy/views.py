@@ -279,7 +279,7 @@ def user_ratings(request, rated_user_id):
     rated_user = get_object_or_404(User, id=rated_user_id)
     rate_type_filter = request.GET.get('rate_type', '')  # Fetch filter value from GET
     ratings = Rating.objects.filter(rated_user=rated_user)
-    
+
     rating_counts = Rating.objects.filter(rated_user=rated_user).values('rate_type').annotate(count=Count('id'))
     rating_type_counts = {item['rate_type']: item['count'] for item in rating_counts}
     
@@ -298,10 +298,10 @@ def user_ratings(request, rated_user_id):
             # Exclude these user ratings from the main ratings list
             ratings = ratings.exclude(id__in=user_ratings.values_list('id', flat=True))
             # Add the user's ratings at the top
-            ratings = list(user_ratings) + list(ratings)
+            ratings = list(user_ratings.order_by('-rating')) + list(ratings.order_by('-rating'))
 
     # Pagination setup
-    paginator = Paginator(ratings, 6)  # Show 10 ratings per page
+    paginator = Paginator(ratings, 6)  # Show 6 ratings per page
     page = request.GET.get('page')
 
     try:

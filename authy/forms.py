@@ -93,7 +93,7 @@ class UserRegisterForm(UserCreationForm):
         return user
 
 class RatingForm(forms.ModelForm):
-    MAX_REVIEW_LENGTH = 100  
+    MAX_REVIEW_LENGTH = 300  
 
     class Meta:
         model = Rating

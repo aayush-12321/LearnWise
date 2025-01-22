@@ -4,7 +4,7 @@
 {% block style %}
 <style>
     .ratings-container {
-        max-width: 600px;
+        max-width: 800px;
         margin: 40px auto;
         padding: 20px;
         background-color: #f9f9f9;
@@ -35,6 +35,9 @@
         margin-bottom: 15px;
         border-left: 4px solid #FFD700;
         position: relative;
+        display: flex;
+        flex-direction: column;
+        word-wrap: break-word;
     }
 
     .my-rating{
@@ -42,8 +45,13 @@
 
     }
 
-    .rating-item strong {
+    .rating-item strong, .rating-item b {
         color: #333;
+        display: inline-block;
+        max-width: 100%;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        white-space: normal;
     }
 
     .rating-item em {
@@ -114,6 +122,53 @@
         font-size: 14px; /* Adjust font size if needed */
     }
 
+@media screen and (max-width: 600px) {
+        .ratings-container {
+            padding: 10px;
+        }
+
+        .average-rating {
+            font-size: 1.2em;
+        }
+
+        .rating-item {
+            padding: 10px;
+        }
+
+        .rating-item small {
+            font-size: 0.8em;
+        }
+
+        .filter-form {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-form select {
+            width: 100%;
+        }
+
+        .filter-form button {
+            width: 100%;
+        }
+        
+    }
+
+    @media screen and (max-width: 1146px) {
+        .ratings-container {
+            padding: 10px;
+            padding-top: 50px;
+            
+        }
+    }
+
+    @media screen and (max-width: 285px) {
+        .delete-button {
+            flex-direction: column;
+            
+        }
+    }
+
 </style>
 {% endblock style %}
 
@@ -174,7 +229,30 @@
             {% if rating.reviewer == user %}
             <div class="rating-item my-rating">
                 <a href="{% url 'profile' rating.reviewer.username %}" style="text-decoration: none;">
-                    <strong>{{ rating.reviewer.username }} ({{ rating.rate_type|capfirst }})</strong>
+                    <!-- <strong>{{ rating.reviewer.username }} ({{ rating.rate_type|capfirst }})</strong> -->
+                     
+                    {% if rating.reviewer.profile.role == "Learner" %}
+                    {% if rating.reviewer.profile.first_name %}
+                    <strong style="color: red;">
+                        {{ rating.reviewer.profile.first_name|capfirst }} 
+                        {{ rating.reviewer.profile.last_name|capfirst }} 
+                        </strong>
+                    {% else %}
+                        <b style="color: red;">{{ rating.reviewer.username }}</b>
+                    {% endif %}
+                    <b style="text-decoration: none; color: rgb(51, 51, 51);">({{ rating.rate_type|capfirst }})</b>
+
+                {% elif rating.reviewer.profile.role == "Mentor" %}
+                        {% if rating.reviewer.profile.first_name %}
+                        <strong style="color: green;">
+                            {{ rating.reviewer.profile.first_name|capfirst }} 
+                            {{ rating.reviewer.profile.last_name|capfirst }} 
+                            </strong>
+                        {% else %}
+                            <b style="color: green;">{{ rating.reviewer.username }}</b>
+                        {% endif %}
+                        <b style="text-decoration: none; color: rgb(51, 51, 51);">({{ rating.rate_type|capfirst }})</b>
+                {% endif %}
                 </a>
                 <em>{{ rating.rating }} stars</em>
                 <p>{{ rating.review }}</p>
@@ -187,7 +265,30 @@
         {% else %}
             <div class="rating-item">
                 <a href="{% url 'profile' rating.reviewer.username %}" style="text-decoration: none;">
-                    <strong>{{ rating.reviewer.username }} ({{ rating.rate_type|capfirst }})</strong>
+                    <!-- <strong>{{ rating.reviewer.username }} ({{ rating.rate_type|capfirst }})</strong> -->
+
+                    {% if rating.reviewer.profile.role == "Learner" %}
+                        {% if rating.reviewer.profile.first_name %}
+                        <strong style="color: red;">
+                            {{ rating.reviewer.profile.first_name|capfirst }} 
+                            {{ rating.reviewer.profile.last_name|capfirst }} 
+                            </strong>
+                        {% else %}
+                            <b style="color: red;">{{ rating.reviewer.username }}</b>
+                        {% endif %}
+                        <b style="text-decoration: none; color: rgb(51, 51, 51);">({{ rating.rate_type|capfirst }})</b>
+
+                    {% elif rating.reviewer.profile.role == "Mentor" %}
+                            {% if rating.reviewer.profile.first_name %}
+                            <strong style="color: green;">
+                                {{ rating.reviewer.profile.first_name|capfirst }} 
+                                {{ rating.reviewer.profile.last_name|capfirst }} 
+                                </strong>
+                            {% else %}
+                                <b style="color: green;">{{ rating.reviewer.username }}</b>
+                            {% endif %}
+                            <b style="text-decoration: none; color: rgb(51, 51, 51);">({{ rating.rate_type|capfirst }})</b>
+                    {% endif %}
                 </a>
                 <em>{{ rating.rating }} stars</em>
                 <p>{{ rating.review }}</p>

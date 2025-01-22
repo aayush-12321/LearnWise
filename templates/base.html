@@ -111,6 +111,18 @@
       color: #00bcd4;
     }
 
+    .navbar-profile-button{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    }
+
+    .navbar-profile-button-image{
+      margin-right: 0.3rem;
+    }
+
+
     /* Responsive Design */
     @media (max-width: 1210px) {
   .navbar {
@@ -203,7 +215,7 @@
       }
     }
  
-    @media (max-width: 410px) {
+    @media (max-width: 415px) {
       .navbar-center input[type="text"] {
         max-width: 50%;
         margin-left: 0.2rem;
@@ -213,7 +225,7 @@
         padding-right: 7%;
       }
     }
-    @media (max-width: 380px) {
+    @media (max-width: 385px) {
       .navbar-center input[type="text"] {
        display: none;
       }
@@ -245,11 +257,15 @@
     <div class="menu-icon" onclick="toggleMenu()">&#9776;</div>
     <div class="navbar-links">
       <a href="{% url 'index' %}" title="Home">&#x1F3E0; Home</a>
-      <a href="{% url 'newpost' %}" title="Create">&#x2795; Create New Post</a>
+      <a href="{% url 'newpost' %}" title="Create New Post">&#x2795; Create New Post</a>
       <a href="{% url 'message' %}" title="Messages">&#x1F4AC; Messages</a>
-      <a href="{% url 'videocall' %}" title="Call" target="_blank">&#x260E; Video Conference</a>
+      <a href="{% url 'videocall' %}" title="Video Conference" target="_blank">&#x260E; Video Conference</a>
       <a href="{% url 'map_view' %}" title="Map" target="_blank">&#x1F5FA; Map</a>
-      <a href="{% url 'profile' request.user %}" title="Profile">&#x1F464; Profile</a>
+      <!-- <a href="{% url 'profile' request.user %}" title="Profile">&#x1F464; Profile</a> -->
+      <a href="{% url 'profile' request.user %}" class="navbar-profile-button" title="{{request.user.profile.first_name|capfirst}}'s Profile"> 
+        <div class="profile-button__picture navbar-profile-button-image">
+          <img src="{{request.user.profile.image.url}}" alt="User Picture">
+        </div><span>Profile</span> </a>
       <a href="{% url 'logout' %}" title="Logout">&#x23CF; Logout</a>
     </div>
     

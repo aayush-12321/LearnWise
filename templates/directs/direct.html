@@ -256,6 +256,7 @@
 			</div>
 
             {% for direct in directs %}
+            {% if direct.body != '' %}
             {% if direct.sender == request.user %}
             <div class="message message-right">{{ direct.body }}
                 <div class="text-white-50 small mt-1">{{ direct.date|date:"y/m/d H:i" }}</div>
@@ -264,6 +265,7 @@
             <div class="message message-left">{{ direct.body }}
                 <div class="text-muted small mt-1">{{ direct.date|date:"y/m/d H:i" }}</div>
             </div>
+            {% endif %}
             {% endif %}
             {% endfor %}
         </div>
