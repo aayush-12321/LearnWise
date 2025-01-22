@@ -68,6 +68,11 @@
     .form-btn:hover {
       background-color: rgb(52, 190, 105);
     }
+    .error-message{
+      color: red;
+      font-size: 14px;
+      margin-top: 5px;
+    }
   </style>
 </head>
 
@@ -79,7 +84,11 @@
           {% csrf_token %}
           <div class="form-header">Edit Profile</div>
           <hr>
-
+          <div>
+            {% if error_message %}
+            <p class="error-message">{{ error_message }}</p>
+            {% endif %}
+          </div>
           <span style="margin-top:5px; padding: 5px; font-size: 20px;">Current Profile</span><br>
           <div class="side-menu__user-profile"
             style="display: flex; align-items: center; padding: 10px; background-color: #f9f9f9; border-radius: 8px; margin-top: 5px;">

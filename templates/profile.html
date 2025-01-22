@@ -46,7 +46,7 @@
             padding: 10px;
             border-radius: 4px;
             width: 72px;
-            margin: 10px;
+            margin: 10px 2px;
             font-size: 15px;
             transition: background-color 0.3s ease, color 0.3s ease; 
             text-decoration: underline;
@@ -202,12 +202,26 @@
     .role-and-ratings{
         margin-top: -65px;
     }
+
+    .profile-user-settings {
+        display: flex;
+        flex-direction: column; 
+        align-items: flex-start; 
+        text-align: left; 
+        padding: 10px;
+        margin-left: 5%;
+        width: 100%; 
+        margin-bottom: 20px; 
+        margin-top: -20px; 
+        margin-left: 10%;
+    }
+
 /* Styles for widths below 970px */
 @media (max-width: 970px) {
     .profile {
-        margin: 10px auto; /* Ensure the container stays centered */
-        padding: 10px; /* Slightly reduce padding */
-        box-sizing: border-box; /* Include padding in width calculations */
+        margin: 10px auto; 
+        padding: 10px; 
+        box-sizing: border-box; 
     }
 
     .container{
@@ -215,15 +229,15 @@
     }
 
     .profile-container {
-        margin: 0 auto; /* Center the container */
-        padding: 10px; /* Add some internal spacing */
+        margin: 0 auto; 
+        padding: 10px; 
     }
 
     .profile-user-settings {
         display: flex;
-        flex-direction: column; /* Stack items vertically */
-        align-items: flex-start; /* Align items to the left */
-        text-align: left; /* Align text to the left */
+        flex-direction: column; 
+        align-items: flex-start; 
+        text-align: left; 
         padding: 10px;
         margin-left: 5%;
         width: 100%; 
@@ -256,11 +270,11 @@
 @media (max-width: 640px) {
     .profile {
         margin: 5px auto; /* Further reduce margins for smaller screens */
-        padding: 5px; /* Reduce padding for tighter spacing */
+        padding: 5px; 
     }
 
     .profile-container {
-        padding: 5px; /* Adjust internal spacing */
+        padding: 5px; 
     }
 
     .profile-user-settings {
@@ -270,7 +284,7 @@
     .profile-image,
     .cover-image {
         margin: 0 auto;
-        max-width: 90%; /* Slightly smaller for very small screens */
+        max-width: 90%; 
         height: auto;
     }
     
@@ -384,7 +398,7 @@
 
                     <div style="margin-top: 15px; margin-bottom: 8px;">
                         {% if request.user.is_authenticated and request.user == profile.user %}
-                        <a href="{% url 'editprofile' %}" class="btn profile-edit-btn">Edit Profile</a>
+                        <a href="{% url 'editprofile' %}" class="btn profile-edit-btn" style="margin-left: 0.1rem;">Edit Profile</a>
                         <a href="{% url 'logout' %}" id="logout" class="btn profile-edit-btn">Logout</a>
 
                         <!-- <button class="btn profile-settings-btn" aria-label="profile settings" style="border: none; background: none;">
@@ -397,7 +411,7 @@
                 <!-- Profile Stats -->
                 <div class="profile-stats" style="width: 100%; text-align: center; margin-bottom: 8px;">
                     <ul style="list-style: none; padding: 0; margin: 0; display: flex; justify-content: space-around;">
-                        <li><span class="profile-stat-count" >{{posts_count}} Posts</span> 
+                        <li><span class="profile-stat-count" style="font-weight: 650; color: rgb(90, 98, 117);font-size: 1.6rem;" >{{posts_count}} Posts</span> 
                         </li>
                         <!-- <li><span class="profile-stat-count" style="font-weight: bold;">{{followers_count}}</span>
                             followers</li>
@@ -407,14 +421,14 @@
                             <a href="{% url 'follow_list' profile_user.id 'followers' %}" class="profile-stat-count"
                                 style="font-size: 14px; color: #555; text-decoration: none; font-weight: bold;"
                                 onmouseover="this.style.color='blue'" onmouseout="this.style.color='#555'">
-                                {{ followers_count }} followers
+                                {{ followers_count }} Followers
                             </a>
                         </li>
                         <li>
                             <a href="{% url 'follow_list' profile_user.id 'followings' %}" class="profile-stat-count"
                                 style="font-size: 14px; color: #555; text-decoration: none; font-weight: bold;"
                                 onmouseover="this.style.color='blue'" onmouseout="this.style.color='#555'">
-                                {{ following_count }} following
+                                {{ following_count }} Following
                             </a>
                         </li>
 

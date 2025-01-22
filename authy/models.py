@@ -16,8 +16,11 @@ class Profile(models.Model):
     image = models.ImageField(upload_to="profile_pciture", null=True, default="default.png")
     first_name = models.CharField(max_length=200, null=True, blank=True)
     last_name = models.CharField(max_length=200, null=True, blank=True)
-    bio = models.CharField(max_length=200, null=True, blank=True)
-    location = models.CharField(max_length=200, null=True, blank=True)
+    # bio = models.CharField(max_length=800, null=True, blank=True)
+    bio = models.TextField(max_length=800, null=True, blank=True)
+    # location = models.CharField(max_length=200, null=True, blank=True)
+    location = models.TextField(max_length=300, null=True, blank=True)
+
     url = models.URLField(max_length=200, null=True, blank=True)
     # favourite = models.ManyToManyField(Post, blank=True)
     favourite = models.ManyToManyField(Post, blank=True)
@@ -34,8 +37,8 @@ class Profile(models.Model):
         ('Learner', 'Learner'),
     ]
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, null=False, blank=False, default='Learner')
-    skills = models.TextField(help_text="List of skills you can share (separated by commas)", null=True, blank=True)
-    interests = models.TextField(help_text="Skills or areas you'd like to learn (separated by commas)", null=True, blank=True)
+    skills = models.TextField(help_text="List of skills you can share (separated by commas)", null=True, blank=True,max_length=500)
+    interests = models.TextField(help_text="Skills or areas you'd like to learn (separated by commas)", null=True, blank=True,max_length=500)
     
     
     # Add relationships for rating/feedback (for Mentors)

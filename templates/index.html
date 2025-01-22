@@ -553,13 +553,13 @@
 
                     <div class="post__footer" style="margin-top: 10px;">
                         <div class="post__buttons" style="display: flex; align-items: center;">
-                            <a href="{% url 'like' post.id %}"
-                                class="post__button post__button--like {% if post.id in liked_post_ids %}filled{% endif %}">
-                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.42 3.42 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5 18.58 5 20 6.42 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                                </svg>
-                            </a>
+                            <a href="#" class="post__button post__button--like {% if post.id in liked_post_ids %}filled{% endif %}" 
+                            data-post-id="{{ post.id }}">
+                             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.42 3.42 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C13.46 5.99 14.96 5 16.5 5 18.58 5 20 6.42 20 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                             </svg>
+                         </a>
+                         
 
                             <a href="{% url 'post-details' post.id %}"
                                 class="post__button post__button--comment {% if post.id in commented_post_ids %}filled{% endif %}">
@@ -569,14 +569,13 @@
                                 </svg>
                             </a>
 
-
-                            <a href="{% url 'favourite' post.id %}"
-                                class="post__button post__button--save {% if post.id in saved_post_ids %}filled{% endif %}">
-                                <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z" />
-                                </svg>
+                            <a href="#" class="post__button post__button--save {% if post.id in saved_post_ids %}filled{% endif %}" 
+                            data-post-id="{{ post.id }}">
+                             <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                 <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2zm0 15l-5-2.18L7 18V5h10v13z" />
+                             </svg>
                             </a>
+
 
                         </div>
 
@@ -584,7 +583,7 @@
                         <div class="post__interaction" style="display: flex; align-items: center; margin-top: 10px;">
                             <div class="post__likes" style="margin-right: 10px;">
                                 <a href="{% url 'post-likers' post.id %}"
-                                    style="font-size: 14px; color: #555; text-decoration: none;"
+                                    style="font-size: 14px; color: #555; text-decoration: none;" id="like-count-{{ post.id }}"
                                     onmouseover="this.style.color='blue'" onmouseout="this.style.color='#555'">
                                     {{ post.likes }} likes
                                 </a>
@@ -853,7 +852,7 @@
   </script> -->
 
         {% block script %}
-        <script>
+        <!-- <script>
             let page = 1;
             const postContainer = document.querySelector('#post-container');
 
@@ -893,6 +892,68 @@
 
             loadMorePosts();
 
+        </script> -->
+
+        <script>
+            // Like post
+            const csrfToken = "{{ csrf_token }}";
+        
+            document.addEventListener("DOMContentLoaded", function() {
+                document.querySelectorAll('.post__button--like').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();  // Prevent link navigation to top of the page
+        
+                        const postId = this.getAttribute('data-post-id');
+                        const likeCountElement = document.getElementById(`like-count-${postId}`);
+        
+                        fetch(`/like/${postId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrfToken,
+                                'Content-Type': 'application/json',
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.liked) {
+                                this.classList.add('filled');
+                            } else {
+                                this.classList.remove('filled');
+                            }
+                            likeCountElement.textContent = data.likes+' likes';
+                        })
+                        .catch(error => console.error('Error:', error));
+                    });
+                });
+            });
+
+            // Save post
+        document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('.post__button--save').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();  // Prevent link navigation
+
+                const postId = this.getAttribute('data-post-id');
+
+                fetch(`/${postId}/favourite`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.saved) {
+                        this.classList.add('filled');
+                    } else {
+                        this.classList.remove('filled');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    });
         </script>
 
         {% endblock script %}

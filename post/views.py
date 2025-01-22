@@ -300,21 +300,40 @@ def Tags(request, tag_slug):
     }
     return render(request, 'tag.html', context)
 
-@login_required
-def like(request, post_id):
-    user = request.user
-    post = Post.objects.get(id=post_id)
+# @login_required
+# def like(request, post_id):
+#     user = request.user
+#     post = Post.objects.get(id=post_id)
 
     
+#     if post.likers.filter(id=user.id).exists():
+#         post.likers.remove(user)
+#         post.likes -= 1
+#     else:
+#         post.likers.add(user)
+#         post.likes += 1
+
+#     post.save()
+#     return HttpResponseRedirect(reverse('post-details', args=[post_id]))
+
+
+@login_required
+def like(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    user = request.user
+
     if post.likers.filter(id=user.id).exists():
         post.likers.remove(user)
         post.likes -= 1
+        liked = False
     else:
         post.likers.add(user)
         post.likes += 1
+        liked = True
 
     post.save()
-    return HttpResponseRedirect(reverse('post-details', args=[post_id]))
+    
+    return JsonResponse({'liked': liked, 'likes': post.likes})
 
 
 @login_required
@@ -325,12 +344,18 @@ def favourite(request, post_id):
 
     if post in profile.favourite.all():
         profile.favourite.remove(post)
+        saved = False
+
     else:
         profile.favourite.add(post)
+        saved = True
 
     post.savers.add(user) if user not in post.savers.all() else post.savers.remove(user)
     post.save()
-    return HttpResponseRedirect(reverse('post-details', args=[post_id]))
+    # return HttpResponseRedirect(reverse('post-details', args=[post_id]))
+    return JsonResponse({'saved': saved})
+
+
 
 @login_required
 def post_likers(request, post_id):

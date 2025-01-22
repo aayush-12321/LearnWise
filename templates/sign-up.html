@@ -189,16 +189,25 @@
             <div class="form-group">
                 <label for="id_first_name">First Name</label>
                 {{ user_form.first_name }}
+                {% for error in user_form.first_name.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
             </div>
 
             <div class="form-group">
                 <label for="id_last_name">Last Name</label>
                 {{ user_form.last_name }}
+                {% for error in user_form.last_name.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
             </div>
 
             <div class="form-group">
                 <label for="id_bio">Bio</label>
                 {{ user_form.bio }}
+                {% for error in user_form.bbio.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
             </div>
 
             <!-- <div class="form-group">
@@ -232,6 +241,9 @@
             <div class="form-group">
                 <label for="id_url">Website URL</label>
                 {{ user_form.url }}
+                {% for error in user_form.url.errors %}
+                    <p class="error-message">{{ error }}</p>
+                {% endfor %}
             </div>
 
             <div class="form-group">

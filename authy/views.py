@@ -102,34 +102,91 @@ def UserProfile(request, username):
     }
     return render(request, 'profile.html', context)
 
+# @login_required
+# def editProfile(request):
+#     profile = request.user.profile  # Retrieve the profile of the logged-in user
+
+#     if request.method == "POST":
+#         if len(request.FILES) != 0:
+#             if profile.image and len(profile.image.path) > 0 and profile.image!="default.png":
+#                 os.remove(profile.image.path)  # Remove the old image if it exists
+#             profile.image = request.FILES['picture']
+
+#         profile.first_name = request.POST.get('first_name')
+#         profile.last_name = request.POST.get('last_name')
+#         profile.bio = request.POST.get('bio')
+#         # profile.location = request.POST.get('location')
+#         manual_location = request.POST.get('manual_location')
+#         map_location = request.POST.get('location')
+#         profile.location = manual_location if manual_location else map_location
+#         profile.url = request.POST.get('url')
+#         profile.skills = request.POST.get('skills')
+#         profile.role = request.POST.get('role')
+#         profile.interests = request.POST.get('interests')
+        
+#         profile.save()
+#         messages.success(request, "Profile updated successfully")
+#         return redirect('profile', profile.user.username)
+
+#     context = {
+#         'profile': profile
+#     }
+#     return render(request, 'editprofile.html', context)
+
+
 @login_required
 def editProfile(request):
     profile = request.user.profile  # Retrieve the profile of the logged-in user
-
+    error_message = ''
     if request.method == "POST":
         if len(request.FILES) != 0:
-            if profile.image and len(profile.image.path) > 0 and profile.image!="default.png":
+            if profile.image and len(profile.image.path) > 0 and profile.image != "default.png":
                 os.remove(profile.image.path)  # Remove the old image if it exists
             profile.image = request.FILES['picture']
 
-        profile.first_name = request.POST.get('first_name')
-        profile.last_name = request.POST.get('last_name')
-        profile.bio = request.POST.get('bio')
-        # profile.location = request.POST.get('location')
+        # Get form data
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        bio = request.POST.get('bio')
         manual_location = request.POST.get('manual_location')
         map_location = request.POST.get('location')
-        profile.location = manual_location if manual_location else map_location
-        profile.url = request.POST.get('url')
-        profile.skills = request.POST.get('skills')
-        profile.role = request.POST.get('role')
-        profile.interests = request.POST.get('interests')
-        
-        profile.save()
-        messages.success(request, "Profile updated successfully")
-        return redirect('profile', profile.user.username)
+        url = request.POST.get('url')
+        skills = request.POST.get('skills')
+        interests = request.POST.get('interests')
+
+        # Validation checks for max length
+        if first_name and  len(first_name) > 200:
+            error_message=("First name exceeds the maximum length of 200 characters.")
+        elif last_name and len(last_name) > 200:
+            error_message = ("Last name exceeds the maximum length of 200 characters.")
+        elif bio and len(bio) > 800:
+            error_message = ("Bio exceeds the maximum length of 800 characters.")
+        elif (manual_location or map_location) and len(manual_location or map_location) > 300:
+            error_message = ("Location exceeds the maximum length of 300 characters.")
+        elif url and len(url) > 200:
+            error_message = ("URL exceeds the maximum length of 200 characters.")
+        elif skills and len(skills) > 500:
+            error_message = ("Skills exceed the maximum length of 500 characters.")
+        elif interests and len(interests) > 500:
+            error_message = ("Interests exceed the maximum length of 500 characters.")
+        else:
+            # Update profile if validation passes
+            profile.first_name = first_name
+            profile.last_name = last_name
+            profile.bio = bio
+            profile.location = manual_location if manual_location else map_location
+            profile.url = url
+            profile.skills = skills
+            profile.role = request.POST.get('role')  # Assuming role is required
+            profile.interests = interests
+            profile.save()
+
+            error_message = (request, "Profile updated successfully")
+            return redirect('profile', profile.user.username)
 
     context = {
-        'profile': profile
+        'profile': profile,
+        'error_message': error_message,
     }
     return render(request, 'editprofile.html', context)
 
