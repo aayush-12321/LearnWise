@@ -12,39 +12,9 @@ class NewPostform(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['picture', 'caption', 'tags']
-
-# from django.core.exceptions import ValidationError
-
-# class NewPostform(forms.ModelForm):
-#     picture = forms.ImageField(required=False)
-#     caption = forms.CharField(
-#         widget=forms.TextInput(attrs={'class': 'input', 'placeholder': 'Caption'}),
-#         required=False
-#     )
-#     tags = forms.CharField(
-#         widget=forms.TextInput(attrs={'class': 'input', 'placeholder': 'Tags | Separate with comma'}),
-#         required=False
-#     )
-
-#     class Meta:
-#         model = Post
-#         fields = ['picture', 'caption', 'tags']
-
-#     def clean(self):
-#         cleaned_data = super().clean()
-#         picture = cleaned_data.get('picture')
-#         caption = cleaned_data.get('caption')
-#         tags = cleaned_data.get('tags')
-
-#         # Validation to ensure tags cannot be submitted alone
-#         if not (picture or caption) and tags:
-#             raise ValidationError(
-#                 "Tags cannot be submitted alone. Please include either a picture, a caption, or both."
-#             )
-
-#         if not (picture or caption or tags):
-#             raise ValidationError(
-#                 "At least one of 'Picture', 'Caption', or 'Tags' must be provided."
-#             )
-
-#         return cleaned_data
+    
+    def clean_body(self):
+        caption = self.cleaned_data.get('caption')
+        if len(caption) > 3000:
+            raise forms.ValidationError("Caption text cannot exceed 3000 characters.")
+        return caption

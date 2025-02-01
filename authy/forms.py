@@ -9,25 +9,30 @@ class EditProfileForm(forms.ModelForm):
     first_name = forms.CharField(
         widget=forms.TextInput(attrs={"class": "input", "placeholder": "First Name"}),
         required=False,
+        max_length=200,
     )
     last_name = forms.CharField(
         widget=forms.TextInput(attrs={"class": "input", "placeholder": "Last Name"}),
         required=False,
+        max_length=200,
     )
     bio = forms.CharField(
         widget=forms.TextInput(attrs={"class": "input", "placeholder": "Bio"}),
         required=False,
+        max_length=800,
     )
     url = forms.CharField(
         widget=forms.TextInput(attrs={"class": "input", "placeholder": "URL"}),
         required=False,
+        max_length=200,
     )
     location = forms.CharField(
         widget=forms.TextInput(attrs={"class": "input", "placeholder": "Address"}),
+        max_length=300,
         required=False,
     )
-    skills = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your skills (e.g., Python, Data Analysis)'}),required=False, max_length=200)
-    interests = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your interests (e.g., Web Development, Machine Learning)'}),required=False, max_length=200)
+    skills = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your skills (e.g., Python, Data Analysis)'}),required=False, max_length=800)
+    interests = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your interests (e.g., Web Development, Machine Learning)'}),required=False, max_length=800)
     
 
     class Meta:
@@ -38,13 +43,15 @@ class UserRegisterForm(UserCreationForm):
     email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email', 'class': 'prompt srch_explore'}))
     first_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'First Name'}), required=False, max_length=200)
     last_name = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Last Name'}), required=False, max_length=200)
-    bio = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Tell us about yourself'}), required=False)
-    location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Location'}), required=False, max_length=200)
-    url = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Website URL'}), required=False)
+    bio = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Tell us about yourself'}), required=False, max_length=800)
+    # location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Location'}), required=False, max_length=200)
+    location = forms.CharField(widget=forms.HiddenInput(), required=False, max_length=300)
+    manual_location = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Type your address'}), required=False, max_length=300)
+    url = forms.URLField(widget=forms.TextInput(attrs={'placeholder': 'Website URL'}), required=False, max_length=200)
     image = forms.ImageField(required=False)
 
-    skills = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your skills (e.g., Python, Data Analysis)'}),required=False, max_length=200)
-    interests = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your interests (e.g., Web Development, Machine Learning)'}),required=False, max_length=200)
+    skills = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your skills (e.g., Python, Data Analysis)'}),required=False, max_length=500)
+    interests = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your interests (e.g., Web Development, Machine Learning)'}),required=False, max_length=500)
     role = forms.ChoiceField(
         choices=Profile.ROLE_CHOICES,  # Use the choices defined in the Profile model
         widget=forms.Select(attrs={'class': 'form-select'}),
@@ -66,7 +73,7 @@ class UserRegisterForm(UserCreationForm):
         profile.first_name = self.cleaned_data.get('first_name')
         profile.last_name = self.cleaned_data.get('last_name')
         profile.bio = self.cleaned_data.get('bio')
-        profile.location = self.cleaned_data.get('location')
+        # profile.location = self.cleaned_data.get('location')
         profile.url = self.cleaned_data.get('url')
         profile.skills = self.cleaned_data.get('skills')
         profile.interests = self.cleaned_data.get('interests')
@@ -75,6 +82,14 @@ class UserRegisterForm(UserCreationForm):
         # Set the profile image if provided
         if self.cleaned_data.get('image'):
             profile.image = self.cleaned_data.get('image')
+
+        
+        # Use manual location if provided, otherwise use map location
+        manual_location = self.cleaned_data.get('manual_location')
+        if manual_location:
+            profile.location = manual_location
+        else:
+            profile.location = self.cleaned_data.get('location')
         
         if commit:
             user.save()
@@ -83,7 +98,7 @@ class UserRegisterForm(UserCreationForm):
         return user
 
 class RatingForm(forms.ModelForm):
-    MAX_REVIEW_LENGTH = 100  
+    MAX_REVIEW_LENGTH = 300  
 
     class Meta:
         model = Rating
@@ -105,18 +120,3 @@ class RatingForm(forms.ModelForm):
         return rating
 
 
-##########
-
-# class ProfileForm(forms.ModelForm):
-#     skills = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your skills (e.g., Python, Data Analysis)'}),required=False, max_length=200)
-#     interests = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Enter your interests (e.g., Web Development, Machine Learning)'}),required=False, max_length=200)
-#     role = forms.ChoiceField(
-#         choices=Profile.ROLE_CHOICES,  # Use the choices defined in the Profile model
-#         widget=forms.Select(attrs={'class': 'form-select'}),
-#         required=True
-#     )
-#     class Meta:
-#         model = Profile
-#         fields = ['role', 'skills', 'interests'] 
-
-#########

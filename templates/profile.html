@@ -46,7 +46,7 @@
             padding: 10px;
             border-radius: 4px;
             width: 72px;
-            margin: 10px;
+            margin: 10px 2px;
             font-size: 15px;
             transition: background-color 0.3s ease, color 0.3s ease; 
             text-decoration: underline;
@@ -187,6 +187,122 @@
     }
 
 
+    .profile-image img{
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        border: 5px solid white;
+        position: relative;
+        top: -65px;
+        right: 300px;
+        margin-left: 20%;
+        object-fit: cover;
+    }
+
+    .role-and-ratings{
+        margin-top: -65px;
+    }
+
+    .profile-user-settings {
+        display: flex;
+        flex-direction: column; 
+        align-items: flex-start; 
+        text-align: left; 
+        padding: 10px;
+        margin-left: 5%;
+        width: 100%; 
+        margin-bottom: 20px; 
+        margin-top: -20px; 
+        margin-left: 10%;
+    }
+
+/* Styles for widths below 970px */
+@media (max-width: 970px) {
+    .profile {
+        margin: 10px auto; 
+        padding: 10px; 
+        box-sizing: border-box; 
+    }
+
+    .container{
+        margin-left: 0%;
+    }
+
+    .profile-container {
+        margin: 0 auto; 
+        padding: 10px; 
+    }
+
+    .profile-user-settings {
+        display: flex;
+        flex-direction: column; 
+        align-items: flex-start; 
+        text-align: left; 
+        padding: 10px;
+        margin-left: 5%;
+        width: 100%; 
+        margin-bottom: 20px; 
+        margin-top: -120px; 
+        margin-left: 10%;
+    }
+
+    .role-and-ratings{
+        margin-top: 10px;
+    }
+
+/* Profile image specific styling */
+.profile-image img {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 5px solid white;
+    position: relative;
+    top: -65px;
+    right: 40%;
+    margin-left: 20%;
+}
+
+#learner,#mentor,.ratings-link{
+        margin-top: 22px;
+    }
+}
+/* Styles for widths below 640px */
+@media (max-width: 640px) {
+    .profile {
+        margin: 5px auto; /* Further reduce margins for smaller screens */
+        padding: 5px; 
+    }
+
+    .profile-container {
+        padding: 5px; 
+    }
+
+    .profile-user-settings {
+        padding: 5px;
+    }
+
+    .profile-image,
+    .cover-image {
+        margin: 0 auto;
+        max-width: 90%; 
+        height: auto;
+    }
+    
+    #learner,#mentor,.ratings-link{
+        margin-top: 22px;
+    }
+    .profile-stats{
+        padding: auto;
+    }
+}
+
+@media (max-width: 500px) {
+    .gallery-item{
+        margin: 10px auto;
+    }
+}
+
+
     </style>
 
 </head>
@@ -208,25 +324,16 @@
                 <!-- Profile Image -->
                 <div class="profile-image" style="text-align: center; margin-bottom: 20px; z-index: 1;">
                     <a href="{{ profile.image.url }}">
-                        <img src="{{ profile.image.url }}" alt="Profile Image"
-                            style="width: 200px; height: 200px; border-radius: 50%; border: 5px solid white; position: relative; top: -65px; right: 300px;">
+                    <img src="{{ profile.image.url }}" alt="Profile Image">
                     </a>
 
                 </div>
 
-                <!-- <div class="profile-image" style="text-align: center; margin-bottom: 20px; z-index: 1;">
-                    <a href="user.profile.image.url" style="display: inline-block;">
-                        <img src="{{profile.image.url}}" alt="Profile Image"
-                            style="width: 200px; height: 200px; border-radius: 50%; border: 5px solid white; position: relative; top: -65px; right: 300px;">
-                    </a>
-                </div> -->
-
-
                 <!-- Profile User Settings -->
-                <div class="profile-user-settings"
-                    style="width: 100%; margin-bottom: 20px; margin-top: -80px; margin-left: 110px;">
+                <div class="profile-user-settings">
                     
                     <div class="role-and-ratings">
+                        <a href="{% url 'user_ratings' profile_user.id %}" class="ratings-link">Ratings</a>
                         {% if profile.role %}
                             {% if profile.role == "Mentor" %}
                                 <p class="role mentor" id="mentor">{{ profile.role }}</p>
@@ -235,7 +342,6 @@
                             {% endif %}
                         {% endif %}
                     
-                        <a href="{% url 'user_ratings' profile_user.id %}" class="ratings-link">Ratings</a>
                     </div>
                     
                     <div class="rating">
@@ -257,15 +363,19 @@
                     </div>
                                                    
                     {% if profile.first_name %}
-                    <h6 class="profile-user-name" style="font-size: 20px; margin: 0; font-weight: 450; margin: 8px 0px;">{{profile.first_name}}
-                        {{profile.last_name}}</h6>
+                    <h6 class="profile-user-name" style="font-size: 20px; margin: 0; font-weight: 450; margin: 8px 0px;">{{profile.first_name|capfirst}}
+                        {{profile.last_name|capfirst}}</h6>
                     {% endif %}
-                    <h5 style="font-size: 15px; color: gray; margin: 5px 0;">@{{profile.user.username}}</h5>
+                    <h5 class="profile-user-name" style="font-size: 15px; color: gray; margin: 5px 2px;">@{{profile.user.username}}</h5>
                     {% if profile.bio %}
                     <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.bio}}</p>
                     {% endif %}
                     {% if profile.location %}
-                    <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ {{profile.location}}</p>
+                  
+                      <a href="{% url 'location' profile_user %}?location={{ profile.location|urlencode }}" 
+                      style="text-decoration: none; color: inherit; font-size: 14px; margin: 10px 0px;" class="profile-info">
+                      ◉ Address : {{ profile.location|human_readable_location }}
+                   </a>
                     {% endif %}
                     {% if profile.skills %}
                     <p style="font-size: 14px; margin: 10px 0px;" class="profile-info">◉ Skills: {{profile.skills}}</p>
@@ -278,9 +388,9 @@
                             style="color: blue;">{{profile.url}}</a></p>
                     {% endif %}
 
-                    <div style="margin-top: 15px;">
+                    <div style="margin-top: 15px; margin-bottom: 8px;">
                         {% if request.user.is_authenticated and request.user == profile.user %}
-                        <a href="{% url 'editprofile' %}" class="btn profile-edit-btn">Edit Profile</a>
+                        <a href="{% url 'editprofile' %}" class="btn profile-edit-btn" style="margin-left: 0.1rem;">Edit Profile</a>
                         <a href="{% url 'logout' %}" id="logout" class="btn profile-edit-btn">Logout</a>
 
                         <!-- <button class="btn profile-settings-btn" aria-label="profile settings" style="border: none; background: none;">
@@ -291,26 +401,23 @@
                 </div>
 
                 <!-- Profile Stats -->
-                <div class="profile-stats" style="width: 100%; text-align: center; margin-bottom: 20px;">
+                <div class="profile-stats" style="width: 100%; text-align: center; margin-bottom: 8px;">
                     <ul style="list-style: none; padding: 0; margin: 0; display: flex; justify-content: space-around;">
-                        <li><span class="profile-stat-count" style="font-weight: bold;">{{posts_count}}</span> posts
+                        <li><span class="profile-stat-count" style="font-weight: 650; color: rgb(90, 98, 117);font-size: 1.6rem;" >{{posts_count}} Posts</span> 
                         </li>
-                        <!-- <li><span class="profile-stat-count" style="font-weight: bold;">{{followers_count}}</span>
-                            followers</li>
-                        <li><span class="profile-stat-count" style="font-weight: bold;">{{following_count}}</span>
-                            following</li> -->
+                        
                         <li>
                             <a href="{% url 'follow_list' profile_user.id 'followers' %}" class="profile-stat-count"
                                 style="font-size: 14px; color: #555; text-decoration: none; font-weight: bold;"
                                 onmouseover="this.style.color='blue'" onmouseout="this.style.color='#555'">
-                                {{ followers_count }} followers
+                                {{ followers_count }} Followers
                             </a>
                         </li>
                         <li>
                             <a href="{% url 'follow_list' profile_user.id 'followings' %}" class="profile-stat-count"
                                 style="font-size: 14px; color: #555; text-decoration: none; font-weight: bold;"
                                 onmouseover="this.style.color='blue'" onmouseout="this.style.color='#555'">
-                                {{ following_count }} following
+                                {{ following_count }} Following
                             </a>
                         </li>
 
@@ -320,7 +427,7 @@
                 </div>
 
                 <!-- Follow and Message Buttons -->
-                <div style="margin-top: 20px; text-align: center; width: 100%;">
+                <div style="margin-top: 10px; text-align: center; width: 100%;">
 
                     <a href="{% url 'profile' profile.user %}" class="btn profile-edit-btn profile-page-btn"
                         style="color: white; background-color: rgb(63, 224, 125); border-radius: 5px; padding: 8px 12px; text-align: center; text-decoration: none; flex-grow: 1;">Posts</a>
@@ -434,7 +541,7 @@
             {% endif %}
             {% endfor %}
 
-            {% if posts.has_next %}
+            {% if posts_with_media_info.has_next %}
             <li class="page-item">
                 <a class="page-link" href="?page={{ posts_with_media_info.next_page_number }}">Next</a>
             </li>

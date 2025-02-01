@@ -116,48 +116,10 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
-#before trying for file size limit
-# @login_required
-# def NewPost(request):
-#     # Define the maximum size in bytes (100 MB = 100 * 1024 * 1024)
-#     MAX_SIZE = 50 * 1024 * 1024
-
-#     if request.method == 'POST':
-#         caption = request.POST.get('caption', '')
-#         tags_form = request.POST.get('tags', '')
-#         pictures = request.FILES.getlist('pictures')
-
-#         if caption or pictures:
-#             post = Post.objects.create(
-#                 user=request.user,
-#                 caption=caption,
-#             )
-#             # Handle tags
-#             if tags_form:
-#                 tag_list = tags_form.split(',')
-#                 for tag in tag_list:
-#                     t, created = Tag.objects.get_or_create(title=tag.strip())
-#                     post.tags.add(t)
-
-#             # Save pictures
-#             for picture in pictures:
-#                 if picture.size > MAX_SIZE:
-#                     messages.error(request, 'Size of a file should be less than 100 MB.')
-
-#                 else:
-#                     PostImage.objects.create(post=post, image=picture)
-
-#             messages.success(request, 'Your post has been created!')
-#             return redirect('profile', request.user.username)
-#         else:
-#             messages.error(request, 'Please provide a caption or pictures.')
-
-#     return render(request, 'newpost.html')
-
 @login_required
 def NewPost(request):
     # Define the maximum size in bytes (50 MB = 50 * 1024 * 1024)
-    MAX_SIZE = 50 * 1024 * 1024
+    MAX_SIZE = 100 * 1024 * 1024
     MAX_FILES = 20  # Maximum number of files
     error_message = ''  # Initialize error_message
     success_message = ''  # Initialize success_message
@@ -174,8 +136,12 @@ def NewPost(request):
         # Check if any file exceeds the size limit
         oversized_pictures = [picture.name for picture in pictures if picture.size > MAX_SIZE]
         if oversized_pictures:
-            error_message = f"The following files exceed the 50 MB limit: {', '.join(oversized_pictures)}. Post not created."
+            error_message = f"The following files exceed the 100 MB limit: {', '.join(oversized_pictures)}. Post not created."
             return render(request, 'newpost.html', {'error_message': error_message})  # Stop execution and return to form
+
+        if len(caption) > 3000:
+            error_message = "Caption cannot exceed 3000 characters."
+            return render(request, 'newpost.html', {'error_message': error_message})
 
         if caption or pictures:
             post = Post.objects.create(
@@ -203,8 +169,11 @@ def NewPost(request):
 
 @login_required
 def PostDetail(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
+    try:
+        post = get_object_or_404(Post, id=post_id)
 
+    except:
+        return HttpResponseRedirect(reverse('index'))
     user = request.user
     # print(user)
 
@@ -283,28 +252,33 @@ def Tags(request, tag_slug):
             'media_info': media_info,
         })
 
+    paginator = Paginator(posts_with_media_info, 6)
+    page_number = request.GET.get('page')
+    tags_paginator = paginator.get_page(page_number)
+
     context = {
-        'posts_with_media_info': posts_with_media_info,
+        'posts_with_media_info': tags_paginator,
         'tag': tag,
     }
     return render(request, 'tag.html', context)
 
 @login_required
 def like(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
     user = request.user
-    post = Post.objects.get(id=post_id)
 
-    
     if post.likers.filter(id=user.id).exists():
         post.likers.remove(user)
         post.likes -= 1
+        liked = False
     else:
         post.likers.add(user)
         post.likes += 1
+        liked = True
 
     post.save()
-    return HttpResponseRedirect(reverse('post-details', args=[post_id]))
-
+    
+    return JsonResponse({'liked': liked, 'likes': post.likes})
 
 @login_required
 def favourite(request, post_id):
@@ -314,12 +288,16 @@ def favourite(request, post_id):
 
     if post in profile.favourite.all():
         profile.favourite.remove(post)
+        saved = False
+
     else:
         profile.favourite.add(post)
+        saved = True
 
     post.savers.add(user) if user not in post.savers.all() else post.savers.remove(user)
     post.save()
-    return HttpResponseRedirect(reverse('post-details', args=[post_id]))
+    # return HttpResponseRedirect(reverse('post-details', args=[post_id]))
+    return JsonResponse({'saved': saved})
 
 @login_required
 def post_likers(request, post_id):
@@ -327,17 +305,25 @@ def post_likers(request, post_id):
     
     # Get the usernames of the likers
     likers = post.likers.all()  # Assuming likers is a ManyToManyField
+
+    paginator = Paginator(likers, 4)
+    page_number = request.GET.get('page')
+    likers_paginator = paginator.get_page(page_number)
+
     context = {
         'post': post,
-        'likers': likers,
+        # 'likers': likers,
+        'likers': likers_paginator,
+        
     }
     return render(request, 'likers.html', context)
+    
 @login_required
 def edit_post(request, post_id):
     post = get_object_or_404(Post, id=post_id, user=request.user)  # Ensure the user can only edit their own posts
     
     # Define the maximum size in bytes (50 MB = 50 * 1024 * 1024)
-    MAX_SIZE = 50 * 1024 * 1024
+    MAX_SIZE = 100 * 1024 * 1024
     MAX_FILES = 20  # Maximum number of files
 
     if request.method == 'POST':
@@ -362,6 +348,11 @@ def edit_post(request, post_id):
         if oversized_pictures:
             error_message = f"The following files exceed the 50 MB limit: {', '.join(oversized_pictures)}. Post not updated."
             return render(request, 'editpost.html', {'post': post, 'error_message': error_message})  # Return with error message
+
+        # Check if the caption exceeds the character limit
+        if len(caption) > 3000:
+            error_message = "Caption cannot exceed 3000 characters."
+            return render(request, 'editpost.html', {'post': post, 'error_message': error_message})
 
         # Check if removing caption without picture or removing picture without caption
         has_existing_images = post.pictures.exclude(id__in=remove_images).exists()  # Remaining images after removal
@@ -404,59 +395,8 @@ def edit_post(request, post_id):
 
     return render(request, 'editpost.html', {'post': post})
 
-
-# @login_required
-# def edit_post(request, post_id):
-#     post = get_object_or_404(Post, id=post_id, user=request.user)  # Ensure the user can only edit their own posts
-#     if request.method == 'POST':
-#         # Retrieve form data
-#         caption = request.POST.get('caption', '').strip()
-#         tags_form = request.POST.get('tags', '').strip()
-#         pictures = request.FILES.getlist('pictures')
-#         remove_images = request.POST.getlist('remove_images')
-
-#         # Check if removing caption without picture or removing picture without caption
-#         has_existing_images = post.pictures.exclude(id__in=remove_images).exists()  # Remaining images after removal
-#         is_caption_empty = not caption
-#         is_picture_empty = not pictures and not has_existing_images
-
-#         if is_caption_empty and not post.pictures.exists():
-#             messages.error(request, "You cannot remove the caption unless a picture is provided.")
-#             return render(request, 'editpost.html', {'post': post})
-
-#         if is_picture_empty and not caption:
-#             messages.error(request, "You cannot remove the picture unless a caption is provided.")
-#             return render(request, 'editpost.html', {'post': post})
-
-#         # Update the post's caption (allow blank)
-#         post.caption = caption
-
-#         # Handle tags
-#         if tags_form:
-#             post.tags.clear()  # Remove all existing tags
-#             tag_list = tags_form.split(',')
-#             for tag in tag_list:
-#                 t, created = Tag.objects.get_or_create(title=tag.strip())
-#                 post.tags.add(t)
-#         elif not tags_form:
-#             post.tags.clear()  # Remove all tags if no tags are provided
-
-#         # Handle image removal
-#         for image_id in remove_images:
-#             post.pictures.filter(id=image_id).delete()
-
-#         # Handle new pictures
-#         if pictures:
-#             for picture in pictures:
-#                 PostImage.objects.create(post=post, image=picture)
-
-#         post.save()  # Save changes
-#         messages.success(request, "Post updated successfully!")
-#         return redirect('post-details', post.id)
-
-#     return render(request, 'editpost.html', {'post': post})
-
 @csrf_exempt
+@login_required
 def delete_post(request, post_id):
     if request.user.is_authenticated:
         if request.method == 'POST':  
@@ -486,6 +426,9 @@ def edit_comment(request, comment_id):
 
             if not new_body:
                 return JsonResponse({"success": False, "error": "Comment body cannot be empty."})
+            
+            if len(new_body) > 2000:
+                return JsonResponse({"success": False, "error": "Comment body cannot exceed 2000 characters"})
 
             comment.body = new_body
             comment.save()
@@ -497,9 +440,6 @@ def edit_comment(request, comment_id):
             return JsonResponse({"success": False, "error": "Comment not found or not authorized."})
 
     return JsonResponse({"success": False, "error": "Invalid request method."})
-
-
-
 
 @login_required
 @csrf_exempt

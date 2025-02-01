@@ -60,7 +60,7 @@ img { max-width: 100%; }
 
 /* -------------------------------------------------- */
 
-/* Header Navbar */
+/* Header Navbar
 .header {
     width: 100%;
     height: var(--header-height);
@@ -157,11 +157,11 @@ img { max-width: 100%; }
     display: flex;
     align-items: center;
     gap: 16px;
-}
+}*/
 
 
 /* Bottom Navbar */
-.navbar {
+/* .navbar {
     width: 100%;
     height: var(--nav-height);
     background-color: var(--primary);
@@ -192,7 +192,7 @@ img { max-width: 100%; }
     width: 28px;
     height: 28px;
     border-width: 2px;
-}
+}  */
 /* 
 #search:hover{
     background-color: rgb(35, 167, 85) !important;
@@ -811,9 +811,9 @@ img { max-width: 100%; }
 /* Media Queries */
 /* @media (max-width: 767px) { */
 @media (max-width: 940px) {
-    .header__buttons--desktop {
+    /* .header__buttons--desktop {
         display: none;
-    }
+    } */
 
     /* Fix post medias indicators bugs on mobile */
     .post__medias {
@@ -859,7 +859,7 @@ img { max-width: 100%; }
         --nav-height: 0px;
     }
 
-    .header__content {
+    /* .header__content {
         padding: 0 20px;
     }
 
@@ -873,7 +873,7 @@ img { max-width: 100%; }
 
     .navbar {
         display: none;
-    }
+    } */
 }
 
 @media (min-width: 1024px) {

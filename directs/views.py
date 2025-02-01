@@ -1,7 +1,8 @@
-
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404,HttpResponseRedirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from directs.models import Message
+from post.models import Follow
 from django.contrib.auth.models import User
 from authy.models import Profile
 from django.db.models import Q
@@ -13,10 +14,14 @@ from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 from geopy.distance import geodesic
 import folium
 import branca
-# from .models import User  # Assuming user data is stored in a model called User
+
 import time
 from django.utils.html import escape
 from django.http import JsonResponse
+from django.utils.html import escape
+import time
+from django.core.exceptions import ObjectDoesNotExist
+
 
 @login_required
 def inbox(request):
@@ -29,19 +34,35 @@ def inbox(request):
     if messages:
         message = messages[0]
         active_direct = message['user'].username
-        directs = Message.objects.filter(user=request.user, reciepient=message['user'])
+        directs = Message.objects.filter(user=request.user, reciepient=message['user']).order_by('date')
         directs.update(is_read=True)
 
         for message in messages:
             if message['user'].username == active_direct:
                 message['unread'] = 0
-    context = {
-        'directs':directs,
-        'messages': messages,
-        'active_direct': active_direct,
-        'profile': profile,
-    }
-    return render(request, 'directs/direct.html', context)
+
+        paginator = Paginator(directs, 10)
+        page_number = request.GET.get('page')
+        if not page_number:
+            page_number = paginator.num_pages  # Redirect to the last page if no page number is provided
+        directs_paginated = paginator.get_page(page_number)
+
+        active_profile=Profile.objects.get(user__username=active_direct)
+        # print(active_profile)
+        first_name = active_profile.first_name.capitalize()
+        last_name = active_profile.last_name.capitalize()
+        full_name = f"{first_name} {last_name}" if first_name and last_name else active_direct if active_direct else ""
+
+        context = {
+            'full_name': full_name,
+            'directs': directs_paginated,
+            'messages': messages,
+            'active_direct': active_direct,
+            'profile': profile,
+        }
+        return render(request, 'directs/direct.html', context)
+    else:
+        return render(request, 'directs/direct.html', {'profile': profile})
 
 
 @login_required
@@ -49,66 +70,98 @@ def Directs(request, username):
     user  = request.user
     messages = Message.get_message(user=user)
     active_direct = username
-    directs = Message.objects.filter(user=user, reciepient__username=username)  
+    directs = Message.objects.filter(user=user, reciepient__username=username).order_by('date')
     directs.update(is_read=True)
 
     for message in messages:
             if message['user'].username == username:
                 message['unread'] = 0
+    
+    # directs = directs.order_by('date')
+
+    paginator = Paginator(directs, 10)
+    page_number = request.GET.get('page')
+    try:
+        message_paginator = paginator.get_page(page_number)
+    except EmptyPage:
+        message_paginator = paginator.page(paginator.num_pages)
+    # message_paginator = paginator.get_page(page_number)
+
+        # Determine the last page number
+    last_page_number = paginator.num_pages
+
+    # Redirect to the last page if no page number is provided or invalid
+    if not page_number or not page_number.isdigit() or int(page_number) > last_page_number:
+        return HttpResponseRedirect(f'?page={last_page_number}')
+
+    active_profile=Profile.objects.get(user__username=username)
+    first_name = active_profile.first_name.capitalize()
+    last_name = active_profile.last_name.capitalize()
+    full_name = f"{first_name} {last_name}" if first_name and last_name else active_direct if active_direct else ""
     context = {
-        'directs': directs,
+        # 'directs': directs,
+        'full_name': full_name,
+        'directs': message_paginator,
         'messages': messages,
         'active_direct': active_direct,
     }
     return render(request, 'directs/direct.html', context)
 
+@login_required
 def SendDirect(request):
     from_user = request.user
     to_user_username = request.POST.get('to_user')
     body = request.POST.get('body')
+    max_length = 2000
 
     strip_body = request.POST.get('body', '').strip()  # Use .strip() to remove leading and trailing spaces
 
-    if strip_body:
+    if len(strip_body) > max_length:
+        return redirect('message')
+        
+    followings = from_user.following.all().select_related('following')
+    follow_users = [follow.following for follow in followings]
+    title = f"Followings of {from_user.username}"
 
-        followings = from_user.following.all().select_related('following')
-        follow_users = [follow.following for follow in followings]
-        title = f"Followings of {from_user.username}"
-
-        if request.method == "POST":
-            try:
-                to_user = User.objects.get(username=to_user_username)
-                # print(to_user)
+    if request.method == "POST":
+        try:
+            to_user = User.objects.get(username=to_user_username)
+            if strip_body:
                 Message.sender_message(from_user, to_user, body)
-                return redirect('message')
-            except:
-                context = {
-                        'user': from_user,  # User being viewed
-                        'follow_users': follow_users,  # List of followers or followings
-                        'title': title,  # Title for the page
-                        }
-                return render(request, 'follow_list.html', context)
+
+            # Fetch all messages between users and calculate the last page
+            all_messages = Message.objects.filter(
+                user=from_user, reciepient=to_user
+            ).order_by('date')
+            paginator = Paginator(all_messages, 10)
+            last_page = paginator.num_pages
+
+            # Redirect to the last page of the conversation
+            return redirect(f'/message/?page={last_page}')
+
+        except User.DoesNotExist:
+            context = {
+                'user': from_user,  # User being viewed
+                'follow_users': follow_users,  # List of followers or followings
+                'title': title,  # Title for the page
+            }
+            return render(request, 'follow_list.html', context)
     else:
         return redirect('message')
 
+@login_required
+def NewConversation(request, username):
+    from_user = request.user
+    body = ''
+    try:
+        to_user = User.objects.get(username=username)
+    except Exception as e:
+        return redirect('search-users')
+    if from_user != to_user:
+        Message.sender_message(from_user, to_user, body)
+    return redirect('message')
 
-# def UserSearch(request):
-#     query = request.GET.get('q')
-#     context = {}
-#     if query:
-#         users = User.objects.filter(Q(username__icontains=query))
-
-#         # Paginator
-#         paginator = Paginator(users, 8)
-#         page_number = request.GET.get('page')
-#         users_paginator = paginator.get_page(page_number)
-
-#         context = {
-#             'users': users_paginator,
-#             }
-
-#     return render(request, 'directs/search.html', context)
-
+@login_required
 def UserSearch(request):
     query = request.GET.get('q', '').strip()  # Search query
     selected_skills = request.GET.getlist('skills')  # Selected skills for filtering
@@ -177,18 +230,6 @@ def UserSearch(request):
 
     return render(request, 'directs/search.html', context)
 
-def NewConversation(request, username):
-    from_user = request.user
-    body = ''
-    try:
-        to_user = User.objects.get(username=username)
-    except Exception as e:
-        return redirect('search-users')
-    if from_user != to_user:
-        Message.sender_message(from_user, to_user, body)
-    return redirect('message')
-
-
 def geocode_with_retry(loc, address, max_retries=3):
     retries = 0
     while retries < max_retries:
@@ -199,15 +240,25 @@ def geocode_with_retry(loc, address, max_retries=3):
             time.sleep(1)
     return None
 
-def map_view(request):
-    # Assuming logged-in user's profile can be accessed through request.user.profile
-    user_profile = Profile.objects.filter(user=request.user).first()
-    
-    if not user_profile:
-        return render(request, 'directs/not_found.html')
+def reverse_geocode_with_retry(loc, latitude, longitude, max_retries=3):
+    retries = 0
+    while retries < max_retries:
+        try:
+            return loc.reverse((latitude, longitude), timeout=10)
+        except (GeocoderTimedOut, GeocoderUnavailable):
+            retries += 1
+            time.sleep(1)
+    return None
 
+@login_required
+def map_view(request):
+    try:
+        user_profile = Profile.objects.get(user=request.user)
+    except ObjectDoesNotExist:
+        return redirect('sign-in')  # Redirect to the login page if the profile is not found
+    
     loc = Nominatim(user_agent="GetLoc")
-    user_location = f"{user_profile.location}, Nepal"
+    user_location = f"{user_profile.location}"
     geocode_result = geocode_with_retry(loc, user_location)
 
     if geocode_result:
@@ -215,41 +266,132 @@ def map_view(request):
     else:
         user_latitude, user_longitude = 27.6800062, 85.3857303  # Default location if geocoding fails
 
+    # Get the users that the logged-in user is following
+    following_users = Follow.objects.filter(follower=request.user).values_list('following', flat=True)
+
+    # Filter profiles with valid locations and in the following list
+    valid_profiles = Profile.objects.filter(user__in=following_users, location__isnull=False).exclude(location__exact="")
+    # print(valid_profiles)
+    valid_profiles = valid_profiles.order_by('first_name')  # Order alphabetically by first name
+    # print(valid_profiles)
+
+    # Paginate the valid profiles
+    valid_profiles = valid_profiles.order_by('first_name')  # Order alphabetically by first name
+    # print(valid_profiles)
+    paginator = Paginator(valid_profiles, 5)  # Show 5 profiles per page
+    page_number = request.GET.get('page')
+    profiles_page = paginator.get_page(page_number) 
+
     # Initialize a Folium map
     m = folium.Map(location=[user_latitude, user_longitude], zoom_start=10, control_scale=True)
 
-    # Retrieve all profiles and add markers, excluding the logged-in user’s profile
-    profiles = Profile.objects.exclude(user=request.user)
-    for profile in profiles:
-        location_str = f"{profile.location}, Nepal"
-        loc_result = geocode_with_retry(loc, location_str)
+    profile_urls = {}
+    location_groups = {}
 
-        if loc_result:
-            lat, lon = loc_result.latitude, loc_result.longitude
-            distance = geodesic((user_latitude, user_longitude), (lat, lon)).km
+    for profile in profiles_page:  # Only include profiles on the current page
+        try:
+            lat, lon = map(float, profile.location.split(','))
+            reverse_geocode_result = reverse_geocode_with_retry(loc, lat, lon)
+            human_readable_location = reverse_geocode_result.address if reverse_geocode_result else profile.location
+        except ValueError:
+            location_str = f"{profile.location}"
+            loc_result = geocode_with_retry(loc, location_str)
+            if loc_result:
+                lat, lon = loc_result.latitude, loc_result.longitude
+                human_readable_location = location_str
+            else:
+                continue  # Skip profiles with invalid location
 
-            # Profile details for popup
-            # profile_image_url = profile.image.url if profile.image.url else '/path/to/default/image.jpg'
-            profile_name = escape(profile.user.username)
+        distance = geodesic((user_latitude, user_longitude), (lat, lon)).km
+
+        if (lat, lon) not in location_groups:
+            location_groups[(lat, lon)] = []
+
+        # Append the profile to the appropriate location group
+        location_groups[(lat, lon)].append((profile, human_readable_location))
+
+    # Iterate over location groups and add markers to the map
+    for (lat, lon), profiles in location_groups.items():
+        popup_content = "<div style='text-align: center;'>"
+        for profile, human_readable_location in profiles:
+            first_name = profile.first_name.capitalize() if profile.first_name else ""
+            last_name = profile.last_name.capitalize() if profile.last_name else ""
+            full_name = f"{first_name} {last_name}".strip() or escape(profile.user.username)
             profile_bio = escape(profile.bio or "No bio available")
+            profile_url = reverse('profile', args=[profile.user.username])
+            profile_urls[profile.user.id] = profile_url
 
-            popup_content = f"""
-                <div style="text-align: center;">
-                   
-                    <p><strong>{profile_name}</strong></p>
-                    <p><em>{profile_bio}</em></p>
-                    <p>Location: {escape(profile.location)}</p>
-                    <p>Distance: {distance:.2f} km</p>
-                </div>
+            popup_content += f"""
+                <strong style="color: rgb(51, 51, 51);">
+                    {escape(full_name)}
+                </strong>
+                <p>Location: {escape(human_readable_location)}</p>
+                <p>Distance: {distance:.2f} km</p>
+                <hr>
             """
-            iframe = branca.element.IFrame(html=popup_content, width=250, height=150)
-            folium.Marker([lat, lon], popup=folium.Popup(iframe)).add_to(m)
+        popup_content += "</div>"
 
-    # Render the map in HTML
+        # Add the marker and popup
+        iframe = branca.element.IFrame(html=popup_content, width=250, height=150)
+        popup = folium.Popup(iframe)
+        marker = folium.Marker([lat, lon], popup=popup)
+        m.add_child(marker)
+
+    m = m._repr_html_()  # Convert map to HTML
+
+    return render(request, 'directs/map_view.html', {'map': m, 'profiles_page': profiles_page, 'profile_urls': profile_urls})
+
+@login_required
+def location(request,username): 
+    user = get_object_or_404(User, username=username)
+    # print(user)
+    loc = Nominatim(user_agent="GetLoc")
+    location_query = request.GET.get('location')# Get the location query from the URL
+    geocode_result = geocode_with_retry(loc, location_query)
+
+    if location_query:
+        # Geocode the provided location
+        geocode_result = geocode_with_retry(loc, location_query)
+        if geocode_result:
+            user_latitude, user_longitude = geocode_result.latitude, geocode_result.longitude
+        else:
+            user_latitude, user_longitude = 27.6800062, 85.3857303  # Default location if geocoding fails
+        # Initialize a Folium map for the specific location
+
+        try:
+            lat, lon = map(float, location_query.split(','))
+            reverse_geocode_result = reverse_geocode_with_retry(loc, lat, lon)
+            human_readable_location = reverse_geocode_result.address if reverse_geocode_result else location_query
+
+        except ValueError:
+            location_str = location_query
+            loc_result = geocode_with_retry(loc, location_str)
+            if loc_result:
+                    lat, lon = loc_result.latitude, loc_result.longitude
+                    human_readable_location = location_str
+            else:
+                return HttpResponseRedirect(reverse('profile', args=[user.username]))
+
+        popup_content = f"""
+            <div style="text-align: center; width: 250px; font-size: 14px;">
+                    <strong id="profile-link-{user.id}" 
+                            style="cursor: pointer; color: rgb(51, 51, 51);">
+                        {escape(user.username)}
+                    </strong>
+                
+                <p>Location: {escape(human_readable_location)}</p>
+            </div>
+        """
+
+        m = folium.Map(location=[user_latitude, user_longitude], zoom_start=10, control_scale=True)
+        folium.Marker([user_latitude, user_longitude], popup=popup_content).add_to(m)
+
+        profiles_page=1
+        profile_urls=user.username
+
     m = m._repr_html_()  # Convert map to HTML
 
     return render(request, 'directs/map_view.html', {'map': m})
-
 
 @login_required
 def CallView(request, username):

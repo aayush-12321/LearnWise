@@ -117,15 +117,7 @@ h4 {
 
           <!-- Existing Pictures with Option to Remove -->
           <h4>Existing Pictures</h4>
-          <!-- <div class="pictures-grid">
-            {% for picture in post.pictures.all %}
-            <label>
-              <img src="{{ picture.image.url }}" alt="Post Image">
-              <input type="checkbox" name="remove_images" value="{{ picture.id }}"> Remove
-            </label>
-            {% endfor %}
-          </div> -->
-
+          
           <div class="pictures-grid">
             {% for picture in post.pictures.all %}
                 <label>

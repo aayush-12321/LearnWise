@@ -8,3 +8,9 @@ class NewCommentForm(forms.ModelForm):
     class Meta:
         model = Comment
         fields = ("body",)
+    
+    def clean_body(self):
+        body = self.cleaned_data.get('body')
+        if len(body) > 2000:
+            raise forms.ValidationError("Body text cannot exceed 2000 characters.")
+        return body

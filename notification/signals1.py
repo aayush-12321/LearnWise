@@ -6,8 +6,6 @@ from comment.models import Comment
 from django.contrib.auth.models import User
 from post.models import Post, Follow
 
-
-
 # Signal when a user follows another user
 @receiver(post_save, sender=Follow)
 def user_follow(sender, instance, created, **kwargs):
