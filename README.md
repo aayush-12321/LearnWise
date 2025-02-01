@@ -1,7 +1,7 @@
 # Learnwise
 
 ## Description
-**Learnwise** is a web application built with **Django** aimed at connecting learners and mentors. The platform allows users to create profiles, follow others, engage in educational content, and schedule video sessions. It is designed to provide a collaborative learning environment with features for social interaction, content sharing, and mentorship.
+**Learnwise** is a web application built with **Django** aimed at connecting learners and mentors. The platform allows users to create profiles, follow others, engage in educational content, and schedule video sessions. It is designed to provide a collaborative learning environment with features for social interaction, content sharing, and mentorship.  It is similar to a social media site but specifically designed for learning.
 
 ## Features
 - **User Roles**: Two types of users—learners and mentors.
@@ -24,7 +24,7 @@
 Clone the repository to your local machine using the following command:
 
 ```bash
-git clone https://github.com/your-username/learnwise.git
+git clone https://github.com/aayush-12321/tryProjectV.git
 ```
 
 ### Step 2: Create a Virtual Environment
@@ -32,12 +32,12 @@ Create a virtual environment for the project to isolate dependencies:
 
 #### For Windows:
 ```bash
-python -m venv venv
+python -m venv env
 ```
 
 #### For macOS/Linux:
 ```bash
-python3 -m venv venv
+python3 -m venv env
 ```
 
 ### Step 3: Activate the Virtual Environment
@@ -45,12 +45,12 @@ Activate the virtual environment:
 
 #### For Windows:
 ```bash
-venv\Scripts\activate
+env\Scripts\activate
 ```
 
 #### For macOS/Linux:
 ```bash
-source venv/bin/activate
+source env/bin/activate
 ```
 
 ### Step 4: Install Dependencies
@@ -94,9 +94,6 @@ We welcome contributions! If you'd like to contribute to Learnwise, please follo
    git push origin feature-branch
    ```
 6. **Open a pull request**.
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contact
 For any queries or support, feel free to reach out at **aayushparajuli23@gmail.com**.
