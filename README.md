@@ -24,7 +24,7 @@
 Clone the repository to your local machine using the following command:
 
 ```bash
-git clone https://github.com/aayush-12321/tryProjectV.git
+git clone https://github.com/aayush-12321/LearnWise.git
 ```
 
 ### Step 2: Create a Virtual Environment
