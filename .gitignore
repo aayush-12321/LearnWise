@@ -1,1 +1,32 @@
-env
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Django
+*.log
+*.pot
+*.pyc
+*.pyo
+
+# Virtualenv
+venv/
+env/
+
+# Static and Media files
+media/*
+!media/default.png
+# static/
+
+# Environment variables
+.env
+.env.local
+
+# PyCharm or other IDEs
+.idea/
+.vscode/
+
+# Other
+*.swp

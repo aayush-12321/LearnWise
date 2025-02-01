@@ -10,11 +10,6 @@ from django.db import models
 import uuid
 from django.utils import timezone
 
-
-# uploading user files to a specific directory
-# def user_directory_path(instance, filename):
-#     return 'user_{0}/{1}'.format(instance.user.id, filename)
-
 def user_directory_path(instance, filename):
     # Access the user through the related post
     return f"user_{instance.post.user.id}/{filename}"
@@ -87,12 +82,6 @@ class Follow(models.Model):
         notify = Notification.objects.filter(sender=sender, user=following, notification_types=3)
         notify.delete()
     
-    # def followers_names(self):
-    #     return [follower.username for follower in self.follower.all()]
-    
-    # def followings_names(self):
-    #     return [followings.username for followings in self.following.all()]
-
 class Stream(models.Model):
     following = models.ForeignKey(User, on_delete=models.CASCADE, null=True, related_name='stream_following')
     user = models.ForeignKey(User, on_delete=models.CASCADE)

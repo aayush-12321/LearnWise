@@ -384,14 +384,6 @@
                             {% endif %}
 
                         </div>
-                        <!-- <button class="post__more-options" style="background: none; border: none; cursor: pointer;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="6.5" cy="11.5" r="1.5" fill="#333" />
-                                <circle cx="12" cy="11.5" r="1.5" fill="#333" />
-                                <circle cx="17.5" cy="11.5" r="1.5" fill="#333" />
-                            </svg>
-                        </button> -->
                     </div>
 
                     <!-- Caption -->
@@ -418,42 +410,6 @@
                         <a href="{{ tag.get_absolute_url }}" style="text-decoration: none; color: #007bff;">#{{tag}}</a>
                         {% endfor %}
                     </p>
-
-
-                    <!-- {% if post.pictures.all %}
-                    {% if post.pictures.count == 1 %}
-                   
-                    <div class="post__single-image">
-                        <a href="{% url 'post-details' post.id %}">
-                            <img class="post__media" src="{{ post.pictures.first.image.url }}" alt="Post Content">
-                        </a>
-                    </div>
-                    {% else %}
-                    
-                    <div class="home_post_grid">
-                        {% for picture in post.pictures.all %}
-                        {% if forloop.counter <= 4 %}<a href="{% url 'post-details' post.id %}">
-                            <div class="post__grid-item">
-
-                                <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
-                            </div>
-                            </a>
-
-
-
-                            {% if forloop.counter == 4 and post.pictures.count > 4 %}
-                            <a href="{% url 'post-details' post.id %}">
-                                <div class="gallery-item-info">
-                                    <span class="remaining-pictures">+{{ post.pictures.count|add:-4 }}</span>
-                                </div>
-                            </a>
-                            {% endif %}
-                            {% endif %}
-                            {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% endif %} -->
-                    
 
                     {% load media_tags %}
 
@@ -506,51 +462,6 @@
                         {% endif %}
                     {% endif %}
                     
-
-                    <!--  -->
-
-                    <!-- {% if post.pictures.all %}
-                    {% if post.pictures.count == 1 %}
-
-                    <div class="post__single-image">
-                        <a href="{% url 'post-details' post.id %}">
-                            <img class="post__media" src="{{ post.pictures.first.image.url }}" alt="Post Content">
-                        </a>
-                    </div>
-                    {% else %}
-
-                    <div class="home_post_grid">
-                        {% for picture in post.pictures.all %}
-                        {% if forloop.counter <= 4 %}<a href="{% url 'post-details' post.id %}">
-                            <div class="post__grid-item">
-
-                                <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
-                            </div>
-                            </a>
-
-
-
-                            {% if forloop.counter == 4 and post.pictures.count > 4 %}
-                            <a href="{% url 'post-details' post.id %}">
-                                <div class="gallery-item-info">
-                                    <span class="remaining-pictures">+{{ post.pictures.count|add:-4 }}</span>
-                                </div>
-                            </a>
-                            {% endif %}
-                            {% endif %}
-                            {% endfor %}
-                    </div>
-                    {% endif %}
-                    {% endif %} -->
-
-
-
-                    <!--  -->
-
-
-
-
-
                     <div class="post__footer" style="margin-top: 10px;">
                         <div class="post__buttons" style="display: flex; align-items: center;">
                             <a href="#" class="post__button post__button--like {% if post.id in liked_post_ids %}filled{% endif %}" 
@@ -720,9 +631,6 @@
                 <div class="side-menu__user-info" style="flex-grow: 1;">
                     {% if user.profile.first_name %}
 
-                    <!-- <a href="{{request.user.username}}"
-                        style="font-weight: bold; color: #333; text-decoration: none;">{{request.user.profile.first_name|title}}
-                        {{request.user.profile.last_name|title }}</a> -->
                     {% with request.user.profile.first_name|add:" "|add:request.user.profile.last_name as full_name %}
                     {% if full_name|length > 11 %}
                     <a href="{{ request.user.username }}"
@@ -840,60 +748,8 @@
         </section>
         {% endblock content %}
 
-        <!-- <script>
-    function toggleButton(type, element, postId) {
-      element.classList.toggle('filled');
-      // Here you can also add an AJAX request to update the like/save status on the server
-      fetch(`/toggle-${type}/${postId}/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-      });
-    }
-  </script> -->
-
         {% block script %}
-        <!-- <script>
-            let page = 1;
-            const postContainer = document.querySelector('#post-container');
-
-            const loadMorePosts = () => {
-                const lastPost = document.querySelector('.post:last-child');
-                const observer = new IntersectionObserver(entries => {
-                    if (entries[0].isIntersecting) {
-                        observer.disconnect();
-                        page += 1;
-                        fetch(`/index?page=${page}`, {
-                            headers: {
-                                'x-requested-with': 'XMLHttpRequest'
-                            }
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.posts) {
-                                    data.posts.forEach(post => {
-                                        const postElement = document.createElement('article');
-                                        postElement.classList.add('post');
-                                        postElement.id = `post-${post.id}`;
-                                        postElement.innerHTML = `
-                            <h3>${post.user.username}</h3>
-                            <p>${post.caption}</p>
-                        `;
-                                        postContainer.appendChild(postElement);
-                                    });
-                                }
-                                if (data.has_next) {
-                                    loadMorePosts();
-                                }
-                            });
-                    }
-                });
-                observer.observe(lastPost);
-            };
-
-            loadMorePosts();
-
-        </script> -->
-
+   
         <script>
             // Like post
             const csrfToken = "{{ csrf_token }}";

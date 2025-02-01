@@ -1,4 +1,3 @@
-
 from django.shortcuts import redirect, render, get_object_or_404,HttpResponseRedirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
@@ -107,45 +106,6 @@ def Directs(request, username):
         'active_direct': active_direct,
     }
     return render(request, 'directs/direct.html', context)
-
-# @login_required
-# def Directs(request, username):
-#     user = request.user
-#     messages = Message.get_message(user=user)
-#     active_direct = username
-#     directs = Message.objects.filter(user=user, reciepient__username=username)
-
-#     directs.update(is_read=True)
-
-#     for message in messages:
-#         if message['user'].username == username:
-#             message['unread'] = 0
-
-#     # Ordering by date
-#     directs = directs.order_by('date')
-
-#     # Debugging - log the order of the messages
-#     for direct in directs:
-#         print(direct.date)  # This will log the date values in the terminal to verify ordering.
-
-#     paginator = Paginator(directs, 10)
-#     page_number = request.GET.get('page')
-#     message_paginator = paginator.get_page(page_number)
-
-#     # Determine the last page number
-#     last_page_number = paginator.num_pages
-
-#     # Redirect to the last page if no page number is provided or invalid
-#     if not page_number or not page_number.isdigit() or int(page_number) > last_page_number:
-#         return HttpResponseRedirect(f'?page={last_page_number}')
-
-#     context = {
-#         'directs': message_paginator,
-#         'messages': messages,
-#         'active_direct': active_direct,
-#     }
-#     return render(request, 'directs/direct.html', context)
-
 
 @login_required
 def SendDirect(request):
@@ -269,70 +229,6 @@ def UserSearch(request):
     }
 
     return render(request, 'directs/search.html', context)
-    
-
-
-# def geocode_with_retry(loc, address, max_retries=3):
-#     retries = 0
-#     while retries < max_retries:
-#         try:
-#             return loc.geocode(address, timeout=10)
-#         except (GeocoderTimedOut, GeocoderUnavailable):
-#             retries += 1
-#             time.sleep(1)
-#     return None
-
-# def map_view(request):
-#     # Assuming logged-in user's profile can be accessed through request.user.profile
-#     user_profile = Profile.objects.filter(user=request.user).first()
-    
-#     if not user_profile:
-#         return render(request, 'directs/not_found.html')
-
-#     loc = Nominatim(user_agent="GetLoc")
-#     user_location = f"{user_profile.location}, Nepal"
-#     geocode_result = geocode_with_retry(loc, user_location)
-
-#     if geocode_result:
-#         user_latitude, user_longitude = geocode_result.latitude, geocode_result.longitude
-#     else:
-#         user_latitude, user_longitude = 27.6800062, 85.3857303  # Default location if geocoding fails
-
-#     # Initialize a Folium map
-#     m = folium.Map(location=[user_latitude, user_longitude], zoom_start=10, control_scale=True)
-
-#     # Retrieve all profiles and add markers, excluding the logged-in user’s profile
-#     profiles = Profile.objects.exclude(user=request.user)
-#     for profile in profiles:
-#         location_str = f"{profile.location}, Nepal"
-#         loc_result = geocode_with_retry(loc, location_str)
-
-#         if loc_result:
-#             lat, lon = loc_result.latitude, loc_result.longitude
-#             distance = geodesic((user_latitude, user_longitude), (lat, lon)).km
-
-#             # Profile details for popup
-#             # profile_image_url = profile.image.url if profile.image.url else '/path/to/default/image.jpg'
-#             profile_name = escape(profile.user.username)
-#             profile_bio = escape(profile.bio or "No bio available")
-
-#             popup_content = f"""
-#                 <div style="text-align: center;">
-                   
-#                     <p><strong>{profile_name}</strong></p>
-#                     <p><em>{profile_bio}</em></p>
-#                     <p>Location: {escape(profile.location)}</p>
-#                     <p>Distance: {distance:.2f} km</p>
-#                 </div>
-#             """
-#             iframe = branca.element.IFrame(html=popup_content, width=250, height=150)
-#             folium.Marker([lat, lon], popup=folium.Popup(iframe)).add_to(m)
-
-#     # Render the map in HTML
-#     m = m._repr_html_()  # Convert map to HTML
-
-#     return render(request, 'directs/map_view.html', {'map': m})
-
 
 def geocode_with_retry(loc, address, max_retries=3):
     retries = 0

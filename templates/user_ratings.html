@@ -211,20 +211,6 @@
 
     <div class="reviews-list">
         {% for rating in ratings %}
-            <!-- <div class="rating-item">
-                <a href="{% url 'profile' rating.reviewer.username %}" style="text-decoration: none;"> <strong>{{ rating.reviewer.username }} ({{ rating.rate_type|capfirst }})</strong></a>
-                <em>{{ rating.rating }} stars</em>
-                <p>{{ rating.review }}</p>
-                <small>Reviewed on {{ rating.created_at|date:"F j, Y, g:i a" }}</small>
-
-                {% if rating.reviewer == user %}
-                <a class="delete-button" href="{% url 'delete_rating' rating.id %}" 
-                onclick="return confirm('Are you sure you want to delete this rating?');">
-                    Delete
-                </a>
-                {% endif %}
-
-            </div> -->
 
             {% if rating.reviewer == user %}
             <div class="rating-item my-rating">

@@ -243,18 +243,6 @@
         }
 
         /* Grid layout for the images */
-        /* .post__grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 10px; 
-    }
-    .post__grid-item img {
-        width: 100%;
-        height: 250;
-        border-radius: 9px; 
-        box-shadow: 3px 7px 9px rgba(0, 0, 0, 0.3);
-    } */
-        /* Grid layout for the images */
         .post__grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -356,15 +344,6 @@
                         </div>
                         <!-- <button class="post__more-options"> -->
                         <div class="post__more-options">
-                            <!-- SVG icon code -->
-                            <!-- <button class="post__more-options" style="background: none; border: none; cursor: pointer;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="6.5" cy="11.5" r="1.5" fill="#333" />
-                                    <circle cx="12" cy="11.5" r="1.5" fill="#333" />
-                                    <circle cx="17.5" cy="11.5" r="1.5" fill="#333" />
-                                </svg>
-                            </button> -->
 
                             {% if post.user.username == user.username %}
                             <div class="dropdown">
@@ -435,30 +414,6 @@
                         {% endfor %}
                     </p>
 
-
-
-                    <!-- {% if post.pictures.all %}
-                    {% if post.pictures.count == 1 %}
-                  
-                    <div class="post__single-image">
-                        <a href="{{ post.pictures.first.image.url }}" target="_blank">
-                            <img class="post__media" src="{{ post.pictures.first.image.url }}" alt="Post Content">
-                        </a>
-                    </div>
-                    {% else %}
-                    <div class="post__grid">
-                        {% for picture in post.pictures.all %}
-                        <div class="post__grid-item">
-                            <a href="{{ picture.image.url }}" target="_blank">
-                                <img class="post__media" src="{{ picture.image.url }}" alt="Post Content">
-                            </a>
-                        </div>
-                        {% endfor %}
-                    </div>
-                   
-                    {% endif %}
-                    {% endif %} -->
-
                     {% if media_info %}
                     {% if media_info|length == 1 %}
                     <!-- Single Media (Image or Video) Full-Width Layout -->
@@ -502,11 +457,7 @@
 
                     {% endif %}
 
-
                     <!-- Like and Comment Section -->
-
-                    <!-- <div class="post__footer">
-                        <div class="post__buttons"> -->
 
                     <!-- Like, comment, and share buttons with SVGs -->
 
@@ -549,42 +500,6 @@
                         </div>
                         <span class="post__date-time">{{post.posted}}</span>
                     </div>
-
-                    <!-- Comment Section -->
-                    <!-- <div class="comment-section mt-1">
-                        <form method="POST">
-                            {% csrf_token %}
-                            <div class="bg-light p-2">
-                                <div class="d-flex flex-row align-items-start">
-                                    <a href="#" class="side-menu__user-avatar">
-                                        <img src="{{ request.user.profile.image.url }}" alt="User Picture">
-                                    </a>
-                                    <textarea name="body" placeholder="Write your comment here..."
-                                        id="{{ form.body.id_for_label }}">{{ form.body.value|default_if_none:'' }}</textarea>
-                                </div>
-                                <div class="text-right mt-2">
-                                    <button class="btn btn-primary btn-sm shadow-none" type="submit">Post
-                                        Comment</button>
-                                </div>
-                            </div>
-                        </form>
-
-                        {% for comment in comments %}
-                        <div class="comment-box">
-                            <div class="user-info">
-                                <img src="{{comment.user.profile.image.url}}">
-                                <div>
-                                    <a href="{% url 'profile' comment.user %}"
-                                        class="name">{{comment.user.profile.first_name}}
-                                        {{comment.user.profile.last_name}}</a>
-                                    <span class="date">{{comment.date}}</span>
-                                </div>
-                            </div>
-                            <p class="comment-text">{{ comment.body|linebreaks }}</p>
-                        </div>
-                        {% endfor %}
-                    </div> -->
-
 
                     <!-- Comment Section -->
                     <div class="comment-section mt-1"  id="filter-section">

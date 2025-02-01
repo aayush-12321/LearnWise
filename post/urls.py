@@ -13,7 +13,6 @@ urlpatterns = [
     path('<uuid:post_id>/favourite', favourite, name='favourite'),
     # path('follow/<int:user_id>/<str:follow_type>/', followers_followings_list, name='follow_list'),
 
-    
     # path("n/post/<int:post_id>/delete", delete_post, name="deletepost"),
     # path("n/post/<int:post_id>/edit", edit_post, name="editpost"),
     
@@ -21,14 +20,8 @@ urlpatterns = [
     # path('<uuid:post_id>/delete/', delete_post, name='delete-post'),
     path('<uuid:post_id>/delete/', delete_post, name='delete-post'),
 
-
     path('comment/<int:comment_id>/edit/', edit_comment, name='edit_comment'),
     path('comment/<int:comment_id>/delete/', delete_comment, name='delete_comment'),
     #  path('<int:comment_id>/delete/', delete_comment, name='delete_comment'),
-
-
-
-
-
 
 ]

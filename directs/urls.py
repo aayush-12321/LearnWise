@@ -14,9 +14,6 @@ urlpatterns = [
     path('call/<username>', CallView, name="call"),
     path('generate-token/', GenerateToken, name="generate-token"),
     path('videocall/', videocall, name="videocall"),
-
-    # path('videocall/', joinVideoCall, name="join-videocall"),
-
     
 ]
 

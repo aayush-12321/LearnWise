@@ -116,44 +116,6 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
-#before trying for file size limit
-# @login_required
-# def NewPost(request):
-#     # Define the maximum size in bytes (100 MB = 100 * 1024 * 1024)
-#     MAX_SIZE = 50 * 1024 * 1024
-
-#     if request.method == 'POST':
-#         caption = request.POST.get('caption', '')
-#         tags_form = request.POST.get('tags', '')
-#         pictures = request.FILES.getlist('pictures')
-
-#         if caption or pictures:
-#             post = Post.objects.create(
-#                 user=request.user,
-#                 caption=caption,
-#             )
-#             # Handle tags
-#             if tags_form:
-#                 tag_list = tags_form.split(',')
-#                 for tag in tag_list:
-#                     t, created = Tag.objects.get_or_create(title=tag.strip())
-#                     post.tags.add(t)
-
-#             # Save pictures
-#             for picture in pictures:
-#                 if picture.size > MAX_SIZE:
-#                     messages.error(request, 'Size of a file should be less than 100 MB.')
-
-#                 else:
-#                     PostImage.objects.create(post=post, image=picture)
-
-#             messages.success(request, 'Your post has been created!')
-#             return redirect('profile', request.user.username)
-#         else:
-#             messages.error(request, 'Please provide a caption or pictures.')
-
-#     return render(request, 'newpost.html')
-
 @login_required
 def NewPost(request):
     # Define the maximum size in bytes (50 MB = 50 * 1024 * 1024)
@@ -300,23 +262,6 @@ def Tags(request, tag_slug):
     }
     return render(request, 'tag.html', context)
 
-# @login_required
-# def like(request, post_id):
-#     user = request.user
-#     post = Post.objects.get(id=post_id)
-
-    
-#     if post.likers.filter(id=user.id).exists():
-#         post.likers.remove(user)
-#         post.likes -= 1
-#     else:
-#         post.likers.add(user)
-#         post.likes += 1
-
-#     post.save()
-#     return HttpResponseRedirect(reverse('post-details', args=[post_id]))
-
-
 @login_required
 def like(request, post_id):
     post = get_object_or_404(Post, id=post_id)
@@ -334,7 +279,6 @@ def like(request, post_id):
     post.save()
     
     return JsonResponse({'liked': liked, 'likes': post.likes})
-
 
 @login_required
 def favourite(request, post_id):
@@ -354,8 +298,6 @@ def favourite(request, post_id):
     post.save()
     # return HttpResponseRedirect(reverse('post-details', args=[post_id]))
     return JsonResponse({'saved': saved})
-
-
 
 @login_required
 def post_likers(request, post_id):
@@ -452,58 +394,6 @@ def edit_post(request, post_id):
         return redirect('post-details', post.id)
 
     return render(request, 'editpost.html', {'post': post})
-
-
-# @login_required
-# def edit_post(request, post_id):
-#     post = get_object_or_404(Post, id=post_id, user=request.user)  # Ensure the user can only edit their own posts
-#     if request.method == 'POST':
-#         # Retrieve form data
-#         caption = request.POST.get('caption', '').strip()
-#         tags_form = request.POST.get('tags', '').strip()
-#         pictures = request.FILES.getlist('pictures')
-#         remove_images = request.POST.getlist('remove_images')
-
-#         # Check if removing caption without picture or removing picture without caption
-#         has_existing_images = post.pictures.exclude(id__in=remove_images).exists()  # Remaining images after removal
-#         is_caption_empty = not caption
-#         is_picture_empty = not pictures and not has_existing_images
-
-#         if is_caption_empty and not post.pictures.exists():
-#             messages.error(request, "You cannot remove the caption unless a picture is provided.")
-#             return render(request, 'editpost.html', {'post': post})
-
-#         if is_picture_empty and not caption:
-#             messages.error(request, "You cannot remove the picture unless a caption is provided.")
-#             return render(request, 'editpost.html', {'post': post})
-
-#         # Update the post's caption (allow blank)
-#         post.caption = caption
-
-#         # Handle tags
-#         if tags_form:
-#             post.tags.clear()  # Remove all existing tags
-#             tag_list = tags_form.split(',')
-#             for tag in tag_list:
-#                 t, created = Tag.objects.get_or_create(title=tag.strip())
-#                 post.tags.add(t)
-#         elif not tags_form:
-#             post.tags.clear()  # Remove all tags if no tags are provided
-
-#         # Handle image removal
-#         for image_id in remove_images:
-#             post.pictures.filter(id=image_id).delete()
-
-#         # Handle new pictures
-#         if pictures:
-#             for picture in pictures:
-#                 PostImage.objects.create(post=post, image=picture)
-
-#         post.save()  # Save changes
-#         messages.success(request, "Post updated successfully!")
-#         return redirect('post-details', post.id)
-
-#     return render(request, 'editpost.html', {'post': post})
 
 @csrf_exempt
 @login_required

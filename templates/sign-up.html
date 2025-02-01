@@ -209,25 +209,6 @@
                     <p class="error-message">{{ error }}</p>
                 {% endfor %}
             </div>
-
-            <!-- <div class="form-group">
-                <label for="id_location">Location</label>
-                {{ user_form.location }}
-            </div> -->
-            
-            <!-- <div class="form-group">
-                <label for="id_location">Location</label>
-                {{ user_form.location }}
-                <div id="map" style="height: 400px;"></div>
-            </div> -->
-
-            <!-- <div class="form-group">
-                <label for="id_location">Location (select from map or type manually)</label>
-                {{ user_form.location }}
-                <div id="map" style="height: 400px;"></div>
-                {{ user_form.manual_location }}
-            </div> -->
-
                
         <div class="form-group">
             <label for="id_location">Location (select from map or type manually)</label>
@@ -287,52 +268,6 @@
     </div>
 </body>
 </html>
-<!-- 
-<script>
-    var map = L.map('map').setView([27.7, 85.3], 10); // Default location
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    var marker;
-
-    map.on('click', function(e) {
-        var lat = e.latlng.lat;
-        var lon = e.latlng.lng;
-
-        if (marker) {
-            marker.setLatLng(e.latlng);
-        } else {
-            marker = L.marker(e.latlng).addTo(map);
-        }
-
-        document.getElementById('id_location').value = lat + ',' + lon;
-    });
-</script> -->
-<!-- 
-<script>
-    var map = L.map('map').setView([27.7, 85.3], 10); // Default location
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    var marker;
-
-    map.on('click', function(e) {
-        var lat = e.latlng.lat;
-        var lon = e.latlng.lng;
-
-        if (marker) {
-            marker.setLatLng(e.latlng);
-        } else {
-            marker = L.marker(e.latlng).addTo(map);
-        }
-
-        document.getElementById('id_location').value = lat + ',' + lon;
-    });
-</script> -->
 
 <script>
     document.getElementById('show-map-btn').addEventListener('click', function() {
