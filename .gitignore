@@ -22,6 +22,8 @@ media/*
 
 # Environment variables
 .env
+.venv
+.venv.local
 .env.local
 
 # PyCharm or other IDEs
