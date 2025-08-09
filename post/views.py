@@ -95,7 +95,7 @@ def index(request):
         mutual_friends_count = Follow.objects.filter(following=suggested_user, follower__in=followings).count()
         suggestions_with_mutuals.append((suggested_user, mutual_friends_count))
 
-    sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[0:5]
+    sorted_suggestions = sorted(suggestions_with_mutuals, key=lambda x: x[1], reverse=True)[1:6]
     suggestions = [user for user, _ in sorted_suggestions]
 
         
