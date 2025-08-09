@@ -1,5 +1,5 @@
 # Learnwise
-
+[Live Link](https://learnwise-66sg.onrender.com/)
 ## Description
 **Learnwise** is a web application built with **Django** aimed at connecting learners and mentors. The platform allows users to create profiles, follow others, engage in educational content, and schedule video sessions. It is designed to provide a collaborative learning environment with features for social interaction, content sharing, and mentorship.  It is similar to a social media site but specifically designed for learning.
 
